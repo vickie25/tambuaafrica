@@ -82,14 +82,13 @@ const Safaris = () => {
                   >
                     <Link to={`/safaris/${safari.id}`} className="block">
                       <div className="relative aspect-[16/10] overflow-hidden">
-                        <img 
-                          src={safari.image} 
-                          alt={safari.title} 
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
-                          loading="lazy" 
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1516426122078-c23e76319801?w=800";
-                          }}
+                        <OptimizedImage
+                          src={safari.image}
+                          alt={safari.title}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          width={800}
+                          height={500}
+                          loading="lazy"
                         />
                       </div>
                     </Link>

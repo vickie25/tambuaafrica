@@ -50,12 +50,42 @@ const BookingModal = ({ open, onOpenChange, preselectedSafari }: BookingModalPro
     }
   }, [preselectedSafari]);
 
+  useEffect(() => {
+    if (!open) {
+      setForm({ ...emptyForm, safari: preselectedSafari || "" });
+      setDate(undefined);
+      setPaymentMethod("card");
+      setMpesaPhone("");
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!date) {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(0, 0, 0, 0);
+      setDate(tomorrow);
+    }
+  }, [open, preselectedSafari, date]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
 
     const selectedSafari = safaris.find((safari) => safari.id === form.safari);
     if (!selectedSafari) { toast.error("Please select a safari package."); return; }
     if (!date) { toast.error("Please choose your preferred travel date."); return; }
+
+    const openWhatsAppBooking = () => {
+      const whatsappText = `Hello Tambua Next Wave! I would like to book a safari.\n\nSafari: ${selectedSafari.title}\nName: ${form.name}\nEmail: ${form.email}\nPhone: ${form.phone}\nDate: ${format(date, "yyyy-MM-dd")}\nGuests: ${form.guests}\n\nNotes: ${form.notes || "None"}`;
+      const whatsappUrl = `https://wa.me/254704548878?text=${encodeURIComponent(whatsappText)}`;
+      window.open(whatsappUrl, '_blank');
+      onOpenChange(false);
+      setForm(emptyForm);
+      setDate(undefined);
+    };
 
     setIsSubmitting(true);
 
@@ -63,7 +93,11 @@ const BookingModal = ({ open, onOpenChange, preselectedSafari }: BookingModalPro
       // If user is logged in, create a booking and route to chosen payment gateway
       if (user) {
         if (paymentMethod === "card") {
-          const { data, error } = await supabase.functions.invoke("create-checkout", {
+          if (!selectedSafari.stripePriceId) {
+            throw new Error("This safari package is currently unavailable for card payment. Please choose M-Pesa or contact us directly.");
+          }
+
+          const checkoutPromise = supabase.functions.invoke("create-checkout", {
             body: {
               safariId: selectedSafari.id,
               safariTitle: selectedSafari.title,
@@ -74,28 +108,64 @@ const BookingModal = ({ open, onOpenChange, preselectedSafari }: BookingModalPro
             },
           });
 
-          if (error || data?.error) throw new Error(data?.error || error?.message || "Checkout failed");
-          if (data?.url) window.location.href = data.url;
-        } else {
-          // M-Pesa
-          if (!mpesaPhone.trim()) throw new Error("Please enter your M-Pesa phone number in the correct format (e.g. 2547XXXXXXXX)");
-          // The edge-function expects "amount" value. Let's send a conversion roughly or fallback to direct conversion (1 USD = 130 KES roughly)
-          const mpesaAmount = selectedSafari.price * parseInt(form.guests) * 130;
-          
-          const { data, error } = await supabase.functions.invoke("mpesa-stk-push", {
-            body: {
-              phone: mpesaPhone,
-              amount: mpesaAmount,
-              safariId: selectedSafari.id,
-              safariTitle: selectedSafari.title,
-              guests: form.guests,
-              preferredDate: format(date, "yyyy-MM-dd"),
-              notes: form.notes,
-            },
-          });
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error("Payment processing timed out. Please try again.")), 15000)
+          );
 
-          if (error || data?.error) throw new Error(data?.error || error?.message || "M-Pesa payment failed to initialize.");
-          toast.success("M-Pesa validation sent! Check your phone to complete payment.");
+          const { data, error } = await Promise.race([checkoutPromise, timeoutPromise]) as any;
+
+          if (error || data?.error) {
+            toast.error("Card payment is currently unavailable. Please follow up via WhatsApp.");
+            openWhatsAppBooking();
+            return;
+          }
+
+          if (!data?.url) {
+            toast.error("Unable to start checkout. Please continue via WhatsApp.");
+            openWhatsAppBooking();
+            return;
+          }
+
+          window.location.href = data.url;
+          return;
+        }
+
+        if (paymentMethod === "mpesa") {
+          if (!mpesaPhone.trim()) throw new Error("Please enter your M-Pesa phone number in the correct format (e.g. 2547XXXXXXXX)");
+
+          try {
+            const mpesaAmount = selectedSafari.price * parseInt(form.guests) * 130;
+            
+            const mpesaPromise = supabase.functions.invoke("mpesa-stk-push", {
+              body: {
+                phone: mpesaPhone,
+                amount: mpesaAmount,
+                safariId: selectedSafari.id,
+                safariTitle: selectedSafari.title,
+                guests: form.guests,
+                preferredDate: format(date, "yyyy-MM-dd"),
+                notes: form.notes,
+              },
+            });
+
+            const mpesaTimeoutPromise = new Promise((_, reject) => 
+              setTimeout(() => reject(new Error("M-Pesa processing timed out. Please try again.")), 15000)
+            );
+
+            const { data, error } = await Promise.race([mpesaPromise, mpesaTimeoutPromise]) as any;
+
+            if (error || data?.error) {
+              toast.error("M-Pesa is currently unavailable. Please continue via WhatsApp.");
+              openWhatsAppBooking();
+              return;
+            }
+
+            toast.success("M-Pesa validation sent! Check your phone to complete payment.");
+          } catch (mpesaError) {
+            toast.error(mpesaError instanceof Error ? mpesaError.message : "M-Pesa payment failed. Please try again or contact support.");
+            openWhatsAppBooking();
+            return;
+          }
         }
 
         // Also sync to Google Sheets
@@ -116,17 +186,11 @@ const BookingModal = ({ open, onOpenChange, preselectedSafari }: BookingModalPro
         }
 
         if (paymentMethod === "mpesa") {
-          onOpenChange(false);
-          setForm(emptyForm);
-          setDate(undefined);
-          return; // The toast is already displayed
+          return;
         }
-
-        onOpenChange(false);
-        // Redirect to Stripe checkout handled above
       } else {
         // Guest: just submit inquiry (no payment)
-        const result = await submitInquiry({
+        const inquiryPromise = submitInquiry({
           inquiryType: "booking",
           fullName: form.name,
           email: form.email,
@@ -138,18 +202,24 @@ const BookingModal = ({ open, onOpenChange, preselectedSafari }: BookingModalPro
           message: form.notes,
         });
 
-        const whatsappText = `Hello Tambua Next Wave! I would like to book a safari.\n\nSafari: ${selectedSafari.title}\nName: ${form.name}\nEmail: ${form.email}\nPhone: ${form.phone}\nDate: ${format(date, "yyyy-MM-dd")}\nGuests: ${form.guests}\n\nNotes: ${form.notes || "None"}`;
-        const whatsappUrl = `https://wa.me/254704548878?text=${encodeURIComponent(whatsappText)}`;
-        window.open(whatsappUrl, '_blank');
-
-        toast.success(
-          result.googleSheetsSynced
-            ? "Booking inquiry sent! Opening WhatsApp to connect directly."
-            : "Booking inquiry sent! Opening WhatsApp to connect directly."
+        const inquiryTimeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error("Inquiry submission timed out. Please try again or contact us directly.")), 10000)
         );
-        onOpenChange(false);
-        setForm(emptyForm);
-        setDate(undefined);
+
+        try {
+          const result = await Promise.race([inquiryPromise, inquiryTimeoutPromise]) as any;
+          toast.success(
+            result?.googleSheetsSynced
+              ? "Booking inquiry sent! Opening WhatsApp to connect directly."
+              : "Opening WhatsApp to connect directly for your booking."
+          );
+        } catch (inquiryError) {
+          console.warn("Inquiry submission failed, proceeding to WhatsApp:", inquiryError);
+          toast.success("Opening WhatsApp to connect directly for your booking.");
+        }
+
+        openWhatsAppBooking();
+        return;
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not process your booking.");
@@ -297,7 +367,16 @@ const BookingModal = ({ open, onOpenChange, preselectedSafari }: BookingModalPro
             </div>
           )}
 
-          <Button type="submit" disabled={isSubmitting} className="w-full bg-accent text-accent-foreground hover:bg-accent/90 rounded-xl py-5 text-base font-semibold disabled:opacity-70">
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            onPointerDown={() => {
+              if (document.activeElement instanceof HTMLElement) {
+                document.activeElement.blur();
+              }
+            }}
+            className="w-full bg-accent text-accent-foreground hover:bg-accent/90 rounded-xl py-5 text-base font-semibold disabled:opacity-70"
+          >
             {isSubmitting ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : user ? <CreditCard className="w-5 h-5 mr-2" /> : <Send className="w-5 h-5 mr-2" />}
             {user ? "Proceed to Payment" : "Submit Booking Inquiry"}
           </Button>

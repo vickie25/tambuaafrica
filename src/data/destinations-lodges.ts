@@ -762,7 +762,6 @@ export const destinationLodges: DestinationLodges[] = [
         images: [
           "/images/wasini-island-1.webp",
           "/images/wasini-island-2.webp",
-          "/images/diani-beach.webp",
         ],
       },
       {
@@ -778,10 +777,10 @@ export const destinationLodges: DestinationLodges[] = [
           "Sunset dhow cruises around the island mangroves",
           "Expert local guides with decades of marine knowledge",
         ],
-        image: "/images/watamu-beach.webp",
+        image: "/images/wasini-island-2.webp",
         images: [
-          "/images/watamu-beach.webp",
           "/images/wasini-island-2.webp",
+          "/images/wasini-island-1.webp",
         ],
         website: "https://wasini.com/",
       },

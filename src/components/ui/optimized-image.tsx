@@ -10,7 +10,6 @@ interface OptimizedImageProps {
   priority?: boolean;
   placeholder?: 'blur' | 'empty';
   quality?: number;
-  fetchPriority?: 'high' | 'low' | 'auto';
 }
 
 const OptimizedImage: React.FC<OptimizedImageProps> = ({
@@ -22,7 +21,6 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   priority = false,
   placeholder = 'blur',
   quality = 75,
-  fetchPriority,
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(priority);
@@ -43,7 +41,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
         }
       },
       {
-        rootMargin: '50px', // Start loading 50px before image comes into view
+        rootMargin: '200px', // Start loading 200px before image comes into view
       }
     );
 
@@ -56,17 +54,23 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   // Generate optimized image URL with quality parameter
   const getOptimizedSrc = (originalSrc: string) => {
+    const formatUrl = (url: string) => encodeURI(url);
+
     if (originalSrc.includes('unsplash.com')) {
       // For Unsplash images
       const separator = originalSrc.includes('?') ? '&' : '?';
-      return `${originalSrc}${separator}auto=format&fit=crop&w=${width || 800}&h=${height || 600}&q=${quality}`;
+      return formatUrl(
+        `${originalSrc}${separator}auto=format&fit=crop&w=${width || 800}&h=${height || 600}&q=${quality}`
+      );
     }
     if (originalSrc.includes('cloudinary')) {
       // For Cloudinary images
       const separator = originalSrc.includes('?') ? '&' : '?';
-      return `${originalSrc}${separator}q=${quality}&w=${width || 800}&h=${height || 600}&f_auto`;
+      return formatUrl(
+        `${originalSrc}${separator}q=${quality}&w=${width || 800}&h=${height || 600}&f_auto`
+      );
     }
-    return originalSrc;
+    return formatUrl(originalSrc);
   };
 
   const optimizedSrc = getOptimizedSrc(src);
@@ -97,32 +101,40 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
     <div className={cn("relative overflow-hidden", className)}>
       {/* Placeholder */}
       {placeholder === 'blur' && !isLoaded && (
-        <div className="absolute inset-0 shimmer" />
+        <div className="absolute inset-0 shimmer bg-muted animate-pulse" />
+      )}
+      
+      {/* Loading indicator */}
+      {!isLoaded && !hasError && (
+        <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
+          <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+        </div>
       )}
       
       {/* Actual image */}
-      <img
-        ref={imgRef}
-        src={isInView ? optimizedSrc : undefined}
-        alt={alt}
-        width={width}
-        height={height}
-        loading={priority ? 'eager' : 'lazy'}
-        fetchPriority={fetchPriority}
-        decoding="async"
-        onLoad={handleLoad}
-        onError={handleError}
-        className={cn(
-          "transition-opacity duration-300",
-          isLoaded ? 'opacity-100' : 'opacity-0',
-          className
-        )}
-        style={{
-          objectFit: 'cover',
-          width: '100%',
-          height: '100%',
-        }}
-      />
+      {isInView && (
+        <img
+          ref={imgRef}
+          src={optimizedSrc}
+          alt={alt}
+          width={width}
+          height={height}
+          loading={priority ? 'eager' : 'lazy'}
+          decoding="async"
+          onLoad={handleLoad}
+          onError={handleError}
+          className={cn(
+            "transition-opacity duration-300",
+            isLoaded ? 'opacity-100' : 'opacity-0',
+            className
+          )}
+          style={{
+            objectFit: 'cover',
+            width: '100%',
+            height: '100%',
+          }}
+        />
+      )}
     </div>
   );
 };

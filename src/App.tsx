@@ -36,13 +36,15 @@ const Booking = lazy(() => import("./pages/Booking"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const ConnectionDiagnostics = lazy(() => import("./pages/ConnectionDiagnostics"));
 
+import SuspenseFallback from "@/components/layout/SuspenseFallback";
+
 const queryClient = new QueryClient();
 
 const AnimatedRoutes = () => {
   const location = useLocation();
   return (
     <ErrorBoundary>
-      <Suspense fallback={null}>
+      <Suspense fallback={<SuspenseFallback />}>
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={<Index />} />

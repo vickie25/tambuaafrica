@@ -222,9 +222,8 @@ export const destinations: Destination[] = [
       "Vehicle-free serenity: Wasini has zero cars and zero paved roads, offering a completely undisturbed island experience.",
       "Swahili culture & cuisine: Known for its ancient ruins, Baobab trees, and phenomenal fresh crab and coconut rice dishes.",
     ],
-    image: "/images/diani-beach.webp",
+    image: "/images/wasini-island-1.webp",
     images: [
-      "/images/diani-beach.webp",
       "/images/wasini-island-1.webp",
       "/images/wasini-island-2.webp",
     ],
@@ -244,9 +243,8 @@ export const destinations: Destination[] = [
       "Mombasa Marine National Park: Incredible snorkeling and glass-bottom boat tours exploring rich coral gardens just offshore.",
       "Historic Mombasa Town: Easy access to the 16th-century Fort Jesus, the iconic Mombasa Tusks, and the bustling Old Town.",
     ],
-    image: "/images/wasini-island-1.webp",
+    image: "/images/mombasa-north-1.webp",
     images: [
-      "/images/wasini-island-1.webp",
       "/images/mombasa-north-1.webp",
       "/images/mombasa-north-2.webp",
       "/images/mombasa-north-3.webp",

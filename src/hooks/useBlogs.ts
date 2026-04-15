@@ -1,9 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BlogPost, posts as localPosts } from "@/data/blogPosts";
 
 export const useBlogs = () => {
-  return useQuery({
+  const queryClient = useQueryClient();
+
+  const query = useQuery({
     queryKey: ["blogs"],
     queryFn: async () => {
       try {
@@ -40,10 +43,35 @@ export const useBlogs = () => {
       }
     },
     initialData: localPosts,
-    staleTime: 1000 * 60 * 30, // 30 mins
-    gcTime: 1000 * 60 * 60, // 1 hour
-    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 5, // 5 mins - reduced from 30 mins for faster updates
+    gcTime: 1000 * 60 * 30,   // 30 mins - reduced from 1 hour
+    refetchOnWindowFocus: true, // Enable to show updates when switching tabs
   });
+
+  // Real-time subscription for blogs
+  useEffect(() => {
+    const channel = supabase
+      .channel('blogs-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'blogs'
+        },
+        (payload) => {
+          console.log('Blogs real-time update:', payload);
+          queryClient.invalidateQueries({ queryKey: ["blogs"] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
+  return query;
 };
 
 export const useBlog = (id?: string) => {

@@ -103,7 +103,7 @@ const ActivitiesSection = () => {
                     {activity.images.map((image, i) => (
                       <CarouselItem key={image} className="pl-0 h-full">
                         <img
-                          src={image}
+                          src={encodeURI(image)}
                           alt={`${activity.title} image ${i + 1}`}
                           className="w-full h-full aspect-[4/5] object-cover transition-transform duration-700 group-hover:scale-110"
                           loading="lazy"

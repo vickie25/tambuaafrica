@@ -1,9 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Safari, safaris as localSafaris } from "@/data/safaris";
 
 export const useSafaris = () => {
-  return useQuery({
+  const queryClient = useQueryClient();
+
+  const query = useQuery({
     queryKey: ["safaris"],
     queryFn: async () => {
       try {
@@ -33,10 +36,35 @@ export const useSafaris = () => {
       }
     },
     initialData: localSafaris,
-    staleTime: 1000 * 60 * 30, // 30 mins
-    gcTime: 1000 * 60 * 60,   // 1 hour
-    refetchOnWindowFocus: false, // Prevent lag when switching tabs
+    staleTime: 1000 * 60 * 5, // 5 mins - reduced from 30 mins for faster updates
+    gcTime: 1000 * 60 * 30,   // 30 mins - reduced from 1 hour
+    refetchOnWindowFocus: true, // Enable to show updates when switching tabs
   });
+
+  // Real-time subscription for safaris
+  useEffect(() => {
+    const channel = supabase
+      .channel('safaris-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'safaris'
+        },
+        (payload) => {
+          console.log('Safaris real-time update:', payload);
+          queryClient.invalidateQueries({ queryKey: ["safaris"] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
+  return query;
 };
 
 export const useSafari = (id?: string) => {

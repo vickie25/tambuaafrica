@@ -3,17 +3,19 @@ import { Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageTransition from "@/components/layout/PageTransition";
-import { destinations, Destination } from "@/data/destinations";
+import { Destination } from "@/data/destinations";
 import { destinationLodges, Lodge } from "@/data/destinations-lodges";
+import { useDestinations } from "@/hooks/useDestinations";
 import { ArrowRight, MapPin, Star, X, ChevronLeft, ChevronRight, Bed } from "lucide-react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useAuth } from "@/contexts/AuthContext";
 import OptimizedImage from "@/components/ui/optimized-image";
+import BookingModal from "@/components/booking/BookingModal";
 
 // ─────────────────────────────────────────────────────────
 // Image slider
 // ─────────────────────────────────────────────────────────
-const ImageSlider = ({ images, name }: { images: string[]; name: string }) => {
+const ImageSlider = ({ images, name, priority = false }: { images: string[]; name: string; priority?: boolean }) => {
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
@@ -34,12 +36,7 @@ const ImageSlider = ({ images, name }: { images: string[]; name: string }) => {
           className={`absolute inset-0 w-full h-full object-cover transition-all duration-1000 group-hover:scale-110 ${
             i === current ? "opacity-100" : "opacity-0"
           }`}
-          loading="lazy"
-          onError={(e) => {
-            // Fallback for broken images
-            (e.target as HTMLImageElement).src =
-              "https://images.unsplash.com/photo-1516426122078-c23e76319801?w=800";
-          }}
+          priority={priority && i === 0}
         />
       ))}
     </>
@@ -66,10 +63,6 @@ const LodgeCard = ({
         src={lodge.image}
         alt={lodge.name}
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-        onError={(e) => {
-          (e.target as HTMLImageElement).src =
-            "https://images.unsplash.com/photo-1516426122078-c23e76319801?w=800";
-        }}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
     </div>
@@ -123,10 +116,7 @@ const LodgeModal = ({
             src={lodge.image}
             alt={lodge.name}
             className="w-full h-full object-cover"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src =
-                "https://images.unsplash.com/photo-1516426122078-c23e76319801?w=800";
-            }}
+            priority={true}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
           <button
@@ -228,7 +218,8 @@ const DestinationModal = ({
 
   const handleBooking = (destinationName: string, lodgeName?: string) => {
     if (user) {
-      // User is logged in, go to booking page
+      // User is logged in - show booking modal (no specific safari ID, just inquiry)
+      // For now, navigate to contact page for destination-specific booking
       const bookingParams = new URLSearchParams({ destination: destinationName });
       if (lodgeName) bookingParams.set('lodge', lodgeName);
       navigate(`/booking?${bookingParams.toString()}`);
@@ -411,6 +402,8 @@ const Destinations = () => {
   const { user } = useAuth();
   const { ref, isVisible } = useScrollAnimation();
   const [selected, setSelected] = useState<Destination | null>(null);
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const { data: destinations = [], isLoading } = useDestinations();
 
   return (
     <PageTransition>
@@ -441,6 +434,16 @@ const Destinations = () => {
           {/* Kenya Destinations */}
           <section className="section-padding bg-background" ref={ref}>
             <div className="container-wide mx-auto">
+              {isLoading ? (
+                <div className="flex items-center justify-center h-96">
+                  <div className="text-center">
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-accent/10 animate-spin">
+                      <div className="w-8 h-8 rounded-full border-2 border-accent/20 border-t-accent"></div>
+                    </div>
+                    <p className="mt-4 text-muted-foreground">Loading destinations...</p>
+                  </div>
+                </div>
+              ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {destinations.filter(dest => dest.country === 'Kenya').map((dest, index) => {
                   const lodgeCount =
@@ -455,7 +458,7 @@ const Destinations = () => {
                       style={{ transitionDelay: `${index * 80}ms` }}
                       onClick={() => setSelected(dest)}
                     >
-                      <ImageSlider images={dest.images || [dest.image]} name={dest.name} />
+                      <ImageSlider images={dest.images || [dest.image]} name={dest.name} priority={index < 3} />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                       <div className="absolute bottom-0 left-0 right-0 p-6">
                         <h3 className="text-white font-bold text-xl">{dest.name}</h3>
@@ -475,12 +478,14 @@ const Destinations = () => {
                   );
                 })}
               </div>
+              )}
             </div>
           </section>
 
 
         </main>
         <Footer />
+        <BookingModal open={bookingOpen} onOpenChange={setBookingOpen} />
       </div>
 
       {/* Destination + lodge modal */}

@@ -19,6 +19,7 @@ import { AdminInsights } from "@/components/admin/AdminInsights";
 import { AdminInquiries } from "@/components/admin/AdminInquiries";
 import { AdminHealth } from "@/components/admin/AdminHealth";
 import ErrorBoundary from "@/components/layout/ErrorBoundary";
+import SuspenseFallback from "@/components/layout/SuspenseFallback";
 
 interface AdminBooking {
   id: string;
@@ -195,14 +196,12 @@ const Admin = () => {
     return (
       <PageTransition>
         <Navbar />
-        <div className="min-h-screen bg-background flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-accent" />
-        </div>
+        <SuspenseFallback />
       </PageTransition>
     );
   }
 
-  if (!isAdmin) return null;
+  if (!isAdmin && !isSuperAdmin) return null;
 
   return (
     <PageTransition>

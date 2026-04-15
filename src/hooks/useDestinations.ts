@@ -1,9 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Destination, destinations as localDestinations } from "@/data/destinations";
 
 export const useDestinations = () => {
-  return useQuery({
+  const queryClient = useQueryClient();
+
+  const query = useQuery({
     queryKey: ["destinations"],
     queryFn: async () => {
       try {
@@ -32,8 +35,33 @@ export const useDestinations = () => {
       }
     },
     initialData: localDestinations,
-    staleTime: 1000 * 60 * 30, // 30 mins
-    gcTime: 1000 * 60 * 60,   // 1 hour
-    refetchOnWindowFocus: false, // Prevent lag when switching tabs
+    staleTime: 1000 * 60 * 5, // 5 mins - reduced from 30 mins for faster updates
+    gcTime: 1000 * 60 * 30,   // 30 mins - reduced from 1 hour
+    refetchOnWindowFocus: true, // Enable to show updates when switching tabs
   });
+
+  // Real-time subscription for destinations
+  useEffect(() => {
+    const channel = supabase
+      .channel('destinations-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'destinations'
+        },
+        (payload) => {
+          console.log('Destinations real-time update:', payload);
+          queryClient.invalidateQueries({ queryKey: ["destinations"] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
+  return query;
 };

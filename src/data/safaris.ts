@@ -106,7 +106,7 @@ export const safaris: Safari[] = [
     price: 850,
     rating: 4.8,
     reviews: 133,
-    image: "/image%20copy%2010.webp",
+    image: "/images/destiations/Lake Nakuru/lake elementaita.webp",
     description: "Experience the vibrant pink shores of Lake Nakuru, a sanctuary for endangered black and white rhinos and millions of flamingos.",
     highlights: ["Endangered Rhinos", "Flamingo Flocks", "Baboon Cliff Panorama"],
     category: "Wildlife Safari",

@@ -10,7 +10,7 @@ import { Edit, Plus, Trash2, Loader2, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { compressImage, createPreviewUrl } from "@/lib/image-utils";
+import { compressImage, createPreviewUrl, uploadFileToSupabase } from "@/lib/image-utils";
 import { SUPABASE_STORAGE_BUCKET } from "@/lib/supabase-config";
 
 const emptyDestination: Partial<Destination> = {
@@ -23,6 +23,7 @@ export const AdminDestinations = () => {
   const [editing, setEditing] = useState<Partial<Destination> | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<"processing" | "uploading" | null>(null);
 
   const handleEdit = (dest: Destination) => setEditing(dest);
   
@@ -34,36 +35,32 @@ export const AdminDestinations = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // 1. Show instant preview
+    // 1. Show instant local preview
     const previewUrl = createPreviewUrl(file);
+    const previousImage = editing?.image;
     setEditing((prev) => prev ? { ...prev, image: previewUrl } : null);
 
     setUploading(true);
+    setUploadStatus("processing");
     try {
-      // 2. Compress image
+      // 2. Optimized compression
       const compressedFile = await compressImage(file);
       
-      const fileExt = compressedFile.name.split(".").pop();
-      const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from(SUPABASE_STORAGE_BUCKET)
-        .upload(fileName, compressedFile);
+      setUploadStatus("uploading");
+      // 3. Optimized upload
+      const publicUrl = await uploadFileToSupabase(compressedFile);
 
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from(SUPABASE_STORAGE_BUCKET)
-        .getPublicUrl(fileName);
-
-      // 3. Final URL update
+      // 4. Final URL update
       setEditing((prev) => prev ? { ...prev, image: publicUrl } : null);
       toast.success("Image uploaded!");
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error("Image upload failed");
+      // Revert to previous image
+      setEditing((prev) => prev ? { ...prev, image: previousImage } : null);
+      toast.error("Image upload failed. Please try again.");
     } finally {
       setUploading(false);
+      setUploadStatus(null);
     }
   };
 
@@ -82,15 +79,47 @@ export const AdminDestinations = () => {
         safari_count: editing.safariCount,
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any).from("destinations").upsert(payload);
-      if (error) throw error;
+      // Optimistic Update: Update the local cache immediately
+      const previousData = queryClient.getQueryData(["destinations"]);
+      queryClient.setQueryData(["destinations"], (old: Destination[] = []) => {
+        const index = old.findIndex((d) => d.id === payload.id);
+        if (index > -1) {
+          const updated = [...old];
+          updated[index] = { ...payload, safariCount: payload.safari_count } as Destination;
+          return updated;
+        }
+        return [...old, { ...payload, safariCount: payload.safari_count } as Destination];
+      });
 
-      toast.success("Destination saved successfully");
-      queryClient.invalidateQueries({ queryKey: ["destinations"] });
       setEditing(null);
+
+      // Perform the actual cloud save with a timeout
+      const cloudSync = async () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await (supabase as any).from("destinations").upsert(payload);
+        if (error) throw error;
+      };
+
+      const timeout = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error("Cloud Sync Timeout")), 20000)
+      );
+
+      try {
+        await Promise.race([cloudSync(), timeout]);
+        toast.success("Destination saved to cloud");
+        queryClient.invalidateQueries({ queryKey: ["destinations"] });
+      } catch (error: any) {
+        console.error("Cloud save failed:", error);
+        // Revert optimistic update
+        queryClient.setQueryData(["destinations"], previousData);
+        const msg = error.message === "Cloud Sync Timeout" 
+          ? "Cloud sync timed out. Data is saved locally but not in the database. Check your internet connection." 
+          : `Cloud save failed: ${error.message}. Ensure you ran the SQL script in Supabase.`;
+        toast.error(msg, { duration: 5000 });
+      }
     } catch (error) {
-      toast.error("Failed to save destination.");
+      console.error("Critical save error:", error);
+      toast.error("Failed to prepare data for saving.");
     } finally {
       setIsSubmitting(false);
     }
@@ -185,7 +214,12 @@ export const AdminDestinations = () => {
                 {editing?.image && <img src={editing.image} alt="Preview" className="w-16 h-16 rounded object-cover" />}
                 <div className="flex-1">
                   <Input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} />
-                  {uploading && <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin"/> Uploading...</p>}
+                  {uploading && (
+                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                      <Loader2 className="w-3 h-3 animate-spin"/> 
+                      {uploadStatus === "processing" ? "Optimizing image..." : "Uploading to cloud..."}
+                    </p>
+                  )}
                 </div>
               </div>
               <Input placeholder="Or paste image URL" value={editing?.image || ""} onChange={(e) => setEditing(prev => ({ ...prev!, image: e.target.value }))} className="mt-2" />

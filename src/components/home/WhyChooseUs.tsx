@@ -28,15 +28,15 @@ const WhyChooseUs = () => {
           {features.map((feature, index) => (
             <div
               key={feature.title}
-              className={`bg-muted/50 border border-border rounded-2xl p-6 hover:bg-muted transition-all duration-500 ${
+              className={`bg-muted/50 border border-border rounded-2xl p-6 hover:bg-muted transition-all duration-500 hover:-translate-y-1 hover:shadow-xl group ${
                 isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
               }`}
               style={{ transitionDelay: `${index * 100}ms` }}
             >
-              <div className="w-12 h-12 rounded-xl bg-muted/20 flex items-center justify-center mb-4">
-                <feature.icon className="w-6 h-6 text-black" />
+              <div className="w-12 h-12 rounded-xl bg-muted/20 flex items-center justify-center mb-4 group-hover:bg-accent/20 group-hover:scale-110 transition-all duration-300">
+                <feature.icon className="w-6 h-6 text-black group-hover:text-accent transition-colors" />
               </div>
-              <h3 className="font-bold text-lg mb-2 text-foreground">{feature.title}</h3>
+              <h3 className="font-bold text-lg mb-2 text-foreground group-hover:text-primary transition-colors">{feature.title}</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">{feature.description}</p>
             </div>
           ))}

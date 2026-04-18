@@ -59,18 +59,11 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-semibold text-lg mb-4">Pages</h4>
+            <h4 className="font-semibold text-lg mb-4">Legal</h4>
             <ul className="space-y-2">
               {[
-                { label: "Home", path: "/" },
-                { label: "Safaris", path: "/safaris" },
-                { label: "Kenya Safaris", path: "/safaris/kenya" },
-                { label: "Destination", path: "/destinations" },
-                { label: "Travel Info", path: "/travel-info" },
-                { label: "About Us", path: "/about" },
-                { label: "Gallery Page", path: "/gallery" },
-                { label: "Blog News", path: "/blog" },
-                { label: "Contact Us", path: "/contact" },
+                { label: "Privacy Policy", path: "/privacy" },
+                { label: "Terms of Service", path: "/terms" },
               ].map((link) => (
                 <li key={link.path}>
                   <Link
@@ -160,12 +153,8 @@ const Footer = () => {
 
       {/* Bottom Bar */}
       <div className="border-t border-primary-foreground/10">
-        <div className="container-wide mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-primary-foreground/50">
+        <div className="container-wide mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-primary-foreground/50">
           <p>© {new Date().getFullYear()} Tambua Africa Tours & Safaris. All rights reserved.</p>
-          <div className="flex gap-6">
-            <Link to="/privacy" className="hover:text-primary-foreground transition-colors">Privacy Policy</Link>
-            <Link to="/terms" className="hover:text-primary-foreground transition-colors">Terms of Service</Link>
-          </div>
         </div>
       </div>
     </footer>

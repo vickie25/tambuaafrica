@@ -2,14 +2,9 @@ import { motion } from "framer-motion";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
 const partners = [
-  { name: "Kenya Wildlife Service", logo: "/images/logos/kws.png" },
-  { name: "Magical Kenya", logo: "/images/logos/magical-kenya.png" },
-  { name: "KATO", logo: "/images/logos/kato.png" },
+  { name: "TRA (Tourism Regulatory Authority)", logo: "/images/logos/tra.png" },
   { name: "TripAdvisor", logo: "/images/logos/tripadvisor.svg" },
   { name: "Safari Bookings", logo: "/images/logos/safaribookings.webp" },
-  { name: "Eco Tourism Kenya", logo: "/images/logos/ecotourism.png" },
-  { name: "IATA", logo: "/images/logos/iata.svg" },
-  { name: "UN Tourism", logo: "/images/logos/un-tourism.svg" },
 ];
 
 const PartnersSection = () => {
@@ -23,25 +18,22 @@ const PartnersSection = () => {
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground mt-2">Our Partners & Affiliations</h2>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-8 items-center justify-items-center">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8">
           {partners.map((partner, i) => (
             <motion.div
               key={partner.name}
-              initial={{ opacity: 0, y: 20 }}
-              animate={isVisible ? { opacity: 1, y: 0 } : {}}
-              transition={{ delay: i * 0.05, duration: 0.4 }}
-              className="flex flex-col items-center justify-center transition-all duration-300 opacity-80 hover:opacity-100"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={isVisible ? { opacity: 1, scale: 1 } : {}}
+              transition={{ delay: i * 0.1, duration: 0.5 }}
+              className="flex items-center justify-center transition-all duration-300 grayscale hover:grayscale-0 opacity-60 hover:opacity-100"
               title={partner.name}
             >
-              <div className="bg-slate-100 p-4 rounded-2xl shadow-sm border border-border/50 w-full flex items-center justify-center min-h-[72px]">
+              <div className="bg-slate-50/50 p-6 rounded-xl flex items-center justify-center w-full h-24">
                 <img
                   src={partner.logo}
                   alt={partner.name}
-                  className="h-12 w-auto object-contain"
+                  className="max-h-12 max-w-full object-contain"
                   loading="lazy"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "/images/logos/kws.png";
-                  }}
                 />
               </div>
             </motion.div>

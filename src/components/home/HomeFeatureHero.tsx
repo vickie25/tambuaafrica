@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { MapPin, Info, ArrowRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import OptimizedImage from "@/components/ui/optimized-image";
 
 interface HomeFeatureHeroProps {
   images: string[];
@@ -17,7 +19,7 @@ const HomeFeatureHero = ({
   slogan,
   title,
   description,
-  interval = 5000,
+  interval = 4000,
   align = "left",
 }: HomeFeatureHeroProps) => {
   const [currentImage, setCurrentImage] = useState(0);
@@ -26,9 +28,17 @@ const HomeFeatureHero = ({
     if (images.length <= 1) return;
     const timer = setInterval(() => {
       setCurrentImage((prev) => (prev + 1) % images.length);
-    }, interval);
+    }, Math.max(interval, 5000));
     return () => clearInterval(timer);
   }, [images, interval]);
+
+  // Preload all images on mount
+  useEffect(() => {
+    images.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, [images]);
 
   // Alternate background and content alignment
   const isLeft = align === "left";
@@ -36,28 +46,34 @@ const HomeFeatureHero = ({
     ? "bg-gradient-to-b from-white/80 via-accent/10 to-white/60"
     : "bg-gradient-to-b from-accent/10 via-white/80 to-white/60";
   const borderClass = isLeft ? "border-t-4 border-accent" : "border-t-4 border-primary";
-  // For border-hugging effect
-  // Hug the absolute far left or right, with strong distinction
-  // Slogan hugs the border, section is full viewport height, strong distinction
   const contentAlign = isLeft
     ? "absolute left-0 top-0 h-full flex flex-col justify-center items-start text-left max-w-xl w-full px-0 sm:px-2 lg:px-4 py-12 shadow-2xl border-r-8 border-accent"
     : "absolute right-0 top-0 h-full flex flex-col justify-center items-end text-right max-w-xl w-full px-0 sm:px-2 lg:px-4 py-12 shadow-2xl border-l-8 border-primary";
 
   return (
     <section className={`relative min-h-screen flex items-center overflow-hidden ${borderClass} shadow-2xl ${sectionBg}`}>
-      {/* Background Slideshow */}
-      <div className="absolute inset-0 z-0">
-        {images.map((src, index) => (
-          <div
-            key={src}
-            className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ease-in-out ${
-              index === currentImage ? "opacity-100" : "opacity-0"
-            }`}
-            style={{ backgroundImage: `url('${src}')` }}
-          />
-        ))}
+      {/* Background Slideshow - Smooth crossfade */}
+      <div className="absolute inset-0 z-0 bg-black">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentImage}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1, ease: "easeInOut" }}
+            className="absolute inset-0"
+          >
+            <OptimizedImage
+              src={images[currentImage]}
+              alt={`${title} background ${currentImage + 1}`}
+              className="w-full h-full"
+              quality={80}
+              priority={false}
+            />
+          </motion.div>
+        </AnimatePresence>
         {/* Overlay */}
-        <div className="absolute inset-0 bg-black/40" />
+        <div className="absolute inset-0 bg-black/50" />
       </div>
 
       {/* Content */}

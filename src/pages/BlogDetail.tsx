@@ -5,6 +5,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Calendar, ArrowLeft, Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { useBlog } from "@/hooks/useBlogs";
+import { Helmet } from "react-helmet-async";
 
 const BlogDetail = () => {
   const { id } = useParams();
@@ -29,6 +30,21 @@ const BlogDetail = () => {
 
   return (
     <PageTransition>
+      <Helmet>
+        <title>{post.title} | Tambua Africa Tours & Safaris</title>
+        <meta name="description" content={post.excerpt} />
+        <meta name="keywords" content={`${post.category}, safari, Kenya, Tanzania, Uganda, Rwanda, East Africa tourism`} />
+        <meta property="og:title" content={post.title} />
+        <meta property="og:description" content={post.excerpt} />
+        <meta property="og:image" content={post.image} />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={`https://tambuaafrica.com/blog/${post.id}`} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={post.title} />
+        <meta name="twitter:description" content={post.excerpt} />
+        <meta name="twitter:image" content={post.image} />
+        <link rel="canonical" href={`https://tambuaafrica.com/blog/${post.id}`} />
+      </Helmet>
       <div className="min-h-screen">
         <Navbar />
         <main>

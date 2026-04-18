@@ -193,6 +193,155 @@ export type Database = {
         }
         Relationships: []
       }
+      safaris: {
+        Row: {
+          id: string
+          title: string
+          location: string
+          duration: string
+          price: number
+          rating: number
+          reviews: number
+          image: string
+          description: string
+          highlights: string[]
+          category: string
+          stripe_price_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          title: string
+          location: string
+          duration: string
+          price: number
+          rating?: number
+          reviews?: number
+          image: string
+          description: string
+          highlights?: string[]
+          category: string
+          stripe_price_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          location?: string
+          duration?: string
+          price?: number
+          rating?: number
+          reviews?: number
+          image?: string
+          description?: string
+          highlights?: string[]
+          category?: string
+          stripe_price_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      destinations: {
+        Row: {
+          id: string
+          name: string
+          country: string
+          description: string
+          image: string
+          safari_count: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          name: string
+          country: string
+          description: string
+          image: string
+          safari_count?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          country?: string
+          description?: string
+          image?: string
+          safari_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      blogs: {
+        Row: {
+          id: string
+          title: string
+          excerpt: string
+          image: string
+          date: string
+          category: string
+          read_time: string
+          content: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          title: string
+          excerpt: string
+          image: string
+          date: string
+          category: string
+          read_time: string
+          content: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          excerpt?: string
+          image?: string
+          date?: string
+          category?: string
+          read_time?: string
+          content?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      carousel_images: {
+        Row: {
+          id: string
+          url: string
+          title: string
+          description: string | null
+          order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          url: string
+          title: string
+          description?: string | null
+          order: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          url?: string
+          title?: string
+          description?: string | null
+          order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

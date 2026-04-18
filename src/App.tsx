@@ -8,40 +8,55 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import FloatingButtons from "@/components/layout/FloatingButtons";
 import CookieConsent from "@/components/layout/CookieConsent";
 import ErrorBoundary from "@/components/layout/ErrorBoundary";
+import BackToTop from "@/components/layout/BackToTop";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { AIAgentChat } from "@/components/chat/AIAgentChat";
 import { PerformanceReport } from "@/components/ui/performance-monitor";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
+import { usePerformanceOptimization } from "@/hooks/usePerformanceOptimization";
 
-// Lazy load heavy components
-const Index = lazy(() => import("./pages/Index"));
-const About = lazy(() => import("./pages/About"));
-const Safaris = lazy(() => import("./pages/Safaris"));
-const SafariDetail = lazy(() => import("./pages/SafariDetail"));
-const Destinations = lazy(() => import("./pages/Destinations"));
-const Gallery = lazy(() => import("./pages/Gallery"));
-const TravelInfo = lazy(() => import("./pages/TravelInfo"));
-const Blog = lazy(() => import("./pages/Blog"));
-const BlogDetail = lazy(() => import("./pages/BlogDetail"));
-const Terms = lazy(() => import("./pages/Terms"));
-const Contact = lazy(() => import("./pages/Contact"));
-const Login = lazy(() => import("./pages/Login"));
-const Signup = lazy(() => import("./pages/Signup"));
-const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
-const ResetPassword = lazy(() => import("./pages/ResetPassword"));
-const Dashboard = lazy(() => import("./pages/Dashboard"));
-const Admin = lazy(() => import("./pages/Admin"));
-const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
-const Booking = lazy(() => import("./pages/Booking"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-const ConnectionDiagnostics = lazy(() => import("./pages/ConnectionDiagnostics"));
+// Lazy load heavy components with optimized prefetching
+const Index = lazy(() => import("./pages/Index").then(m => ({ default: m.default })));
+const About = lazy(() => import("./pages/About").then(m => ({ default: m.default })));
+const Safaris = lazy(() => import("./pages/Safaris").then(m => ({ default: m.default })));
+const SafariDetail = lazy(() => import("./pages/SafariDetail").then(m => ({ default: m.default })));
+const Destinations = lazy(() => import("./pages/Destinations").then(m => ({ default: m.default })));
+const Gallery = lazy(() => import("./pages/Gallery").then(m => ({ default: m.default })));
+const TravelInfo = lazy(() => import("./pages/TravelInfo").then(m => ({ default: m.default })));
+const Blog = lazy(() => import("./pages/Blog").then(m => ({ default: m.default })));
+const BlogDetail = lazy(() => import("./pages/BlogDetail").then(m => ({ default: m.default })));
+const Terms = lazy(() => import("./pages/Terms").then(m => ({ default: m.default })));
+const Contact = lazy(() => import("./pages/Contact").then(m => ({ default: m.default })));
+const Login = lazy(() => import("./pages/Login").then(m => ({ default: m.default })));
+const Signup = lazy(() => import("./pages/Signup").then(m => ({ default: m.default })));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword").then(m => ({ default: m.default })));
+const ResetPassword = lazy(() => import("./pages/ResetPassword").then(m => ({ default: m.default })));
+const Dashboard = lazy(() => import("./pages/Dashboard").then(m => ({ default: m.default })));
+const Admin = lazy(() => import("./pages/Admin").then(m => ({ default: m.default })));
+const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess").then(m => ({ default: m.default })));
+const Booking = lazy(() => import("./pages/Booking").then(m => ({ default: m.default })));
+const NotFound = lazy(() => import("./pages/NotFound").then(m => ({ default: m.default })));
+const ConnectionDiagnostics = lazy(() => import("./pages/ConnectionDiagnostics").then(m => ({ default: m.default })));
 
 import SuspenseFallback from "@/components/layout/SuspenseFallback";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5,      // 5 minutes
+      gcTime: 1000 * 60 * 30,         // 30 minutes
+      retry: 1,                        // Single retry on failure
+      refetchOnWindowFocus: true,      // Refetch when window regains focus
+      refetchOnReconnect: true,        // Refetch when reconnected
+    },
+  },
+});
 
 const AnimatedRoutes = () => {
   const location = useLocation();
+  // Activate performance optimizations
+  usePerformanceOptimization();
+  
   return (
     <ErrorBoundary>
       <Suspense fallback={<SuspenseFallback />}>
@@ -92,6 +107,7 @@ const App = () => (
           <FloatingButtons />
           <AIAgentChat />
           <CookieConsent />
+          <BackToTop />
           <PerformanceReport />
         </AuthProvider>
       </BrowserRouter>

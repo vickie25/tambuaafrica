@@ -11,7 +11,7 @@ import { Edit, Plus, Trash2, Loader2, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { compressImage, createPreviewUrl } from "@/lib/image-utils";
+import { compressImage, createPreviewUrl, uploadFileToSupabase } from "@/lib/image-utils";
 import { SUPABASE_STORAGE_BUCKET } from "@/lib/supabase-config";
 
 const emptySafari: Partial<Safari> = {
@@ -25,6 +25,7 @@ export const AdminSafaris = () => {
   const [editing, setEditing] = useState<Partial<Safari> | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<"processing" | "uploading" | null>(null);
   const [highlightsText, setHighlightsText] = useState("");
 
   const handleEdit = (safari: Safari) => {
@@ -41,36 +42,39 @@ export const AdminSafaris = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // 1. Show instant preview to the user
+    // Check if it's already a URL - use directly without upload
+    if (file.name.startsWith('http')) {
+      setEditing((prev) => prev ? { ...prev, image: file.name } : null);
+      toast.success("Image URL set!");
+      return;
+    }
+
+    // 1. Show instant local preview
     const previewUrl = createPreviewUrl(file);
+    const previousImage = editing?.image;
     setEditing((prev) => prev ? { ...prev, image: previewUrl } : null);
     
     setUploading(true);
+    setUploadStatus("processing");
     try {
-      // 2. Compress the image to speed up upload
+      // 2. Optimized compression
       const compressedFile = await compressImage(file);
       
-      const fileExt = compressedFile.name.split(".").pop();
-      const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from(SUPABASE_STORAGE_BUCKET)
-        .upload(fileName, compressedFile);
+      setUploadStatus("uploading");
+      // 3. Optimized upload
+      const publicUrl = await uploadFileToSupabase(compressedFile);
 
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from(SUPABASE_STORAGE_BUCKET)
-        .getPublicUrl(fileName);
-
-      // 3. Update with the final URL
+      // 4. Update with final URL
       setEditing((prev) => prev ? { ...prev, image: publicUrl } : null);
       toast.success("Image uploaded!");
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error("Image upload failed");
+      // Revert to previous image
+      setEditing((prev) => prev ? { ...prev, image: previousImage } : null);
+      toast.error("Upload failed. Paste a URL instead - it's faster!");
     } finally {
       setUploading(false);
+      setUploadStatus(null);
     }
   };
 
@@ -96,6 +100,7 @@ export const AdminSafaris = () => {
       };
 
       // Optimistic Update: Update the local cache immediately
+      const previousData = queryClient.getQueryData(["safaris"]);
       queryClient.setQueryData(["safaris"], (old: Safari[] = []) => {
         const index = old.findIndex((s) => s.id === payload.id);
         if (index > -1) {
@@ -107,18 +112,34 @@ export const AdminSafaris = () => {
       });
 
       setEditing(null);
-      toast.success("Safari updated (syncing...)");
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any).from("safaris").upsert(payload);
-      if (error) {
-        toast.error("Cloud sync failed. Ensure you ran the SQL permission script.");
-        throw error;
+      // Perform the actual cloud save with a timeout
+      const cloudSync = async () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await (supabase as any).from("safaris").upsert(payload);
+        if (error) throw error;
+      };
+
+      const timeout = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error("Cloud Sync Timeout")), 20000)
+      );
+
+      try {
+        await Promise.race([cloudSync(), timeout]);
+        toast.success("Safari saved to cloud");
+        queryClient.invalidateQueries({ queryKey: ["safaris"] });
+      } catch (error: any) {
+        console.error("Cloud save failed:", error);
+        // Revert optimistic update
+        queryClient.setQueryData(["safaris"], previousData);
+        const msg = error.message === "Cloud Sync Timeout" 
+          ? "Cloud sync timed out. Data is saved locally but not in the database. Check your internet connection." 
+          : `Cloud save failed: ${error.message}. Ensure you ran the SQL script in Supabase.`;
+        toast.error(msg, { duration: 5000 });
       }
-      
-      queryClient.invalidateQueries({ queryKey: ["safaris"] });
     } catch (error) {
-      console.error("Save error:", error);
+      console.error("Critical save error:", error);
+      toast.error("Failed to prepare data for saving.");
     } finally {
       setIsSubmitting(false);
     }
@@ -237,11 +258,42 @@ export const AdminSafaris = () => {
               <div className="flex items-center gap-4">
                 {editing?.image && <img src={editing.image} alt="Preview" className="w-16 h-16 rounded object-cover" />}
                 <div className="flex-1">
-                  <Input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} />
-                  {uploading && <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin"/> Uploading...</p>}
+                  <div className="flex gap-2">
+                    <Input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} className="flex-1" />
+                    {uploading && (
+                      <Button type="button" variant="outline" size="sm" onClick={() => {
+                        setUploading(false);
+                        setUploadStatus(null);
+                        toast.info("Upload cancelled. Use URL instead.");
+                      }}>
+                        Cancel
+                      </Button>
+                    )}
+                  </div>
+                  {uploading && (
+                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                      <Loader2 className="w-3 h-3 animate-spin"/> 
+                      {uploadStatus === "processing" ? "Optimizing..." : "Uploading..."}
+                    </p>
+                  )}
                 </div>
               </div>
-              <Input placeholder="Or paste image URL" value={editing?.image || ""} onChange={(e) => setEditing(prev => ({ ...prev!, image: e.target.value }))} className="mt-2" />
+              {/* Quick URL paste - faster than upload */}
+              <div className="flex items-center gap-2 mt-2">
+                <span className="text-xs text-muted-foreground shrink-0">🌐 Paste URL:</span>
+                <Input 
+                  placeholder="https://... (faster than upload)" 
+                  value={editing?.image?.startsWith('http') ? editing.image : ''} 
+                  onChange={(e) => {
+                    const url = e.target.value;
+                    if (url.startsWith('http')) {
+                      setEditing(prev => ({ ...prev!, image: url }));
+                      toast.success("Image URL set!");
+                    }
+                  }} 
+                  className="flex-1"
+                />
+              </div>
             </div>
 
             <DialogFooter>

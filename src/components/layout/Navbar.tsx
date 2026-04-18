@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Sun, Moon, User, LogIn } from "lucide-react";
+import { Menu, X, Sun, Moon, User, LogIn, LogOut, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 const navLinks = [
   { label: "Home", path: "/" },
@@ -21,10 +22,21 @@ const navLinks = [
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [isDark, setIsDark] = useState(false);
   const location = useLocation();
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, signOut } = useAuth();
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast.success("Signed out successfully");
+      window.location.href = "/";
+    } catch (err) {
+      toast.error("Failed to sign out");
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -34,7 +46,19 @@ const Navbar = () => {
 
   useEffect(() => {
     setIsMobileOpen(false);
+    setOpenDropdown(null);
   }, [location]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setOpenDropdown(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const toggleTheme = () => {
     setIsDark(!isDark);
@@ -64,19 +88,52 @@ const Navbar = () => {
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden lg:flex items-center gap-1">
+          <div className="hidden lg:flex items-center gap-1" ref={dropdownRef}>
             {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  location.pathname === link.path
-                    ? "bg-white/20 text-white"
-                    : "text-white/90 hover:bg-white/10 hover:text-white"
-                }`}
-              >
-                {link.label}
-              </Link>
+              <div key={link.path} className="relative">
+                {link.dropdown ? (
+                  <button
+                    onMouseEnter={() => setOpenDropdown(link.path)}
+                    onClick={() => setOpenDropdown(openDropdown === link.path ? null : link.path)}
+                    className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                      location.pathname.startsWith(link.path)
+                        ? "bg-white/20 text-white"
+                        : "text-white/90 hover:bg-white/10 hover:text-white"
+                    }`}
+                  >
+                    {link.label}
+                    <ChevronDown className={`w-4 h-4 transition-transform ${openDropdown === link.path ? "rotate-180" : ""}`} />
+                  </button>
+                ) : (
+                  <Link
+                    to={link.path}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      location.pathname === link.path
+                        ? "bg-white/20 text-white"
+                        : "text-white/90 hover:bg-white/10 hover:text-white"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                )}
+                {/* Dropdown Menu */}
+                {link.dropdown && openDropdown === link.path && (
+                  <div 
+                    className="absolute top-full left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-border py-1 animate-in fade-in slide-in-from-top-2 duration-200"
+                    onMouseLeave={() => setOpenDropdown(null)}
+                  >
+                    {link.dropdown.map((item) => (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        className="block px-4 py-2 text-sm text-foreground hover:bg-muted hover:text-primary transition-colors"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
           </div>
 
@@ -110,6 +167,13 @@ const Navbar = () => {
                 >
                   <Link to="/dashboard">My Bookings</Link>
                 </Button>
+                <Button
+                  onClick={handleSignOut}
+                  size="icon"
+                  className={"bg-white/10 text-white hover:bg-white/20 border border-white/30"}
+                >
+                  <LogOut className="w-5 h-5" />
+                </Button>
               </div>
             )}
 
@@ -125,21 +189,56 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Menu */}
-      {isMobileOpen && (
-        <div className="lg:hidden bg-white shadow-lg border-t-2 border-primary">
+      <div 
+        className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+          isMobileOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
+        <div className="bg-white shadow-lg border-t-2 border-primary">
           <div className="px-4 py-4 space-y-1">
             {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                  location.pathname === link.path
-                    ? "bg-primary text-primary-foreground"
-                    : "text-foreground hover:bg-primary hover:text-primary-foreground"
-                }`}
-              >
-                {link.label}
-              </Link>
+              <div key={link.path}>
+                {link.dropdown ? (
+                  <div>
+                    <button
+                      onClick={() => setOpenDropdown(openDropdown === link.path ? null : link.path)}
+                      className={`flex items-center justify-between w-full px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                        location.pathname.startsWith(link.path)
+                          ? "bg-primary text-primary-foreground"
+                          : "text-foreground hover:bg-primary hover:text-primary-foreground"
+                      }`}
+                    >
+                      {link.label}
+                      <ChevronDown className={`w-4 h-4 transition-transform ${openDropdown === link.path ? "rotate-180" : ""}`} />
+                    </button>
+                    {/* Mobile Dropdown */}
+                    <div className={`overflow-hidden transition-all duration-200 ${
+                      openDropdown === link.path ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
+                    }`}>
+                      {link.dropdown.map((item) => (
+                        <Link
+                          key={item.path}
+                          to={item.path}
+                          className="block pl-8 pr-4 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-primary transition-colors"
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <Link
+                    to={link.path}
+                    className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                      location.pathname === link.path
+                        ? "bg-primary text-primary-foreground"
+                        : "text-foreground hover:bg-primary hover:text-primary-foreground"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                )}
+              </div>
             ))}
             {isAdmin && (
               <Link
@@ -149,12 +248,16 @@ const Navbar = () => {
                 Admin Dashboard
               </Link>
             )}
+            <Button onClick={handleSignOut} variant="outline" className="w-full mt-2 border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold">
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </Button>
             <Button asChild className="w-full mt-3 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold">
               <Link to="/safaris">Let's Get Started</Link>
             </Button>
           </div>
         </div>
-      )}
+      </div>
     </nav>
   );
 };

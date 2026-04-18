@@ -1,29 +1,12 @@
-import { useEffect, useState } from "react";
 import { useSafaris } from "@/hooks/useSafaris";
 import { useDestinations } from "@/hooks/useDestinations";
-import { supabase } from "@/integrations/supabase/client";
-import { Bot, LineChart, TrendingUp, Users, Activity } from "lucide-react";
+import { useAdminStats } from "@/hooks/useAdminBookings";
+import { Bot, LineChart, TrendingUp, Users, Activity, Loader2 } from "lucide-react";
 
 export const AdminInsights = () => {
   const { data: safaris = [] } = useSafaris();
   const { data: destinations = [] } = useDestinations();
-  const [stats, setStats] = useState({ revenue: 0, inquiries: 0 });
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      const { data: bookings } = await supabase.from("bookings").select("total_amount").eq("status", "confirmed");
-      const { count } = await supabase.from("inquiry_submissions").select("*", { count: 'exact', head: true });
-      
-      if (bookings) {
-        const totalRevenue = bookings.reduce((sum, b) => sum + (b.total_amount || 0), 0);
-        setStats(prev => ({ ...prev, revenue: totalRevenue / 100 }));
-      }
-      if (count !== null) {
-        setStats(prev => ({ ...prev, inquiries: count }));
-      }
-    };
-    fetchStats();
-  }, []);
+  const { data: stats = { revenue: 0, inquiriesCount: 0 }, isLoading: statsLoading } = useAdminStats();
 
   return (
     <div className="space-y-6">
@@ -63,7 +46,7 @@ export const AdminInsights = () => {
             <Users className="w-5 h-5 text-orange-500" />
             <h3 className="font-semibold text-sm">Total Inquiries</h3>
           </div>
-          <p className="text-2xl font-bold">{stats.inquiries}</p>
+          <p className="text-2xl font-bold">{stats.inquiriesCount}</p>
           <p className="text-xs text-muted-foreground mt-1">General & booking inquiries.</p>
         </div>
 

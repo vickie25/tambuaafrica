@@ -1,5 +1,6 @@
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { Compass, Palmtree, Binoculars, Mountain, Activity, Wind } from "lucide-react";
+import OptimizedImage from "@/components/ui/optimized-image";
 import {
   Carousel,
   CarouselContent,
@@ -94,31 +95,29 @@ const ActivitiesSection = () => {
               style={{ transitionDelay: `${index * 150}ms` }}
             >
               {activity.images ? (
-                <Carousel 
-                  className="w-full h-full absolute inset-0" 
+                <Carousel
+                  className="w-full h-full absolute inset-0"
                   opts={{ loop: true }}
-                  plugins={[Autoplay({ delay: 3500 + index * 200, stopOnInteraction: false })]}
+                  plugins={[Autoplay({ delay: 6000, stopOnInteraction: true })]}
                 >
                   <CarouselContent className="-ml-0 h-full">
                     {activity.images.map((image, i) => (
                       <CarouselItem key={image} className="pl-0 h-full">
-                        <img
-                          src={encodeURI(image)}
+                        <OptimizedImage
+                          src={image}
                           alt={`${activity.title} image ${i + 1}`}
                           className="w-full h-full aspect-[4/5] object-cover transition-transform duration-700 group-hover:scale-110"
-                          loading="lazy"
                         />
                       </CarouselItem>
                     ))}
                   </CarouselContent>
-                  <CarouselDots className="bottom-[130px] z-20" />
+                  <CarouselDots className="bottom-4 z-20" />
                 </Carousel>
               ) : (
-                <img
-                  src={activity.image}
+                <OptimizedImage
+                  src={activity.images[0]}
                   alt={activity.title}
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  loading="lazy"
                 />
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />

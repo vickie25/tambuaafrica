@@ -12,6 +12,34 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
+  build: {
+    // Optimize chunk splitting for faster initial load
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'query-vendor': ['@tanstack/react-query'],
+          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-tooltip', '@radix-ui/react-select'],
+          'animation': ['framer-motion'],
+          'icons': ['lucide-react'],
+        },
+      },
+    },
+    // Aggressive minification
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
+    // Generate source maps only in development
+    sourcemap: mode === 'development',
+    // Optimize CSS
+    cssCodeSplit: true,
+    // Preload critical chunks
+    reportCompressedSize: false,
+  },
   plugins: [
     react(),
     VitePWA({
@@ -21,7 +49,7 @@ export default defineConfig(({ mode }) => ({
         maximumFileSizeToCacheInBytes: 12 * 1024 * 1024,
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/.*\.(png|jpg|jpeg|svg|gif)$/,
+            urlPattern: /^https:\/\/.*\.(png|jpg|jpeg|svg|gif|webp|avif|mp4)$/,
             handler: 'CacheFirst',
             options: {
               cacheName: 'images-cache',
@@ -68,18 +96,6 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-  },
-  build: {
-    target: "esnext",
-    minify: "esbuild",
-    cssCodeSplit: true,
-    sourcemap: false,
-    rollupOptions: {
-      output: {
-        // Reverted to default chunking for maximum stability
-      },
-    },
-    chunkSizeWarningLimit: 1000,
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom', 'framer-motion'],

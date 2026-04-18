@@ -10,18 +10,12 @@ export const useBlogs = () => {
     queryKey: ["blogs"],
     queryFn: async () => {
       try {
-        const fetchBlogs = async () => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const { data, error } = await (supabase as any)
-            .from("blogs")
-            .select("*")
-            .order("created_at", { ascending: false });
-          if (error) throw error;
-          return data;
-        };
-
-        const timeout = new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Supabase Timeout")), 5000));
-        const data = await Promise.race([fetchBlogs(), timeout]);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data, error } = await (supabase as any)
+          .from("blogs")
+          .select("*")
+          .order("created_at", { ascending: false });
+        if (error) throw error;
 
         if (!data || data.length === 0) {
           return localPosts;
@@ -38,7 +32,7 @@ export const useBlogs = () => {
           content: item.content,
         })) as BlogPost[];
       } catch (err) {
-        console.warn("Supabase fetch failed or timed out. Falling back to local blog posts.", err);
+        console.warn("Supabase fetch failed. Falling back to local blog posts.", err);
         return localPosts;
       }
     },
@@ -48,7 +42,9 @@ export const useBlogs = () => {
     refetchOnWindowFocus: true, // Enable to show updates when switching tabs
   });
 
-  // Real-time subscription for blogs
+  // Real-time subscription for blogs - disabled due to subscription conflicts
+  // TODO: Re-enable once Supabase realtime is properly configured
+  /*
   useEffect(() => {
     const channel = supabase
       .channel('blogs-changes')
@@ -70,6 +66,7 @@ export const useBlogs = () => {
       supabase.removeChannel(channel);
     };
   }, [queryClient]);
+  */
 
   return query;
 };
@@ -80,19 +77,13 @@ export const useBlog = (id?: string) => {
     queryFn: async () => {
       if (!id) return null;
       try {
-        const fetchBlog = async () => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const { data, error } = await (supabase as any)
-            .from("blogs")
-            .select("*")
-            .eq("id", id)
-            .maybeSingle();
-          if (error) throw error;
-          return data;
-        };
-
-        const timeout = new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Supabase Timeout")), 5000));
-        const data = await Promise.race([fetchBlog(), timeout]);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data, error } = await (supabase as any)
+          .from("blogs")
+          .select("*")
+          .eq("id", id)
+          .maybeSingle();
+        if (error) throw error;
 
         if (data) {
           return {

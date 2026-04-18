@@ -21,10 +21,14 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      console.log("Attempting login with:", email);
       await signIn(email, password);
+      console.log("Login successful, navigating to dashboard");
       toast.success("Welcome back!");
-      navigate("/dashboard");
+      // Use window.location for hard redirect to ensure page refresh
+      window.location.href = "/dashboard";
     } catch (err) {
+      console.error("Login failed:", err);
       toast.error((err as Error).message || "Login failed");
     } finally {
       setLoading(false);

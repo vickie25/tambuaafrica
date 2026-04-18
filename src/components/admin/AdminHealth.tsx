@@ -12,6 +12,7 @@ export const AdminHealth = () => {
   const [latency, setLatency] = useState<number | null>(null);
   const [dbConn, setDbConn] = useState<'checking' | 'ok' | 'fail'>('checking');
   const [storageConn, setStorageConn] = useState<'checking' | 'ok' | 'fail'>('checking');
+  const [tablesOk, setTablesOk] = useState<'checking' | 'ok' | 'fail'>( 'checking');
   const [bucketExists, setBucketExists] = useState<boolean | null>(null);
   const [checking, setChecking] = useState(false);
 
@@ -24,13 +25,25 @@ export const AdminHealth = () => {
       setLatency(Date.now() - start);
       setDbConn(dbError ? 'fail' : 'ok');
 
-      // 2. Check Storage Permissions and bucket existence
+      // 2. Check Admin Tables
+      const checkTables = async () => {
+        const { error: sErr } = await supabase.from('safaris').select('id').limit(1);
+        const { error: dErr } = await supabase.from('destinations').select('id').limit(1);
+        const { error: bErr } = await supabase.from('blogs').select('id').limit(1);
+        const { error: iErr } = await supabase.from('inquiry_submissions').select('id').limit(1);
+        return !sErr && !dErr && !bErr && !iErr;
+      };
+      const tablesExist = await checkTables();
+      setTablesOk(tablesExist ? 'ok' : 'fail');
+
+      // 3. Check Storage Permissions
       const { data: buckets, error: storageError } = await supabase.storage.listBuckets();
       const hasBucket = !storageError && Array.isArray(buckets) && buckets.some((bucket) => bucket.name === SUPABASE_STORAGE_BUCKET);
       setBucketExists(hasBucket);
       setStorageConn(storageError || !hasBucket ? 'fail' : 'ok');
     } catch (err) {
       setDbConn('fail');
+      setTablesOk('fail');
       setStorageConn('fail');
       setBucketExists(false);
     } finally {
@@ -87,12 +100,12 @@ export const AdminHealth = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">User Role</CardTitle>
-            <Badge variant={isAdmin ? "default" : "destructive"}>{role || "No Role"}</Badge>
+            <CardTitle className="text-sm font-medium">Table Sync</CardTitle>
+            {tablesOk === 'ok' ? <CheckCircle className="h-4 w-4 text-green-500" /> : <ShieldAlert className="h-4 w-4 text-red-500" />}
           </CardHeader>
           <CardContent>
-            <div className="text-xl font-medium truncate">{user?.email}</div>
-            <p className="text-xs text-muted-foreground mt-1">Current Auth Identity</p>
+            <div className="text-2xl font-bold">{tablesOk === 'ok' ? "Healthy" : tablesOk === 'checking' ? "Checking..." : "Missing Tables"}</div>
+            <p className="text-xs text-muted-foreground mt-1">Safaris, Destinations, Blogs, Inquiries</p>
           </CardContent>
         </Card>
       </div>
@@ -127,6 +140,16 @@ export const AdminHealth = () => {
              <div>
                <h4 className="font-semibold text-red-500">Database Permissions Blocked</h4>
                <p className="text-sm text-red-400">You do not have administrative roles in the database. <strong>Uploads will fail!</strong> Please run the SQL snippet provided in the instructions.</p>
+             </div>
+           </div>
+          )}
+
+          {tablesOk === 'fail' && (
+             <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 flex items-start gap-3">
+             <ShieldAlert className="h-5 w-5 text-red-500 mt-0.5" />
+             <div>
+               <h4 className="font-semibold text-red-500">Missing Database Tables</h4>
+               <p className="text-sm text-red-400">The Admin tables (Safaris, Destinations, Blogs, or Inquiries) were not found in Supabase. <strong>Changes cannot be saved!</strong> Please run the `full_initialize.sql` script in your Supabase SQL Editor.</p>
              </div>
            </div>
           )}

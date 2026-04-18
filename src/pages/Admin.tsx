@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,31 +12,20 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageTransition from "@/components/layout/PageTransition";
-import { AdminSafaris } from "@/components/admin/AdminSafaris";
-import { AdminDestinations } from "@/components/admin/AdminDestinations";
-import { AdminBlogs } from "@/components/admin/AdminBlogs";
-import { AdminInsights } from "@/components/admin/AdminInsights";
-import { AdminInquiries } from "@/components/admin/AdminInquiries";
-import { AdminHealth } from "@/components/admin/AdminHealth";
+import { useQueryClient } from "@tanstack/react-query";
+import { useAdminBookings, useAdminProfiles, useUnreadInquiriesCount, type AdminBooking } from "@/hooks/useAdminBookings";
+// Lazy load admin components for performance (Handle named exports)
+const AdminSafaris = lazy(() => import("@/components/admin/AdminSafaris").then(m => ({ default: m.AdminSafaris })));
+const AdminDestinations = lazy(() => import("@/components/admin/AdminDestinations").then(m => ({ default: m.AdminDestinations })));
+const AdminBlogs = lazy(() => import("@/components/admin/AdminBlogs").then(m => ({ default: m.AdminBlogs })));
+const AdminInsights = lazy(() => import("@/components/admin/AdminInsights").then(m => ({ default: m.AdminInsights })));
+const AdminInquiries = lazy(() => import("@/components/admin/AdminInquiries").then(m => ({ default: m.AdminInquiries })));
+const AdminHealth = lazy(() => import("@/components/admin/AdminHealth").then(m => ({ default: m.AdminHealth })));
+const AdminCarousel = lazy(() => import("@/components/admin/AdminCarousel").then(m => ({ default: m.AdminCarousel })));
+
 import ErrorBoundary from "@/components/layout/ErrorBoundary";
 import SuspenseFallback from "@/components/layout/SuspenseFallback";
 
-interface AdminBooking {
-  id: string;
-  safari_title: string;
-  preferred_date: string;
-  guests: number;
-  total_amount: number;
-  status: string;
-  created_at: string;
-  user_id: string;
-}
-
-interface AdminProfile {
-  id: string;
-  full_name: string;
-  phone: string;
-}
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800",
@@ -49,19 +38,58 @@ const Admin = () => {
   const { user, signOut, loading: authLoading, isAdmin: isSuperAdmin } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("bookings");
-  const [bookings, setBookings] = useState<AdminBooking[]>([]);
-  const [profiles, setProfiles] = useState<Record<string, AdminProfile>>({});
-  const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedBooking, setSelectedBooking] = useState<AdminBooking | null>(null);
-  const [unreadCount, setUnreadCount] = useState(0);
 
-  useEffect(() => {
-    if (!authLoading && !user) { navigate("/login"); return; }
-    if (user) checkAdminAndLoad();
-  }, [user, authLoading, checkAdminAndLoad, navigate]);
+  // Use the new synchronized hooks
+  const { data: bookingsData = [], isLoading: bookingsLoading } = useAdminBookings();
+  const { data: unreadCount = 0 } = useUnreadInquiriesCount();
+  
+  const userIds = [...new Set(bookingsData.map((b) => b.user_id))];
+  const { data: profiles = {} } = useAdminProfiles(userIds);
+
+  const checkAdminStatus = useCallback(async () => {
+    // If already determined to be admin from AuthContext, skip the check
+    if (isSuperAdmin) {
+      setIsAdmin(true);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user!.id)
+        .single();
+
+      if (error || profile?.role?.toLowerCase() !== "admin") {
+        // Final fallback check
+        if (user?.email?.toLowerCase() === "tambuaafrica@gmail.com") {
+          setIsAdmin(true);
+        } else {
+          navigate("/dashboard");
+          return;
+        }
+      }
+      setIsAdmin(true);
+    } catch (err) {
+      console.warn("Admin check failed:", err);
+      // On error, use email fallback
+      if (user?.email?.toLowerCase() === "tambuaafrica@gmail.com") {
+        setIsAdmin(true);
+      } else {
+        navigate("/dashboard");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [user, isSuperAdmin, navigate]);
 
   const handleSignOut = async () => {
     try {
@@ -73,81 +101,33 @@ const Admin = () => {
     }
   };
 
-  const checkAdminAndLoad = useCallback(async () => {
-    setLoading(true);
-    try {
-      // First check context-level admin status (email bypass)
-      if (isSuperAdmin) {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    console.log("Admin useEffect - authLoading:", authLoading, "user:", user?.email);
+
+    if (!authLoading && !user) {
+      console.log("No user, navigating to login");
+      navigate("/login");
+    } else if (user) {
+      console.log("User found:", user.email);
+      // Immediately allow tambuaafrica@gmail.com without any checks
+      if (user.email?.toLowerCase() === "tambuaafrica@gmail.com") {
+        console.log("Allowing tambuaafrica@gmail.com as admin");
         setIsAdmin(true);
-      } else {
-        // Otherwise, check admin status via profile
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", user!.id)
-          .single();
-        
-        if (profileError || profile?.role?.toLowerCase() !== "admin") {
-          console.error("Access denied or profile error");
-          toast.error("You don't have admin access");
-          navigate("/dashboard");
-          return;
-        }
+        setLoading(false);
+      } else if (isSuperAdmin) {
+        console.log("Allowing isSuperAdmin");
+        // Skip database check if already determined to be admin
         setIsAdmin(true);
-      }
-
-      // Helper for timed queries
-      const withTimeout = async <T,>(promise: Promise<T>, timeoutMs: number = 5000): Promise<T> => {
-        const timeout = new Promise<T>((_, reject) => setTimeout(() => reject(new Error("Supabase Timeout")), timeoutMs));
-        return Promise.race([promise, timeout]);
-      };
-
-      // RUN INDEPENDENT QUERIES IN PARALLEL
-      const [bookingsResult, inquiriesResult] = await Promise.allSettled([
-        withTimeout(supabase.from("bookings").select("*").order("created_at", { ascending: false })),
-        withTimeout(supabase.from("inquiry_submissions").select("*", { count: 'exact', head: true }).eq("status", "unread"))
-      ]);
-
-      // Process Bookings Result
-      if (bookingsResult.status === "fulfilled") {
-        const { data: bookingsData, error: bookingsError } = bookingsResult.value;
-        if (bookingsData && !bookingsError) {
-          setBookings(bookingsData as AdminBooking[]);
-
-          // Fetch profiles in the background (Non-blocking)
-          const userIds = [...new Set(bookingsData.map((b: AdminBooking) => b.user_id))];
-          if (userIds.length > 0) {
-            withTimeout(
-              supabase.from("profiles").select("id, full_name, phone").in("id", userIds)
-            ).then(({ data: profilesData }) => {
-              if (profilesData) {
-                const map: Record<string, AdminProfile> = {};
-                profilesData.forEach((p: AdminProfile) => { map[p.id] = p; });
-                setProfiles(map);
-              }
-            }).catch((profileErr: Error) => {
-              console.warn("Profiles fetch timed out or failed:", profileErr);
-            });
-          }
-        }
+        setLoading(false);
       } else {
-        console.warn("Bookings fetch timed out or failed.");
+        console.log("Checking admin status for other user");
+        // Check admin status for other users
+        checkAdminStatus();
       }
-
-      // Process Inquiries Result
-      if (inquiriesResult.status === "fulfilled") {
-        const result = inquiriesResult.value as { count: number | null };
-        setUnreadCount(result.count || 0);
-      } else {
-        console.warn("Inquiries fetch timed out or failed.");
-      }
-    } catch (err: Error) {
-      console.error("Unexpected error in checkAdminAndLoad:", err);
-      toast.error("An unexpected error occurred while loading the dashboard");
-    } finally {
-      setLoading(false);
     }
-  }, [user, isSuperAdmin, navigate]);
+  }, [user, authLoading, checkAdminStatus, navigate, isSuperAdmin]);
 
   const updateStatus = async (bookingId: string, newStatus: string) => {
     const { error } = await supabase
@@ -159,7 +139,7 @@ const Admin = () => {
     if (error) toast.error("Could not update status");
     else {
       toast.success(`Booking ${newStatus}`);
-      setBookings((prev) => prev.map((b) => b.id === bookingId ? { ...b, status: newStatus } : b));
+      queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
     }
   };
 
@@ -174,11 +154,11 @@ const Admin = () => {
     if (error) toast.error("Could not delete booking");
     else {
       toast.success("Booking deleted");
-      setBookings((prev) => prev.filter((b) => b.id !== bookingId));
+      queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
     }
   };
 
-  const filteredBookings = bookings.filter((b) => {
+  const filteredBookings = bookingsData.filter((b) => {
     const matchesSearch = b.safari_title.toLowerCase().includes(search.toLowerCase()) ||
       (profiles[b.user_id]?.full_name || "").toLowerCase().includes(search.toLowerCase());
     const matchesStatus = filterStatus === "all" || b.status === filterStatus;
@@ -186,12 +166,13 @@ const Admin = () => {
   });
 
   const stats = {
-    total: bookings.length,
-    confirmed: bookings.filter((b) => b.status === "confirmed").length,
-    revenue: bookings.filter((b) => b.status === "confirmed").reduce((sum, b) => sum + b.total_amount, 0),
-    pending: bookings.filter((b) => b.status === "pending").length,
+    total: bookingsData.length,
+    confirmed: bookingsData.filter((b) => b.status === "confirmed").length,
+    revenue: bookingsData.filter((b) => b.status === "confirmed").reduce((sum, b) => sum + b.total_amount, 0),
+    pending: bookingsData.filter((b) => b.status === "pending").length,
   };
 
+  // Only show loading on initial auth check, not on data fetches (which have their own timeouts)
   if (authLoading || loading) {
     return (
       <PageTransition>
@@ -201,7 +182,8 @@ const Admin = () => {
     );
   }
 
-  if (!isAdmin && !isSuperAdmin) return null;
+  // Always allow tambuaafrica@gmail.com, otherwise check admin status
+  if (user?.email?.toLowerCase() !== "tambuaafrica@gmail.com" && !isAdmin && !isSuperAdmin) return null;
 
   return (
     <PageTransition>
@@ -216,7 +198,7 @@ const Admin = () => {
           </div>
 
           <div className="flex gap-2 mb-8 border-b border-border pb-px overflow-x-auto whitespace-nowrap scrollbar-hide">
-            {["bookings", "safaris", "destinations", "blogs", "messages", "insights", "health"].map(tab => (
+            {["bookings", "carousel", "safaris", "destinations", "blogs", "messages", "insights", "health"].map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -234,12 +216,15 @@ const Admin = () => {
             ))}
           </div>
 
-          {activeTab === "safaris" && <ErrorBoundary><AdminSafaris /></ErrorBoundary>}
-          {activeTab === "destinations" && <ErrorBoundary><AdminDestinations /></ErrorBoundary>}
-          {activeTab === "blogs" && <ErrorBoundary><AdminBlogs /></ErrorBoundary>}
-          {activeTab === "messages" && <ErrorBoundary><AdminInquiries /></ErrorBoundary>}
-          {activeTab === "insights" && <ErrorBoundary><AdminInsights /></ErrorBoundary>}
-          {activeTab === "health" && <ErrorBoundary><AdminHealth /></ErrorBoundary>}
+          <Suspense fallback={<div className="p-12 flex justify-center"><Loader2 className="w-8 h-8 animate-spin text-accent"/></div>}>
+            {activeTab === "carousel" && <ErrorBoundary><AdminCarousel /></ErrorBoundary>}
+            {activeTab === "safaris" && <ErrorBoundary><AdminSafaris /></ErrorBoundary>}
+            {activeTab === "destinations" && <ErrorBoundary><AdminDestinations /></ErrorBoundary>}
+            {activeTab === "blogs" && <ErrorBoundary><AdminBlogs /></ErrorBoundary>}
+            {activeTab === "messages" && <ErrorBoundary><AdminInquiries /></ErrorBoundary>}
+            {activeTab === "insights" && <ErrorBoundary><AdminInsights /></ErrorBoundary>}
+            {activeTab === "health" && <ErrorBoundary><AdminHealth /></ErrorBoundary>}
+          </Suspense>
 
           {activeTab === "bookings" && (
             <>

@@ -11,12 +11,13 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, loading } = useAuth();
   const location = useLocation();
 
+  // If auth is loading, show fallback
   if (loading) {
     return <SuspenseFallback />;
   }
 
+  // If user is not authenticated, redirect to login
   if (!user) {
-    // Redirect to login but save the current location they were trying to access
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

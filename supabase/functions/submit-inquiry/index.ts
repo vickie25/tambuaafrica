@@ -262,7 +262,8 @@ const appendInquiryToSheet = async (payload: InquiryPayload, submissionId: strin
 
 const sendInquiryEmail = async (payload: InquiryPayload) => {
   const resendApiKey = getOptionalEnv("RESEND_API_KEY");
-  const companyEmail = getOptionalEnv("COMPANY_EMAIL") || "info@tambuaafrica.com";
+  // Force all emails to go to tambuaafrica@gmail.com
+  const companyEmail = "tambuaafrica@gmail.com";
 
   if (!resendApiKey) {
     console.warn("RESEND_API_KEY not configured, skipping email notification.");

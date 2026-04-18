@@ -7,16 +7,44 @@ import { Button } from "@/components/ui/button";
 import { useSafaris } from "@/hooks/useSafaris";
 import BookingModal from "@/components/booking/BookingModal";
 import { Star, MapPin, Clock, Filter, Loader2 } from "lucide-react";
-import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import OptimizedImage from "@/components/ui/optimized-image";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const categories = ["All", "Wildlife Safari", "Beach Holiday", "Cultural Tour", "Adventure"];
+
+// Skeleton loader for safari cards
+const SafariSkeleton = () => (
+  <div className="bg-card rounded-2xl overflow-hidden border border-border">
+    <div className="aspect-[16/10]">
+      <Skeleton className="w-full h-full" />
+    </div>
+    <div className="p-5 space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-4 w-10" />
+        </div>
+        <Skeleton className="h-4 w-16" />
+      </div>
+      <Skeleton className="h-6 w-3/4" />
+      <Skeleton className="h-4 w-full" />
+      <Skeleton className="h-4 w-1/2" />
+      <div className="flex gap-2">
+        <Skeleton className="h-6 w-16 rounded-full" />
+        <Skeleton className="h-6 w-20 rounded-full" />
+      </div>
+      <div className="flex items-center justify-between pt-3 border-t border-border">
+        <Skeleton className="h-6 w-24" />
+        <Skeleton className="h-9 w-24 rounded-lg" />
+      </div>
+    </div>
+  </div>
+);
 
 const Safaris = () => {
   const [activeCategory, setActiveCategory] = useState("All");
   const [bookingOpen, setBookingOpen] = useState(false);
   const [selectedSafari, setSelectedSafari] = useState("");
-  const { ref, isVisible } = useScrollAnimation();
   const { data: safaris = [], isLoading } = useSafaris();
 
   const filtered = activeCategory === "All" ? safaris : safaris.filter((s) => s.category === activeCategory);
@@ -49,7 +77,7 @@ const Safaris = () => {
             </div>
           </section>
 
-          <section className="section-padding bg-background" ref={ref}>
+          <section className="section-padding bg-background">
             <div className="container-wide mx-auto">
               <div className="flex items-center gap-2 mb-8 flex-wrap">
                 <Filter className="w-5 h-5 text-muted-foreground" />
@@ -68,18 +96,17 @@ const Safaris = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {isLoading ? (
-                  <div className="col-span-1 sm:col-span-2 lg:col-span-3 flex justify-center py-12">
-                    <Loader2 className="w-8 h-8 animate-spin text-accent" />
-                  </div>
+                  <>
+                    <SafariSkeleton />
+                    <SafariSkeleton />
+                    <SafariSkeleton />
+                  </>
                 ) : (
                   filtered.map((safari, index) => (
-                  <div
-                    key={safari.id}
-                    className={`group bg-card rounded-2xl overflow-hidden border border-border hover:shadow-xl transition-all duration-500 ${
-                      isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-                    }`}
-                    style={{ transitionDelay: `${index * 100}ms` }}
-                  >
+                    <div
+                      key={safari.id}
+                      className="group bg-card rounded-2xl overflow-hidden border border-border hover:shadow-xl transition-all duration-500"
+                    >
                     <Link to={`/safaris/${safari.id}`} className="block">
                       <div className="relative aspect-[16/10] overflow-hidden">
                         <OptimizedImage

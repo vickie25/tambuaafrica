@@ -84,25 +84,83 @@ const Contact = () => {
                 </div>
 
                 <div className="space-y-5">
-                  {[
-                    { icon: MapPin, label: "Kenya Office", value: "Plainsview Road, Off Mombasa Road, Nairobi, Kenya" },
-                    { icon: MapPin, label: "UK Office", value: "London, United Kingdom" },
-                    { icon: Phone, label: "Kenya Phone", value: "+254 726 207 900 | +254 792 329 682 | +254 704 548 78" },
-                    { icon: Phone, label: "UK Phone", value: "+44 793 997 0489" },
-                    { icon: MessageCircle, label: "WhatsApp Support", value: "+254 704 548 878" },
-                    { icon: Mail, label: "Email", value: "info@tambuaafrica.com" },
-                    { icon: Clock, label: "Working Hours", value: "Mon - Sat: 8:00 AM - 6:00 PM EAT" },
-                  ].map((item) => (
-                    <div key={item.label} className="flex items-start gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
-                        <item.icon className="w-5 h-5 text-accent" />
+                  {/* UK Office Block */}
+                  <div className="p-5 rounded-2xl bg-muted/40 border border-border">
+                    <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
+                      <MapPin className="w-5 h-5 text-accent" /> UK Office
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="flex items-start gap-3">
+                        <MapPin className="w-4 h-4 text-accent mt-0.5 shrink-0" />
+                        <div>
+                          <div className="font-medium text-foreground text-sm">Physical Location</div>
+                          <div className="text-muted-foreground text-sm">London, United Kingdom</div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="font-semibold text-foreground text-sm">{item.label}</div>
-                        <div className="text-muted-foreground text-sm">{item.value}</div>
+                      <div className="flex items-start gap-3">
+                        <Phone className="w-4 h-4 text-accent mt-0.5 shrink-0" />
+                        <div>
+                          <div className="font-medium text-foreground text-sm">Phone</div>
+                          <div className="text-muted-foreground text-sm">+44 793 997 0489</div>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <Mail className="w-4 h-4 text-accent mt-0.5 shrink-0" />
+                        <div>
+                          <div className="font-medium text-foreground text-sm">Email</div>
+                          <div className="text-muted-foreground text-sm">info@tambuaafrica.com</div>
+                        </div>
                       </div>
                     </div>
-                  ))}
+                  </div>
+
+                  {/* Kenya Office Block */}
+                  <div className="p-5 rounded-2xl bg-muted/40 border border-border">
+                    <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
+                      <MapPin className="w-5 h-5 text-accent" /> Kenya Office
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="flex items-start gap-3">
+                        <MapPin className="w-4 h-4 text-accent mt-0.5 shrink-0" />
+                        <div>
+                          <div className="font-medium text-foreground text-sm">Physical Location</div>
+                          <div className="text-muted-foreground text-sm">Plainsview Road, Off Mombasa Road, Nairobi, Kenya</div>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <Phone className="w-4 h-4 text-accent mt-0.5 shrink-0" />
+                        <div>
+                          <div className="font-medium text-foreground text-sm">Phone</div>
+                          <div className="text-muted-foreground text-sm">+254 726 207 900 | +254 792 329 682 | +254 704 548 78</div>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <MessageCircle className="w-4 h-4 text-accent mt-0.5 shrink-0" />
+                        <div>
+                          <div className="font-medium text-foreground text-sm">WhatsApp</div>
+                          <div className="text-muted-foreground text-sm">+254 704 548 878</div>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <Mail className="w-4 h-4 text-accent mt-0.5 shrink-0" />
+                        <div>
+                          <div className="font-medium text-foreground text-sm">Email</div>
+                          <div className="text-muted-foreground text-sm">info@tambuaafrica.com</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Working Hours */}
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+                      <Clock className="w-5 h-5 text-accent" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-foreground text-sm">Working Hours</div>
+                      <div className="text-muted-foreground text-sm">Mon - Sat: 8:00 AM - 6:00 PM EAT</div>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="p-5 rounded-2xl bg-primary text-primary-foreground">

@@ -24,6 +24,7 @@ const addResult = (name: string, status: ConnectionTestResult["status"], message
 };
 
 export const testConnections = async () => {
+  results.length = 0;
   console.log("🔍 Starting Frontend-Backend Connection Tests...\n");
 
   // Test 1: Environment Variables
@@ -106,8 +107,8 @@ export const testConnections = async () => {
     const { data: buckets, error } = await supabase.storage.listBuckets();
     if (error) throw error;
     
-    const safariImagesBucket = buckets.find((b) => b.name === "safari-images");
-    if (safariImagesBucket) {
+    const safarisBucket = buckets.find((b) => b.name === "safaris");
+    if (safarisBucket) {
       addResult("Storage: safaris Bucket", "success", "Bucket exists and accessible");
       console.log("✅ Storage bucket 'safaris' exists and is accessible");
     } else {
@@ -115,7 +116,7 @@ export const testConnections = async () => {
       console.log("⚠️ Storage bucket 'safaris' not found");
     }
   } catch (err) {
-    addResult("Storage: safari-images Bucket", "failed", (err as Error).message);
+    addResult("Storage: safaris Bucket", "failed", (err as Error).message);
     console.log("❌ Cannot access storage:", (err as Error).message);
   }
 

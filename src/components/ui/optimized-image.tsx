@@ -12,6 +12,10 @@ interface OptimizedImageProps {
   quality?: number;
 }
 
+// Ultra-fast LQIP (Low Quality Image Placeholder) - 1px data URL
+const generateLQIP = (color = '#e5e7eb') => 
+  `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3Crect fill='${encodeURIComponent(color)}'/%3E%3C/svg%3E`;
+
 const OptimizedImage: React.FC<OptimizedImageProps> = ({
   src,
   alt,
@@ -25,7 +29,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(priority);
   const [hasError, setHasError] = useState(false);
-  const imgRef = useRef<HTMLImageElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (priority) {
@@ -41,30 +45,32 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
         }
       },
       {
-        rootMargin: '200px', // Start loading 200px before image comes into view
+        rootMargin: '100px', // Reduced from 300px for faster visible load
       }
     );
 
-    if (imgRef.current) {
-      observer.observe(imgRef.current);
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
     }
 
     return () => observer.disconnect();
   }, [priority]);
 
-  // Generate optimized image URL with quality parameter
+  useEffect(() => {
+    setIsLoaded(false);
+    setHasError(false);
+  }, [src]);
+
   const getOptimizedSrc = (originalSrc: string) => {
     const formatUrl = (url: string) => encodeURI(url);
 
     if (originalSrc.includes('unsplash.com')) {
-      // For Unsplash images
       const separator = originalSrc.includes('?') ? '&' : '?';
       return formatUrl(
         `${originalSrc}${separator}auto=format&fit=crop&w=${width || 800}&h=${height || 600}&q=${quality}`
       );
     }
     if (originalSrc.includes('cloudinary')) {
-      // For Cloudinary images
       const separator = originalSrc.includes('?') ? '&' : '?';
       return formatUrl(
         `${originalSrc}${separator}q=${quality}&w=${width || 800}&h=${height || 600}&f_auto`
@@ -74,20 +80,14 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   };
 
   const optimizedSrc = getOptimizedSrc(src);
-
-  const handleLoad = () => {
-    setIsLoaded(true);
-  };
-
-  const handleError = () => {
-    setHasError(true);
-  };
+  const lqip = generateLQIP();
 
   if (hasError) {
     return (
-      <div 
+      <div
+        ref={containerRef}
         className={cn(
-          "flex items-center justify-center bg-muted border border-border rounded-lg",
+          'flex items-center justify-center bg-muted border border-border rounded-lg',
           className
         )}
         style={{ width, height }}
@@ -98,42 +98,38 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   }
 
   return (
-    <div className={cn("relative overflow-hidden", className)}>
-      {/* Placeholder */}
-      {placeholder === 'blur' && !isLoaded && (
-        <div className="absolute inset-0 shimmer bg-muted animate-pulse" />
-      )}
-      
-      {/* Loading indicator */}
-      {!isLoaded && !hasError && (
-        <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
-          <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-        </div>
-      )}
-      
-      {/* Actual image */}
-      {isInView && (
-        <img
-          ref={imgRef}
-          src={optimizedSrc}
-          alt={alt}
-          width={width}
-          height={height}
-          loading={priority ? 'eager' : 'lazy'}
-          decoding="async"
-          onLoad={handleLoad}
-          onError={handleError}
-          className={cn(
-            "transition-opacity duration-300",
-            isLoaded ? 'opacity-100' : 'opacity-0',
-            className
-          )}
-          style={{
-            objectFit: 'cover',
-            width: '100%',
-            height: '100%',
-          }}
+    <div ref={containerRef} className={cn('relative overflow-hidden', className)}>
+      {/* Ultra-fast LQIP background - shows instantly while image loads */}
+      {!isLoaded && (
+        <div 
+          className="absolute inset-0" 
+          style={{ backgroundImage: `url('${lqip}')`, backgroundSize: 'cover' }}
         />
+      )}
+
+      {/* Actual image — rendered only after the container enters the viewport */}
+      {isInView && (
+        <>
+          {/* Preload image in background for near-instantaneous display */}
+          <link rel="preload" as="image" href={optimizedSrc} />
+          <img
+            src={optimizedSrc}
+            alt={alt}
+            width={width}
+            height={height}
+            loading={priority ? 'eager' : 'lazy'}
+            decoding="async"
+            onLoad={() => setIsLoaded(true)}
+            onError={() => setHasError(true)}
+            className={cn(
+              'w-full h-full transition-opacity duration-300',
+              isLoaded ? 'opacity-100' : 'opacity-0'
+            )}
+            style={{
+              objectFit: 'cover',
+            }}
+          />
+        </>
       )}
     </div>
   );

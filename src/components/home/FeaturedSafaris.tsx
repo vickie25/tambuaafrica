@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useSafaris } from "@/hooks/useSafaris";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import BookingModal from "@/components/booking/BookingModal";
+import OptimizedImage from "@/components/ui/optimized-image";
 
 const FeaturedSafaris = () => {
   const { ref, isVisible } = useScrollAnimation();
@@ -34,12 +35,8 @@ const FeaturedSafaris = () => {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {isLoading ? (
-            <div className="col-span-1 sm:col-span-2 lg:col-span-3 flex justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-accent" />
-            </div>
-          ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[400px]">
+          {isLoading ? null : (
             safaris.slice(0, 6).map((safari, index) => (
               <div
               key={safari.id}
@@ -50,7 +47,11 @@ const FeaturedSafaris = () => {
             >
               <Link to={`/safaris/${safari.id}`} className="block">
                 <div className="relative aspect-[16/10] overflow-hidden">
-                  <img src={safari.image} alt={safari.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+                  <OptimizedImage 
+                    src={safari.image} 
+                    alt={safari.title} 
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                  />
                 </div>
               </Link>
               <div className="p-5 space-y-3">

@@ -68,22 +68,16 @@ const Dashboard = () => {
     }
 
     try {
-      const fetchRequest = async () => {
-        const { data, error } = await supabase
-          .from("bookings")
-          .select("*")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false });
-        if (error) throw error;
-        return data;
-      };
+      const { data, error } = await supabase
+        .from("bookings")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
 
-      const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Supabase Timeout")), 3000));
-      
-      const data = await Promise.race([fetchRequest(), timeout]);
+      if (error) throw error;
       if (data) setBookings(data as Booking[]);
     } catch (error) {
-      console.warn("Could not fetch bookings or request timed out:", error);
+      console.warn("Could not fetch bookings:", error);
     } finally {
       setLoading(false);
     }
@@ -154,8 +148,13 @@ const Dashboard = () => {
   };
 
   const handleSignOut = async () => {
-    await signOut();
-    navigate("/");
+    try {
+      await signOut();
+      toast.success("Signed out successfully");
+      window.location.href = "/";
+    } catch (err) {
+      toast.error("Failed to sign out");
+    }
   };
 
   const handlePayment = async () => {

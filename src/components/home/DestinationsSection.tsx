@@ -25,12 +25,8 @@ const DestinationsSection = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-          {isLoading ? (
-            <div className="col-span-2 lg:col-span-3 flex justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-accent" />
-            </div>
-          ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 min-h-[400px]">
+          {isLoading ? null : (
             featured.map((dest, index) => (
             <Link
               key={dest.id}

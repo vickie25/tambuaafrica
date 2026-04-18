@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
@@ -31,17 +32,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchRole = async (userId: string) => {
     try {
+      console.log("Fetching role for user:", userId);
       const { data, error } = await supabase
         .from("profiles")
         .select("role")
         .eq("id", userId)
         .single();
-      
+
       if (error) {
         console.error("Error fetching role:", error);
         return null;
       }
-      
+
       if (data) {
         console.log("Fetched role for user:", userId, "=>", data.role);
         setRole(data.role);
@@ -64,23 +66,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           return;
         }
 
-        const { data: { session } } = await supabase.auth.getSession();
-        
+        const fetchSession = async () => {
+          const { data: { session } } = await supabase.auth.getSession();
+          return session;
+        };
+
+        let session = null;
+        try {
+          session = await fetchSession();
+        } catch (err) {
+          console.warn("Supabase session fetch failed, proceeding with null session.");
+        }
+
         if (mounted) {
           setSession(session);
           setUser(session?.user ?? null);
-          
+
           if (session?.user) {
-            // Add a timeout to fetchRole specifically
-            try {
-              const rolePromise = fetchRole(session.user.id);
-              const roleTimeout = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error("Role Timeout")), 4000)
-              );
-              await Promise.race([rolePromise, roleTimeout]);
-            } catch (roleErr) {
-              console.warn("Role fetch timed out or failed, proceeding with default permissions.");
-            }
+            // Fetch role in background, don't block loading
+            fetchRole(session.user.id).catch(roleErr => {
+              console.warn("Role fetch failed, proceeding with default permissions.");
+            });
           } else {
             setRole(null);
           }
@@ -88,27 +94,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } catch (err) {
         console.error("Initialization error:", err);
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
     initializeAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      console.log("Auth state change:", _event, session?.user?.id);
       try {
         if (mounted) {
           setSession(session);
           setUser(session?.user ?? null);
-          
+
           if (session?.user) {
-            await fetchRole(session.user.id);
+            console.log("User logged in, fetching role...");
+            // Fetch role in background, don't block loading
+            fetchRole(session.user.id).catch(roleErr => {
+              console.warn("Role fetch failed, proceeding with default permissions.");
+            });
           } else {
+            console.log("User logged out");
             setRole(null);
           }
+          setLoading(false);
         }
       } catch (err) {
         console.error("Auth state change error:", err);
-      } finally {
         if (mounted) setLoading(false);
       }
     });
@@ -132,8 +146,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signIn = async (email: string, password: string) => {
+    console.log("Attempting sign in for:", email);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
+    if (error) {
+      console.error("Sign in error:", error);
+      throw error;
+    }
+    console.log("Sign in successful");
   };
 
   const signOut = async () => {
@@ -153,7 +172,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (error) throw error;
   };
 
-  const isAdmin = role?.toLowerCase() === "admin" || user?.email?.toLowerCase() === "cresdynamics@gmail.com";
+  const isAdmin = role?.toLowerCase() === "admin" || user?.email?.toLowerCase() === "tambuaafrica@gmail.com";
 
   return (
     <AuthContext.Provider value={{ 

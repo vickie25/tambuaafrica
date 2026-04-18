@@ -10,17 +10,9 @@ export const useSafaris = () => {
     queryKey: ["safaris"],
     queryFn: async () => {
       try {
-        // Enforce a strict 5-second timeout on the Supabase request
-        const fetchSafaris = async () => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const { data, error } = await (supabase as any).from("safaris").select("*");
-          if (error) throw error;
-          return data;
-        };
-
-        const timeout = new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Supabase Timeout")), 5000));
-        
-        const data = await Promise.race([fetchSafaris(), timeout]);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data, error } = await (supabase as any).from("safaris").select("*");
+        if (error) throw error;
 
         if (!data || data.length === 0) {
           return localSafaris;
@@ -31,7 +23,7 @@ export const useSafaris = () => {
           stripePriceId: item.stripe_price_id || item.stripePriceId,
         })) as Safari[];
       } catch (err) {
-        console.warn("Supabase fetch failed or timed out. Falling back to local Safari data.");
+        console.warn("Supabase fetch failed. Falling back to local Safari data.");
         return localSafaris;
       }
     },
@@ -41,10 +33,14 @@ export const useSafaris = () => {
     refetchOnWindowFocus: true, // Enable to show updates when switching tabs
   });
 
-  // Real-time subscription for safaris
+  // Real-time subscription for safaris - disabled due to subscription conflicts
+  // TODO: Re-enable once Supabase realtime is properly configured
+  /*
   useEffect(() => {
     const channel = supabase
-      .channel('safaris-changes')
+      .channel('safaris-changes');
+
+    channel
       .on(
         'postgres_changes',
         {
@@ -63,6 +59,7 @@ export const useSafaris = () => {
       supabase.removeChannel(channel);
     };
   }, [queryClient]);
+  */
 
   return query;
 };
@@ -73,16 +70,9 @@ export const useSafari = (id?: string) => {
     queryFn: async () => {
       if (!id) return null;
       try {
-        const fetchSafari = async () => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const { data, error } = await supabase.from("safaris").select("*").eq("id", id).maybeSingle();
-          if (error) throw error;
-          return data;
-        };
-
-        const timeout = new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Supabase Timeout")), 5000));
-        
-        const data = await Promise.race([fetchSafari(), timeout]);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data, error } = await supabase.from("safaris").select("*").eq("id", id).maybeSingle();
+        if (error) throw error;
 
         if (data) {
           return {
@@ -90,7 +80,7 @@ export const useSafari = (id?: string) => {
             stripePriceId: data.stripe_price_id || data.stripePriceId,
           } as Safari;
         }
-        
+
         // Fallback
         return localSafaris.find((s) => s.id === id) || null;
       } catch (err) {

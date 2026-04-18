@@ -10,17 +10,10 @@ export const useDestinations = () => {
     queryKey: ["destinations"],
     queryFn: async () => {
       try {
-        const fetchDestinations = async () => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const { data, error } = await (supabase as any).from("destinations").select("*");
-          if (error) throw error;
-          return data;
-        };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data, error } = await (supabase as any).from("destinations").select("*");
+        if (error) throw error;
 
-        const timeout = new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Supabase Timeout")), 5000));
-        
-        const data = await Promise.race([fetchDestinations(), timeout]);
-        
         if (!data || data.length === 0) {
           return localDestinations;
         }
@@ -30,7 +23,7 @@ export const useDestinations = () => {
           safariCount: item.safari_count || item.safariCount,
         })) as Destination[];
       } catch (err) {
-        console.warn("Supabase fetch failed or timed out. Falling back to local Destinations data.");
+        console.warn("Supabase fetch failed. Falling back to local Destinations data.");
         return localDestinations;
       }
     },
@@ -40,7 +33,9 @@ export const useDestinations = () => {
     refetchOnWindowFocus: true, // Enable to show updates when switching tabs
   });
 
-  // Real-time subscription for destinations
+  // Real-time subscription for destinations - disabled due to subscription conflicts
+  // TODO: Re-enable once Supabase realtime is properly configured
+  /*
   useEffect(() => {
     const channel = supabase
       .channel('destinations-changes')
@@ -62,6 +57,7 @@ export const useDestinations = () => {
       supabase.removeChannel(channel);
     };
   }, [queryClient]);
+  */
 
   return query;
 };

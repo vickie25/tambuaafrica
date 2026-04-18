@@ -1,4 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useAdminInquiries, type Inquiry } from "@/hooks/useAdminBookings";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,97 +23,67 @@ import { MessageSquare, Phone, Mail, Trash2, Eye, ExternalLink, Loader2 } from "
 import { toast } from "sonner";
 import { format } from "date-fns";
 
-interface Inquiry {
-  id: string;
-  created_at: string;
-  full_name: string;
-  email: string;
-  phone: string | null;
-  inquiry_type: "contact" | "booking";
-  subject: string | null;
-  message: string | null;
-  status: string;
-  safari_title: string | null;
-  preferred_date: string | null;
-  guests: string | null;
-}
 
 const statusColors: Record<string, string> = {
-  unread: "bg-red-100 text-red-800 border-red-200",
+  new: "bg-red-100 text-red-800 border-red-200",
   read: "bg-blue-100 text-blue-800 border-blue-200",
   replied: "bg-green-100 text-green-800 border-green-200",
 };
 
+const isNewInquiryStatus = (status?: string | null) =>
+  ["unread", "pending", "synced", "sync_failed"].includes((status || "").toLowerCase());
+
+const getDisplayStatus = (status?: string | null) => {
+  if (isNewInquiryStatus(status)) return "new";
+  if ((status || "").toLowerCase() === "replied") return "replied";
+  return "read";
+};
+
 export const AdminInquiries = () => {
-  const [inquiries, setInquiries] = useState<Inquiry[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchInquiries = async () => {
-    setLoading(true);
-    try {
-      const fetchPromise = supabase
-        .from("inquiry_submissions")
-        .select("*")
-        .order("created_at", { ascending: false });
+  const { data: inquiries = [], isLoading: loading } = useAdminInquiries();
 
-      const timeoutPromise = new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error("Supabase Timeout")), 5000)
-      );
-
-      const result = await Promise.race([fetchPromise, timeoutPromise]);
-
-      if ('error' in result && result.error) {
-        toast.error("Failed to load inquiries");
-      } else if ('data' in result && result.data) {
-        setInquiries(result.data as Inquiry[]);
-      }
-    } catch (err) {
-      console.warn("Inquiries fetch timed out or failed:", err);
-      // Inquiries will stay empty but UI will load
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchInquiries();
-  }, []);
 
   const updateStatus = async (id: string, newStatus: string) => {
-    const { error } = await supabase
-      .from("inquiry_submissions")
-      .update({ status: newStatus })
-      .eq("id", id);
+    try {
+      const { error } = await supabase
+        .from("inquiry_submissions")
+        .update({ status: newStatus })
+        .eq("id", id);
 
-    if (error) {
+      if (error) throw error;
+      
+      queryClient.invalidateQueries({ queryKey: ["admin-inquiries"] });
+      queryClient.invalidateQueries({ queryKey: ["unread-inquiries-count"] });
+    } catch (err) {
       toast.error("Failed to update status");
-    } else {
-      setInquiries((prev) =>
-        prev.map((inq) => (inq.id === id ? { ...inq, status: newStatus } : inq))
-      );
     }
   };
 
   const deleteInquiry = async (id: string) => {
     if (!confirm("Are you sure you want to delete this inquiry?")) return;
 
-    const { error } = await supabase
-      .from("inquiry_submissions")
-      .delete()
-      .eq("id", id);
+    try {
+      const { error } = await supabase
+        .from("inquiry_submissions")
+        .delete()
+        .eq("id", id);
 
-    if (error) {
-      toast.error("Failed to delete inquiry");
-    } else {
+      if (error) throw error;
+      
       toast.success("Inquiry deleted");
-      setInquiries((prev) => prev.filter((inq) => inq.id !== id));
+      queryClient.invalidateQueries({ queryKey: ["admin-inquiries"] });
+      queryClient.invalidateQueries({ queryKey: ["unread-inquiries-count"] });
+    } catch (err) {
+      toast.error("Failed to delete inquiry");
     }
   };
 
   const handleView = (inq: Inquiry) => {
     setSelectedInquiry(inq);
-    if (inq.status === "unread") {
+    if (isNewInquiryStatus(inq.status)) {
       updateStatus(inq.id, "read");
     }
   };
@@ -150,7 +122,7 @@ export const AdminInquiries = () => {
             Total: {inquiries.length}
           </Badge>
           <Badge className="bg-red-500 hover:bg-red-600 px-3 py-1">
-            New: {inquiries.filter(i => i.status === 'unread').length}
+            New: {inquiries.filter(i => isNewInquiryStatus(i.status)).length}
           </Badge>
         </div>
       </div>
@@ -186,8 +158,8 @@ export const AdminInquiries = () => {
                   {inq.subject || inq.safari_title || "General Inquiry"}
                 </TableCell>
                 <TableCell>
-                  <Badge className={`${statusColors[inq.status || "unread"]} border text-[10px] capitalize`}>
-                    {inq.status || "unread"}
+                  <Badge className={`${statusColors[getDisplayStatus(inq.status)]} border text-[10px] capitalize`}>
+                    {getDisplayStatus(inq.status)}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
@@ -241,8 +213,8 @@ export const AdminInquiries = () => {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div className="col-span-2 pb-2 border-b border-border">
                   <p className="text-muted-foreground font-medium mb-1 truncate">Status</p>
-                  <Badge className={`${statusColors[selectedInquiry.status]} capitalize`}>
-                    {selectedInquiry.status}
+                  <Badge className={`${statusColors[getDisplayStatus(selectedInquiry.status)]} capitalize`}>
+                    {getDisplayStatus(selectedInquiry.status)}
                   </Badge>
                 </div>
                 <div>

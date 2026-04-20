@@ -19,6 +19,16 @@ const ImageSlider = ({ images, name, priority = false }: { images: string[]; nam
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
+    const shouldPreloadSecondImage =
+      typeof window !== "undefined" && !window.matchMedia("(max-width: 768px)").matches;
+    const maxImagesToPreload = priority ? (shouldPreloadSecondImage ? 2 : 1) : 1;
+    images.slice(0, maxImagesToPreload).forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, [images, priority]);
+
+  useEffect(() => {
     if (images.length <= 1) return;
     const timer = setInterval(() => {
       setCurrent((p) => (p + 1) % images.length);
@@ -33,10 +43,10 @@ const ImageSlider = ({ images, name, priority = false }: { images: string[]; nam
           key={i}
           src={src}
           alt={`${name} ${i + 1}`}
-          className={`absolute inset-0 w-full h-full object-cover transition-all duration-1000 group-hover:scale-110 ${
+          className={`absolute inset-0 w-full h-full object-cover transition-all duration-1000 md:group-hover:scale-110 ${
             i === current ? "opacity-100" : "opacity-0"
           }`}
-          priority={priority && i === 0}
+          priority={priority && i < 2}
         />
       ))}
     </>

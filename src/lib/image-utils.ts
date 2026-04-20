@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { SUPABASE_STORAGE_BUCKET } from "./supabase-config";
+import { SUPABASE_STORAGE_BUCKET, SUPABASE_STORAGE_BUCKET_FALLBACKS } from "./supabase-config";
 
 /**
  * Fast image compression - skips heavy canvas processing
@@ -120,29 +120,51 @@ export const uploadFileToSupabase = async (file: File, timeoutMs = 30000): Promi
   const baseName = file.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9-_]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "").toLowerCase() || "upload";
   const filePath = `${new Date().getUTCFullYear()}/${Date.now()}-${baseName}.${fileExt}`;
 
-  const uploadPromise = supabase.storage.from(SUPABASE_STORAGE_BUCKET).upload(filePath, file, {
-    cacheControl: "3600",
-    upsert: false,
-    contentType: file.type || undefined,
-  });
+  const bucketsToTry = [
+    SUPABASE_STORAGE_BUCKET,
+    ...SUPABASE_STORAGE_BUCKET_FALLBACKS,
+  ].filter((bucket, idx, arr) => Boolean(bucket) && arr.indexOf(bucket) === idx);
 
-  const timeoutPromise = new Promise<never>((_, reject) => {
-    setTimeout(() => reject(new Error("Upload timed out. Check the storage bucket and your connection.")), timeoutMs);
-  });
+  let lastError = "Unknown upload error";
 
-  const uploadResult = await Promise.race([uploadPromise, timeoutPromise]) as {
-    data: { path: string } | null;
-    error: { message: string } | null;
-  };
+  for (const bucket of bucketsToTry) {
+    const uploadPromise = supabase.storage.from(bucket).upload(filePath, file, {
+      cacheControl: "3600",
+      upsert: false,
+      contentType: file.type || undefined,
+    });
 
-  if (uploadResult.error) {
-    throw new Error(uploadResult.error.message);
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(
+        () => reject(new Error(`Upload timed out for bucket '${bucket}'.`)),
+        timeoutMs
+      );
+    });
+
+    try {
+      const uploadResult = (await Promise.race([uploadPromise, timeoutPromise])) as {
+        data: { path: string } | null;
+        error: { message: string } | null;
+      };
+
+      if (uploadResult.error) {
+        lastError = uploadResult.error.message;
+        continue;
+      }
+
+      const { data } = supabase.storage.from(bucket).getPublicUrl(filePath);
+      if (!data.publicUrl) {
+        lastError = `Upload succeeded in '${bucket}', but no public URL was returned.`;
+        continue;
+      }
+
+      return data.publicUrl;
+    } catch (error) {
+      lastError = error instanceof Error ? error.message : String(error);
+    }
   }
 
-  const { data } = supabase.storage.from(SUPABASE_STORAGE_BUCKET).getPublicUrl(filePath);
-  if (!data.publicUrl) {
-    throw new Error("Upload succeeded, but no public URL was returned.");
-  }
-
-  return data.publicUrl;
+  throw new Error(
+    `Upload failed across configured buckets (${bucketsToTry.join(", ")}): ${lastError}`
+  );
 };

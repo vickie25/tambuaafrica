@@ -40,11 +40,16 @@ function useCarousel() {
 
 const Carousel = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & CarouselProps>(
   ({ orientation = "horizontal", opts, setApi, plugins, className, children, ...props }, ref) => {
+    const resolvedOpts: CarouselOptions = {
+      align: "start",
+      dragFree: false,
+      duration: 30,
+      ...opts,
+      axis: orientation === "horizontal" ? "x" : "y",
+    };
+
     const [carouselRef, api] = useEmblaCarousel(
-      {
-        ...opts,
-        axis: orientation === "horizontal" ? "x" : "y",
-      },
+      resolvedOpts,
       plugins,
     );
     const [canScrollPrev, setCanScrollPrev] = React.useState(false);
@@ -107,7 +112,7 @@ const Carousel = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivEl
         value={{
           carouselRef,
           api: api,
-          opts,
+          opts: resolvedOpts,
           orientation: orientation || (opts?.axis === "y" ? "vertical" : "horizontal"),
           scrollPrev,
           scrollNext,
@@ -139,7 +144,11 @@ const CarouselContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HT
       <div ref={carouselRef} className="overflow-hidden">
         <div
           ref={ref}
-          className={cn("flex w-full", orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col", className)}
+          className={cn(
+            "flex w-full will-change-transform touch-pan-y",
+            orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col",
+            className
+          )}
           {...props}
         />
       </div>

@@ -3,6 +3,19 @@ import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Destination, destinations as localDestinations } from "@/data/destinations";
 
+const mergeDestinationsWithLocal = (remoteDestinations: Destination[]) => {
+  const merged = [...localDestinations];
+  remoteDestinations.forEach((remoteDestination) => {
+    const localIndex = merged.findIndex((item) => item.id === remoteDestination.id);
+    if (localIndex >= 0) {
+      merged[localIndex] = { ...merged[localIndex], ...remoteDestination };
+      return;
+    }
+    merged.push(remoteDestination);
+  });
+  return merged;
+};
+
 export const useDestinations = () => {
   const queryClient = useQueryClient();
 
@@ -18,10 +31,12 @@ export const useDestinations = () => {
           return localDestinations;
         }
 
-        return data.map((item) => ({
+        const remoteDestinations = data.map((item) => ({
           ...item,
           safariCount: item.safari_count || item.safariCount,
         })) as Destination[];
+
+        return mergeDestinationsWithLocal(remoteDestinations);
       } catch (err) {
         console.warn("Supabase fetch failed. Falling back to local Destinations data.");
         return localDestinations;

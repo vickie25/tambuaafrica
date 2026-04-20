@@ -6,12 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Edit, Plus, Trash2, Loader2, Image as ImageIcon } from "lucide-react";
+import { Edit, Plus, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { compressImage, createPreviewUrl, uploadFileToSupabase } from "@/lib/image-utils";
-import { SUPABASE_STORAGE_BUCKET } from "@/lib/supabase-config";
 
 const emptyBlog: Partial<BlogPost> = {
   id: "",
@@ -77,27 +76,45 @@ export const AdminBlogs = () => {
 
     setIsSubmitting(true);
     try {
+      const normalizedCategory = (editing.category || "Blog").trim();
+      const normalizedReadTime = (editing.readTime || "").trim();
+      const metadataPrefix = `<!--meta:${JSON.stringify({
+        excerpt: editing.excerpt || "",
+        category: normalizedCategory,
+        readTime: normalizedReadTime,
+        date: editing.date || "",
+      })}-->`;
+
       const payload = {
         id: editing.id,
         title: editing.title,
-        excerpt: editing.excerpt,
         image: editing.image,
-        date: editing.date,
-        category: editing.category,
-        read_time: editing.readTime,
-        content: editing.content,
+        content: `${metadataPrefix}\n${editing.content || ""}`,
+        author: "Tambua Africa",
+        published: true,
+        tags: [normalizedCategory].filter(Boolean),
       };
 
       // Optimistic Update: Update the local cache immediately
       const previousData = queryClient.getQueryData(["blogs"]);
       queryClient.setQueryData(["blogs"], (old: BlogPost[] = []) => {
         const index = old.findIndex((b) => b.id === payload.id);
+        const optimisticBlog = {
+          id: payload.id!,
+          title: payload.title || "",
+          excerpt: editing.excerpt || "",
+          image: payload.image || "",
+          date: editing.date || "",
+          category: normalizedCategory,
+          readTime: normalizedReadTime || "1 min read",
+          content: editing.content || "",
+        } as BlogPost;
         if (index > -1) {
           const updated = [...old];
-          updated[index] = { ...payload, readTime: payload.read_time } as BlogPost;
+          updated[index] = optimisticBlog;
           return updated;
         }
-        return [...old, { ...payload, readTime: payload.read_time } as BlogPost];
+        return [...old, optimisticBlog];
       });
 
       setEditing(null);

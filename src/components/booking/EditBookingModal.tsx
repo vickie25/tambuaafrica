@@ -13,8 +13,8 @@ import { toast } from "sonner";
 interface Booking {
   id: string;
   safari_title: string;
-  preferred_date: string;
-  guests: number;
+  travel_date: string;
+  number_of_people: number;
 }
 
 interface EditBookingModalProps {
@@ -32,11 +32,11 @@ const EditBookingModal = ({ booking, open, onOpenChange, onSuccess }: EditBookin
   useEffect(() => {
     if (booking && open) {
       try {
-        setDate(parseISO(booking.preferred_date));
+        setDate(parseISO(booking.travel_date || booking.preferred_date));
       } catch {
         setDate(new Date());
       }
-      setGuests(String(booking.guests));
+      setGuests(String(booking.number_of_people));
     }
   }, [booking, open]);
 
@@ -50,8 +50,8 @@ const EditBookingModal = ({ booking, open, onOpenChange, onSuccess }: EditBookin
       const { error } = await supabase
         .from("bookings")
         .update({
-          preferred_date: format(date, "yyyy-MM-dd"),
-          guests: parseInt(guests),
+          travel_date: format(date, "yyyy-MM-dd"),
+          number_of_people: parseInt(guests),
           updated_at: new Date().toISOString()
         })
         .eq("id", booking.id);

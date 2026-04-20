@@ -1,20 +1,38 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Edit, Plus, Trash2, Loader2, Image as ImageIcon } from "lucide-react";
+import { Edit, Plus, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { compressImage, createPreviewUrl, uploadFileToSupabase } from "@/lib/image-utils";
 
 interface CarouselImage {
   id: string;
   url: string;
-  title: string;
+  title?: string;
   description?: string;
   order: number;
+  section:
+    | "hero"
+    | "activities"
+    | "destinations"
+    | "feature_wild"
+    | "feature_culture"
+    | "feature_luxury";
 }
+
+const sectionLabelMap: Record<CarouselImage["section"], string> = {
+  hero: "Hero Section",
+  activities: "Activities Section",
+  destinations: "Destinations Section",
+  feature_wild: "Experience the Wild",
+  feature_culture: "Our Cultural Heritage",
+  feature_luxury: "Luxury Reimagined",
+};
 
 const emptyCarousel: Partial<CarouselImage> = {
   id: "",
@@ -22,24 +40,32 @@ const emptyCarousel: Partial<CarouselImage> = {
   title: "",
   description: "",
   order: 0,
+  section: "hero",
 };
 
 export const AdminCarousel = () => {
   const [images, setImages] = useState<CarouselImage[]>([]);
+  const [selectedSection, setSelectedSection] = useState<CarouselImage["section"]>("hero");
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Partial<CarouselImage> | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<"processing" | "uploading" | null>(null);
   const queryClient = useQueryClient();
 
   const fetchImages = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("carousel_images")
         .select("*")
         .order("order", { ascending: true });
       
       if (error) throw error;
-      setImages(data || []);
+      const normalized = (data || []).map((item: any) => ({
+        ...item,
+        section: (item.section || "hero") as CarouselImage["section"],
+      }));
+      setImages(normalized);
     } catch (error) {
       console.error("Error fetching carousel images:", error);
       toast.error("Failed to load carousel images");
@@ -48,40 +74,106 @@ export const AdminCarousel = () => {
     }
   };
 
-  useState(() => {
+  useEffect(() => {
     fetchImages();
-  });
+  }, []);
 
   const handleEdit = (image: CarouselImage) => setEditing(image);
 
   const handleAdd = () => {
-    const newOrder = Math.max(...images.map(i => i.order), -1) + 1;
-    setEditing({ ...emptyCarousel, id: `carousel-${Date.now()}`, order: newOrder });
+    const sectionImages = images.filter((img) => img.section === selectedSection);
+    const newOrder = Math.max(...sectionImages.map(i => i.order), -1) + 1;
+    const generatedId =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `carousel-${Date.now()}`;
+    setEditing({ ...emptyCarousel, id: generatedId, order: newOrder, section: selectedSection });
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const previewUrl = createPreviewUrl(file);
+    const previousImage = editing?.url;
+    setEditing((prev) => (prev ? { ...prev, url: previewUrl } : null));
+
+    setUploading(true);
+    setUploadStatus("processing");
+    try {
+      const compressedFile = await compressImage(file);
+      setUploadStatus("uploading");
+
+      const publicUrl = await uploadFileToSupabase(compressedFile);
+      setEditing((prev) => (prev ? { ...prev, url: publicUrl } : null));
+      toast.success("Carousel image uploaded");
+    } catch (error) {
+      console.error("Carousel upload error:", error);
+      setEditing((prev) => (prev ? { ...prev, url: previousImage } : null));
+      toast.error("Image upload failed. Please try again or paste a URL.");
+    } finally {
+      setUploading(false);
+      setUploadStatus(null);
+      e.target.value = "";
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editing) return;
+    if (!editing.url || editing.url.startsWith("blob:")) {
+      toast.error("Please wait for upload to complete or paste a valid image URL.");
+      return;
+    }
 
     setIsSubmitting(true);
     try {
+      const existingImage = images.find((img) => img.id === editing.id);
+      const fallbackTitle =
+        existingImage?.title ||
+        `${sectionLabelMap[(editing.section || selectedSection) as CarouselImage["section"]]} Image ${((editing.order ?? 0) + 1).toString()}`;
+      const resolvedTitle = (editing.title || "").trim() || fallbackTitle;
+      const resolvedDescriptionRaw = editing.description?.trim();
+      const resolvedDescription =
+        resolvedDescriptionRaw && resolvedDescriptionRaw.length > 0
+          ? resolvedDescriptionRaw
+          : existingImage?.description || null;
+
       const payload = {
         id: editing.id,
         url: editing.url,
-        title: editing.title,
-        description: editing.description || null,
-        order: editing.order,
+        title: resolvedTitle,
+        description: resolvedDescription,
+        order: Number.isFinite(editing.order) ? editing.order : 0,
+        section: editing.section || selectedSection,
       };
 
-      const { error } = await supabase
+      let { error } = await (supabase as any)
         .from("carousel_images")
         .upsert(payload);
+
+      // Backward compatibility if DB column `section` has not been added yet.
+      if (error?.message?.toLowerCase().includes("section")) {
+        const retry = await (supabase as any)
+          .from("carousel_images")
+          .upsert({
+            id: payload.id,
+            url: payload.url,
+            title: payload.title,
+            description: payload.description,
+            order: payload.order,
+          });
+        error = retry.error;
+        if (!error) {
+          toast.info("Saved without section. Run section migration SQL to enable per-section carousel management.");
+        }
+      }
 
       if (error) throw error;
 
       toast.success("Carousel image saved successfully");
       setEditing(null);
-      fetchImages();
+      await fetchImages();
       queryClient.invalidateQueries({ queryKey: ["carousel-images"] });
     } catch (error) {
       console.error("Error saving carousel image:", error);
@@ -111,12 +203,13 @@ export const AdminCarousel = () => {
   };
 
   const moveImage = async (id: string, direction: 'up' | 'down') => {
-    const currentIndex = images.findIndex(img => img.id === id);
+    const sectionImages = images.filter((img) => img.section === selectedSection);
+    const currentIndex = sectionImages.findIndex(img => img.id === id);
     const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
     
-    if (newIndex < 0 || newIndex >= images.length) return;
+    if (newIndex < 0 || newIndex >= sectionImages.length) return;
 
-    const newImages = [...images];
+    const newImages = [...sectionImages];
     const temp = newImages[currentIndex];
     newImages[currentIndex] = newImages[newIndex];
     newImages[newIndex] = temp;
@@ -124,15 +217,16 @@ export const AdminCarousel = () => {
     // Update order values
     newImages.forEach((img, idx) => img.order = idx);
 
-    setImages(newImages);
+    const otherSections = images.filter((img) => img.section !== selectedSection);
+    setImages([...otherSections, ...newImages].sort((a, b) => a.order - b.order));
 
     try {
       const updates = newImages.map(img => ({
         id: img.id,
-        order: img.order
+        order: img.order,
       }));
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("carousel_images")
         .upsert(updates);
 
@@ -152,21 +246,43 @@ export const AdminCarousel = () => {
     );
   }
 
+  const sectionImages = images.filter((image) => image.section === selectedSection);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center bg-card p-6 rounded-2xl border border-border">
         <div>
           <h2 className="text-xl font-bold">Manage Hero Carousel</h2>
-          <p className="text-muted-foreground text-sm">Add, edit, or reorder carousel images displayed on the homepage.</p>
+          <p className="text-muted-foreground text-sm">
+            Add, edit, or reorder carousel images displayed on the homepage.
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Currently editing: <span className="font-medium">{sectionLabelMap[selectedSection]}</span>
+          </p>
         </div>
-        <Button onClick={handleAdd} className="bg-accent hover:bg-accent/90">
-          <Plus className="w-4 h-4 mr-2" /> Add Image
-        </Button>
+        <div className="flex items-center gap-3">
+          <Select value={selectedSection} onValueChange={(v) => setSelectedSection(v as CarouselImage["section"])}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select section" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="hero">Hero Section</SelectItem>
+              <SelectItem value="activities">Activities Section</SelectItem>
+              <SelectItem value="destinations">Destinations Section</SelectItem>
+                <SelectItem value="feature_wild">Experience the Wild</SelectItem>
+                <SelectItem value="feature_culture">Our Cultural Heritage</SelectItem>
+                <SelectItem value="feature_luxury">Luxury Reimagined</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button onClick={handleAdd} className="bg-accent hover:bg-accent/90">
+            <Plus className="w-4 h-4 mr-2" /> Add Image
+          </Button>
+        </div>
       </div>
 
       <div className="bg-card rounded-2xl border border-border overflow-hidden">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
-          {images.map((image, index) => (
+          {sectionImages.map((image, index) => (
             <div key={image.id} className="relative group rounded-xl overflow-hidden border border-border">
               <img
                 src={image.url}
@@ -189,7 +305,7 @@ export const AdminCarousel = () => {
                       size="sm"
                       variant="outline"
                       onClick={() => moveImage(image.id, 'down')}
-                      disabled={index === images.length - 1}
+                      disabled={index === sectionImages.length - 1}
                       className="bg-white/90 hover:bg-white"
                     >
                       ↓
@@ -218,13 +334,16 @@ export const AdminCarousel = () => {
               <div className="p-3 bg-background">
                 <p className="font-medium text-sm truncate">{image.title}</p>
                 <p className="text-xs text-muted-foreground">Order: {image.order}</p>
+                <p className="text-xs text-muted-foreground">
+                  Used by: {sectionLabelMap[image.section]}
+                </p>
               </div>
             </div>
           ))}
         </div>
-        {images.length === 0 && (
+        {sectionImages.length === 0 && (
           <div className="p-12 text-center text-muted-foreground">
-            No carousel images found. Click "Add Image" to get started.
+            No carousel images found for this section. Click "Add Image" to get started.
           </div>
         )}
       </div>
@@ -243,26 +362,36 @@ export const AdminCarousel = () => {
                 placeholder="https://example.com/image.jpg"
                 required
               />
+              <div className="space-y-2">
+                <Input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} />
+                {uploading && (
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    {uploadStatus === "processing" ? "Optimizing image..." : "Uploading to cloud..."}
+                  </p>
+                )}
+              </div>
               {editing?.url && (
                 <img src={editing.url} alt="Preview" className="w-full h-48 object-cover rounded-lg mt-2" />
               )}
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Title</label>
+              <label className="text-sm font-medium">Title (optional)</label>
               <Input
                 value={editing?.title || ""}
                 onChange={(e) => setEditing(prev => prev ? { ...prev, title: e.target.value } : null)}
-                required
+                placeholder="Optional: auto-generated if left blank"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Description</label>
+              <label className="text-sm font-medium">Description (optional)</label>
               <Textarea
                 rows={3}
                 value={editing?.description || ""}
                 onChange={(e) => setEditing(prev => prev ? { ...prev, description: e.target.value } : null)}
+                placeholder="Optional: existing description is preserved when blank"
               />
             </div>
 
@@ -275,10 +404,35 @@ export const AdminCarousel = () => {
                 required
               />
             </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Section</label>
+              <Select
+                value={(editing?.section || selectedSection) as CarouselImage["section"]}
+                onValueChange={(v) => setEditing((prev) => (prev ? { ...prev, section: v as CarouselImage["section"] } : null))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select section" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="hero">Hero Section</SelectItem>
+                  <SelectItem value="activities">Activities Section</SelectItem>
+                  <SelectItem value="destinations">Destinations Section</SelectItem>
+                  <SelectItem value="feature_wild">Experience the Wild</SelectItem>
+                  <SelectItem value="feature_culture">Our Cultural Heritage</SelectItem>
+                  <SelectItem value="feature_luxury">Luxury Reimagined</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                This image will be used in:{" "}
+                <span className="font-medium">
+                  {sectionLabelMap[(editing?.section || selectedSection) as CarouselImage["section"]]}
+                </span>
+              </p>
+            </div>
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
-              <Button type="submit" className="bg-accent hover:bg-accent/90" disabled={isSubmitting}>
+              <Button type="submit" className="bg-accent hover:bg-accent/90" disabled={isSubmitting || uploading}>
                 {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null} Save
               </Button>
             </DialogFooter>

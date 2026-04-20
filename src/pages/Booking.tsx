@@ -58,8 +58,9 @@ const Booking = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.safari_id || !formData.preferred_date) {
-      toast.error("Please select a safari and preferred date");
+    // Allow booking without safari_id if it's a destination booking
+    if (!formData.preferred_date) {
+      toast.error("Please select a preferred date");
       return;
     }
 
@@ -69,13 +70,17 @@ const Booking = () => {
       const selectedSafari = safaris.find(s => s.id === formData.safari_id);
       const totalAmount = selectedSafari?.price ? selectedSafari.price * formData.guests * 100 : 0;
 
+      // For destination bookings (no safari), use destination/lodge in safari_title
+      const safariTitle = selectedSafari?.title || 
+        (destination ? `Destination: ${destination}${lodge ? ' - ' + lodge : ''}` : "Custom Safari");
+
       const { data, error } = await supabase
         .from("bookings")
         .insert({
-          safari_id: formData.safari_id,
-          safari_title: selectedSafari?.title || "Custom Safari",
-          preferred_date: formData.preferred_date,
-          guests: formData.guests,
+          safari_id: formData.safari_id || null,
+          safari_title: safariTitle,
+          travel_date: formData.preferred_date,
+          number_of_people: formData.guests,
           total_amount: totalAmount,
           currency: "USD",
           notes: formData.notes,
@@ -144,17 +149,20 @@ const Booking = () => {
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Safari Selection */}
+                    {/* Safari Selection - optional for destination bookings */}
                     <div className="space-y-2">
-                      <Label htmlFor="safari_id">Select Safari Package *</Label>
+                      <Label htmlFor="safari_id">
+                        {destination ? "Select Safari Package (Optional)" : "Select Safari Package *"}
+                      </Label>
                       <Select
                         value={formData.safari_id}
                         onValueChange={(value) => handleInputChange("safari_id", value)}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Choose a safari package" />
+                          <SelectValue placeholder={destination ? "Select a safari or skip for destination inquiry" : "Choose a safari package"} />
                         </SelectTrigger>
                         <SelectContent>
+                          {!destination && <SelectItem value="">No specific safari - destination inquiry only</SelectItem>}
                           {safaris.map((safari) => (
                             <SelectItem key={safari.id} value={safari.id}>
                               <div className="flex flex-col">

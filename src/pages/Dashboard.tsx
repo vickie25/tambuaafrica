@@ -27,8 +27,8 @@ interface Booking {
   id: string;
   safari_id: string;
   safari_title: string;
-  preferred_date: string;
-  guests: number;
+  travel_date: string;
+  number_of_people: number;
   total_amount: number;
   currency: string;
   status: string;
@@ -283,8 +283,8 @@ const Dashboard = () => {
                       </Badge>
                     </div>
                     <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1"><Calendar className="w-4 h-4" /> {booking.preferred_date}</span>
-                      <span className="flex items-center gap-1"><Users className="w-4 h-4" /> {booking.guests} guest{booking.guests !== 1 ? "s" : ""}</span>
+                      <span className="flex items-center gap-1"><Calendar className="w-4 h-4" /> {booking.travel_date || booking.preferred_date}</span>
+                      <span className="flex items-center gap-1"><Users className="w-4 h-4" /> {(booking.number_of_people || booking.guests || 0)} guest{(booking.number_of_people || booking.guests || 0) !== 1 ? "s" : ""}</span>
                       {booking.total_amount > 0 && (
                         <span className="flex items-center gap-1"><CreditCard className="w-4 h-4" /> ${(booking.total_amount / 100).toLocaleString()}</span>
                       )}

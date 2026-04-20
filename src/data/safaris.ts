@@ -92,7 +92,7 @@ export const safaris: Safari[] = [
     price: 1800,
     rating: 4.8,
     reviews: 50,
-    image: "/images/dawn-w-FmUx8z_Tz4A-unsplash.webp",
+    image: "/images/destiations/Lake Nakuru/lake elementaita.webp",
     description: "Split your adventure between the rich savannah plains of the Masai Mara and the flamingo-filled rift valley sanctuary of Lake Nakuru. You may spot buffalo, waterbuck, white rhino and the rare Rothschild's giraffe.",
     highlights: ["Big Cat Tracking", "Rift Valley Lakes", "Endangered Rhino Spotting", "Baboon Cliff Panorama"],
     category: "Wildlife Safari",

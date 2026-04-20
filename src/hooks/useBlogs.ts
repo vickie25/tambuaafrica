@@ -3,6 +3,74 @@ import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BlogPost, posts as localPosts } from "@/data/blogPosts";
 
+const stripHtml = (html: string) => html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+
+const deriveReadTime = (content: string) => {
+  const words = stripHtml(content).split(" ").filter(Boolean).length;
+  const minutes = Math.max(1, Math.ceil(words / 220));
+  return `${minutes} min read`;
+};
+
+const extractMetaFromContent = (content: string) => {
+  const match = content.match(/^<!--meta:(\{[\s\S]*?\})-->\s*/);
+  if (!match) {
+    return { meta: null as null | Record<string, string>, body: content };
+  }
+
+  try {
+    const parsed = JSON.parse(match[1]) as Record<string, string>;
+    return { meta: parsed, body: content.replace(match[0], "") };
+  } catch {
+    return { meta: null as null | Record<string, string>, body: content };
+  }
+};
+
+const formatBlogDate = (value?: string | null) => {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+};
+
+const mapRemoteBlogToUi = (item: any): BlogPost => {
+  const parsed = extractMetaFromContent(item.content || "");
+  const content = parsed.body;
+  const excerpt =
+    parsed.meta?.excerpt ||
+    item.excerpt ||
+    stripHtml(content).slice(0, 180) + (stripHtml(content).length > 180 ? "..." : "");
+  const category =
+    parsed.meta?.category ||
+    item.category ||
+    (Array.isArray(item.tags) && item.tags.length > 0 ? item.tags[0] : "Blog");
+  const readTime = parsed.meta?.readTime || item.read_time || item.readTime || deriveReadTime(content);
+  const date = parsed.meta?.date || formatBlogDate(item.date || item.created_at || item.updated_at);
+
+  return {
+    id: item.id,
+    title: item.title || "Untitled Blog",
+    excerpt,
+    image: item.image || "/TRA.png",
+    date,
+    category,
+    readTime,
+    content,
+  };
+};
+
+const mergeBlogsWithLocal = (remoteBlogs: BlogPost[]) => {
+  const merged = [...localPosts];
+  remoteBlogs.forEach((remoteBlog) => {
+    const localIndex = merged.findIndex((item) => item.id === remoteBlog.id);
+    if (localIndex >= 0) {
+      merged[localIndex] = { ...merged[localIndex], ...remoteBlog };
+      return;
+    }
+    merged.push(remoteBlog);
+  });
+  return merged;
+};
+
 export const useBlogs = () => {
   const queryClient = useQueryClient();
 
@@ -21,16 +89,9 @@ export const useBlogs = () => {
           return localPosts;
         }
 
-        return data.map((item) => ({
-          id: item.id,
-          title: item.title,
-          excerpt: item.excerpt,
-          image: item.image,
-          date: item.date || item.created_at || "",
-          category: item.category,
-          readTime: item.read_time || item.readTime || "",
-          content: item.content,
-        })) as BlogPost[];
+        const remoteBlogs = data.map((item) => mapRemoteBlogToUi(item)) as BlogPost[];
+
+        return mergeBlogsWithLocal(remoteBlogs);
       } catch (err) {
         console.warn("Supabase fetch failed. Falling back to local blog posts.", err);
         return localPosts;
@@ -86,16 +147,7 @@ export const useBlog = (id?: string) => {
         if (error) throw error;
 
         if (data) {
-          return {
-            id: data.id,
-            title: data.title,
-            excerpt: data.excerpt,
-            image: data.image,
-            date: data.date || data.created_at || "",
-            category: data.category,
-            readTime: data.read_time || data.readTime || "",
-            content: data.content,
-          } as BlogPost;
+          return mapRemoteBlogToUi(data);
         }
 
         return localPosts.find((post) => post.id === id) || null;

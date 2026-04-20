@@ -3,15 +3,11 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Play } from "lucide-react";
 import OptimizedImage from "@/components/ui/optimized-image";
-import { motion, AnimatePresence } from "framer-motion";
-
-const backgroundImages = [
-  "/images/Wild beast migration 2.webp",
-  "/images/maasai-mara-real.webp",
-  "/images/Diani Beach (2).webp",
-];
+import { motion } from "framer-motion";
+import { useCarouselImages } from "@/hooks/useCarouselImages";
 
 const HeroSection = () => {
+  const { data: backgroundImages = [] } = useCarouselImages();
   const [currentImage, setCurrentImage] = useState(0);
 
   useEffect(() => {
@@ -19,7 +15,7 @@ const HeroSection = () => {
       setCurrentImage((prev) => (prev + 1) % backgroundImages.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [backgroundImages.length]);
 
   // Preload all images on mount
   useEffect(() => {
@@ -27,29 +23,36 @@ const HeroSection = () => {
       const img = new Image();
       img.src = src;
     });
-  }, []);
+  }, [backgroundImages]);
+
+  useEffect(() => {
+    if (currentImage >= backgroundImages.length) {
+      setCurrentImage(0);
+    }
+  }, [backgroundImages.length, currentImage]);
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Smooth crossfade carousel - new image fades in first */}
-      <AnimatePresence mode="popLayout">
-        <motion.div
-          key={currentImage}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 1.2, ease: "easeInOut" }}
-          className="absolute inset-0"
-        >
-          <OptimizedImage
-            src={backgroundImages[currentImage]}
-            alt="Hero Background"
-            className="w-full h-full object-cover"
-            priority={true}
-            quality={85}
-          />
-        </motion.div>
-      </AnimatePresence>
+      {/* Keep slides mounted and only animate opacity for smoother transitions */}
+      <div className="absolute inset-0">
+        {backgroundImages.map((image, index) => (
+          <motion.div
+            key={image}
+            initial={false}
+            animate={{ opacity: index === currentImage ? 1 : 0 }}
+            transition={{ duration: 1, ease: "linear" }}
+            className="absolute inset-0 will-change-[opacity]"
+          >
+            <OptimizedImage
+              src={image}
+              alt="Hero Background"
+              className="w-full h-full object-cover"
+              priority
+              quality={85}
+            />
+          </motion.div>
+        ))}
+      </div>
 
       {/* Light gradient for text readability */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/30" />
@@ -84,7 +87,7 @@ const HeroSection = () => {
             <Button
               asChild
               size="lg"
-              className="bg-accent text-accent-foreground hover:bg-accent/90 text-base px-8 py-6 rounded-xl font-semibold transition-transform hover:scale-105 active:scale-95"
+              className="w-full sm:w-auto bg-accent text-accent-foreground hover:bg-accent/90 text-base px-8 py-6 rounded-xl font-semibold transition-transform hover:scale-105 active:scale-95"
             >
               <Link to="/safaris">
                 Explore Safaris <ChevronRight className="w-5 h-5 ml-1" />
@@ -93,7 +96,7 @@ const HeroSection = () => {
             <Button
               variant="outline"
               size="lg"
-              className="border-white/30 text-white hover:bg-white/10 text-base px-8 py-6 rounded-xl bg-transparent transition-transform hover:scale-105 active:scale-95"
+              className="w-full sm:w-auto border-white/30 text-white hover:bg-white/10 text-base px-8 py-6 rounded-xl bg-transparent transition-transform hover:scale-105 active:scale-95"
             >
               <Play className="w-5 h-5 mr-2" /> Watch Our Story
             </Button>

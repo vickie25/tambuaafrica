@@ -3,6 +3,31 @@ import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Safari, safaris as localSafaris } from "@/data/safaris";
 
+const BROKEN_SAFARI_IMAGE_MAP: Record<string, string> = {
+  "/images/dawn-w-FmUx8z_Tz4A-unsplash.webp": "/images/destiations/Lake Nakuru/lake elementaita.webp",
+};
+
+const normalizeSafariImage = (image: string | null | undefined) => {
+  if (!image) return image;
+  return BROKEN_SAFARI_IMAGE_MAP[image] ?? image;
+};
+
+const mergeSafarisWithLocal = (remoteSafaris: Safari[]) => {
+  const localById = new Map(localSafaris.map((safari) => [safari.id, safari]));
+  const merged = [...localSafaris];
+
+  remoteSafaris.forEach((remoteSafari) => {
+    const localIndex = merged.findIndex((item) => item.id === remoteSafari.id);
+    if (localIndex >= 0) {
+      merged[localIndex] = { ...localById.get(remoteSafari.id), ...remoteSafari };
+      return;
+    }
+    merged.push(remoteSafari);
+  });
+
+  return merged;
+};
+
 export const useSafaris = () => {
   const queryClient = useQueryClient();
 
@@ -15,13 +40,17 @@ export const useSafaris = () => {
         if (error) throw error;
 
         if (!data || data.length === 0) {
+          console.log("Using local safaris: Supabase has", data?.length || 0, "safaris");
           return localSafaris;
         }
 
-        return data.map((item) => ({
+        const remoteSafaris = data.map((item) => ({
           ...item,
+          image: normalizeSafariImage(item.image),
           stripePriceId: item.stripe_price_id || item.stripePriceId,
         })) as Safari[];
+
+        return mergeSafarisWithLocal(remoteSafaris);
       } catch (err) {
         console.warn("Supabase fetch failed. Falling back to local Safari data.");
         return localSafaris;
@@ -77,6 +106,7 @@ export const useSafari = (id?: string) => {
         if (data) {
           return {
             ...data,
+            image: normalizeSafariImage(data.image),
             stripePriceId: data.stripe_price_id || data.stripePriceId,
           } as Safari;
         }

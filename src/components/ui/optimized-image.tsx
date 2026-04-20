@@ -10,6 +10,7 @@ interface OptimizedImageProps {
   priority?: boolean;
   placeholder?: 'blur' | 'empty';
   quality?: number;
+  fetchPriority?: "high" | "low" | "auto";
 }
 
 // Ultra-fast LQIP (Low Quality Image Placeholder) - 1px data URL
@@ -25,6 +26,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   priority = false,
   placeholder = 'blur',
   quality = 75,
+  fetchPriority = "auto",
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(priority);
@@ -45,7 +47,8 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
         }
       },
       {
-        rootMargin: '100px', // Reduced from 300px for faster visible load
+        // Start loading earlier so slide changes don't reveal not-yet-decoded images.
+        rootMargin: '300px',
       }
     );
 
@@ -110,14 +113,13 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
       {/* Actual image — rendered only after the container enters the viewport */}
       {isInView && (
         <>
-          {/* Preload image in background for near-instantaneous display */}
-          <link rel="preload" as="image" href={optimizedSrc} />
           <img
             src={optimizedSrc}
             alt={alt}
             width={width}
             height={height}
             loading={priority ? 'eager' : 'lazy'}
+            fetchPriority={priority ? "high" : fetchPriority}
             decoding="async"
             onLoad={() => setIsLoaded(true)}
             onError={() => setHasError(true)}

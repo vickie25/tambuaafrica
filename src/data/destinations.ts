@@ -12,6 +12,27 @@ export interface Destination {
 
 export const destinations: Destination[] = [
   {
+    id: "mombasa",
+    name: "Mombasa",
+    country: "Kenya",
+    description:
+      "Kenya's historic coastal city where Swahili culture, old-town heritage, marine life, and beach experiences come together.",
+    story:
+      "Mombasa is East Africa's oldest living port city, where centuries of trade shaped a unique Swahili identity still visible in carved doors, coral-stone alleys, spice markets, and oceanfront forts. It blends urban energy with coastal relaxation.",
+    features: [
+      "Historic Old Town and Fort Jesus heritage sites",
+      "Gateway to north and south coast beach resorts",
+      "Swahili cuisine, markets, and cultural experiences",
+      "Marine parks, dhow trips, and coastal excursions",
+    ],
+    image: "/images/mombasa-north-1.webp",
+    images: [
+      "/images/mombasa-north-1.webp",
+      "/images/mombasa-north-2.webp",
+    ],
+    safariCount: 1,
+  },
+  {
     id: "tsavo",
     name: "Tsavo National Park",
     country: "Kenya",
@@ -151,14 +172,12 @@ export const destinations: Destination[] = [
     country: "Kenya",
     description:
       "Voted regularly as Africa's leading beach destination, Diani Beach is a stunning tropical paradise boasting endless stretches of powdery white sand, swaying palms, and warm, crystal-clear turquoise waters. Dive into vibrant coral reefs, indulge in rich Swahili culture, and unwind in world-class resorts along the spectacular Kenyan coast.",
-    image: "/images/diani-beach-coast.webp",
+    image: "/images/diani.webp",
     images: [
-      "/images/diani-beach-coast.webp",
-      "/images/diani-beach.webp",
-      "/images/diani-beach-new.webp",
-      "/images/diani-extra-1.png",
-      "/images/diani-extra-2.png",
-      "/images/deckchair-beach.webp",
+      "/images/diani.webp",
+      "/images/Diani Beach (2).webp",
+      "/images/diani-extra-1.webp",
+      "/images/diani-extra-2.webp",
     ],
     safariCount: 2,
   },
@@ -248,6 +267,27 @@ export const destinations: Destination[] = [
       "/images/mombasa-north-1.webp",
       "/images/mombasa-north-2.webp",
       "/images/mombasa-north-3.webp",
+    ],
+    safariCount: 1,
+  },
+  {
+    id: "mombasa-south-coast",
+    name: "Mombasa South Coast",
+    country: "Kenya",
+    description:
+      "A calm coastal stretch south of Mombasa with palm-lined beaches, turquoise bays, and relaxed beach resorts.",
+    story:
+      "The South Coast offers a slower rhythm than the city, with broad sandy beaches, coral reefs, and warm waters ideal for family breaks, honeymoon escapes, and ocean activities.",
+    features: [
+      "Quiet white-sand beaches and lagoon bays",
+      "Snorkeling, diving, and reef boat excursions",
+      "Resort stays with easy city-day-trip access",
+      "Perfect base for coast-and-safari combinations",
+    ],
+    image: "/images/diani.webp",
+    images: [
+      "/images/diani.webp",
+      "/images/Diani Beach (2).webp",
     ],
     safariCount: 1,
   },

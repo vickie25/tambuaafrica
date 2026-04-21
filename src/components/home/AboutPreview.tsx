@@ -20,7 +20,7 @@ const AboutPreview = () => {
           <div className={`relative transition-all duration-700 ${isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"}`}>
             <div className="relative rounded-2xl overflow-hidden aspect-[4/3]">
               <img
-                src="/images/maasai-mara-wildlife.webp"
+                src="/images/real images frm Tambua/Team.jpeg"
                 alt="East Africa safari landscape"
                 className="w-full h-full object-cover"
                 loading="lazy"

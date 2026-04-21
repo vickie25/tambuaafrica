@@ -11,6 +11,7 @@ const corsHeaders = {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  let debugMode = false;
   try {
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -25,10 +26,26 @@ serve(async (req) => {
     const { data: { user } } = await supabaseClient.auth.getUser(token);
     if (!user?.email) throw new Error("Not authenticated");
 
-    const { safariId, safariTitle, priceId, guests, preferredDate, notes } = await req.json();
+    const payload = await req.json();
+    debugMode = Boolean(payload?.debug);
 
-    if (!priceId || !safariId || !safariTitle || !preferredDate) {
-      throw new Error("Missing required booking fields");
+    const {
+      safariId,
+      safariTitle,
+      priceId,
+      guests,
+      preferredDate,
+      notes,
+      existingBookingId,
+    } = payload;
+
+    const effectivePriceId =
+      (typeof priceId === "string" && priceId.trim() !== "" ? priceId : null) ??
+      (typeof (payload as any).stripePriceId === "string" && (payload as any).stripePriceId.trim() !== "" ? (payload as any).stripePriceId : null) ??
+      (typeof (payload as any).stripe_price_id === "string" && (payload as any).stripe_price_id.trim() !== "" ? (payload as any).stripe_price_id : null);
+
+    if (!effectivePriceId) {
+      throw new Error("Missing required payment fields: set a Stripe Price ID in safaris.stripe_price_id or pass priceId in the request body");
     }
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
@@ -42,17 +59,38 @@ serve(async (req) => {
       customerId = customers.data[0].id;
     }
 
-    // Create booking in pending state
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    const guestCount = parseInt(guests) || 1;
+    const guestCount = Math.max(1, parseInt(guests) || 1);
+    let bookingId = existingBookingId as string | undefined;
 
-    const { data: booking, error: bookingError } = await supabaseAdmin
-      .from("bookings")
-      .insert({
+    if (bookingId) {
+      const { data: existingBooking, error: existingBookingError } = await supabaseAdmin
+        .from("bookings")
+        .select("id, user_id, status")
+        .eq("id", bookingId)
+        .single();
+
+      if (existingBookingError || !existingBooking) {
+        throw new Error("Booking not found");
+      }
+
+      if (existingBooking.user_id !== user.id) {
+        throw new Error("Unauthorized booking access");
+      }
+
+      if (existingBooking.status !== "pending") {
+        throw new Error("Only pending bookings can be paid");
+      }
+    } else {
+      if (!safariId || !safariTitle || !preferredDate) {
+        throw new Error("Missing required booking fields");
+      }
+
+      const bookingInsertPayload = {
         user_id: user.id,
         safari_id: safariId,
         safari_title: safariTitle,
@@ -60,29 +98,56 @@ serve(async (req) => {
         guests: guestCount,
         notes: notes || null,
         status: "pending",
-      })
-      .select("id")
-      .single();
+      };
 
-    if (bookingError || !booking) throw new Error("Could not create booking");
+      let { data: booking, error: bookingError } = await supabaseAdmin
+        .from("bookings")
+        .insert(bookingInsertPayload)
+        .select("id")
+        .single();
+
+      const message = bookingError?.message?.toLowerCase() || "";
+      const needsLegacyColumns =
+        message.includes("number_of_people") || message.includes("travel_date");
+
+      if (bookingError && needsLegacyColumns) {
+        const fallback = await supabaseAdmin
+          .from("bookings")
+          .insert({
+            ...bookingInsertPayload,
+            travel_date: preferredDate,
+            number_of_people: guestCount,
+            contact_email: user.email,
+            contact_phone: null,
+            special_requests: notes || null,
+          })
+          .select("id")
+          .single();
+        booking = fallback.data;
+        bookingError = fallback.error;
+      }
+
+      if (bookingError || !booking) throw new Error("Could not create booking");
+      bookingId = booking.id;
+    }
 
     // Create checkout session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
-      line_items: [{ price: priceId, quantity: guestCount }],
+      line_items: [{ price: effectivePriceId, quantity: guestCount }],
       mode: "payment",
-      success_url: `${req.headers.get("origin")}/payment-success?booking_id=${booking.id}&session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${req.headers.get("origin")}/payment-success?booking_id=${bookingId}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/dashboard`,
       metadata: {
-        booking_id: booking.id,
+        booking_id: bookingId!,
         user_id: user.id,
       },
     });
 
     // Create payment record
     await supabaseAdmin.from("payments").insert({
-      booking_id: booking.id,
+      booking_id: bookingId!,
       user_id: user.id,
       stripe_session_id: session.id,
       amount: 0, // will be updated after payment
@@ -90,12 +155,15 @@ serve(async (req) => {
       status: "pending",
     });
 
-    return new Response(JSON.stringify({ url: session.url, bookingId: booking.id }), {
+    return new Response(JSON.stringify({ url: session.url, bookingId }), {
       headers: corsHeaders,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
-    return new Response(JSON.stringify({ error: message }), {
+    return new Response(JSON.stringify({
+      error: message,
+      ...(debugMode && error instanceof Error ? { debug: { message: error.message, stack: error.stack } } : {}),
+    }), {
       status: 500,
       headers: corsHeaders,
     });

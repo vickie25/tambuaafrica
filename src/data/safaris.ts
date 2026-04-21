@@ -148,7 +148,7 @@ export const safaris: Safari[] = [
     price: 2100,
     rating: 4.9,
     reviews: 287,
-    image: "/images/diani-beach-new.webp",
+    image: "/images/diani.webp",
     description: "Unwind on the pristine white sands of Diani Beach with turquoise waters, Swahili culture, and tropical relaxation.",
     highlights: ["White Sand Beaches", "Snorkeling & Diving", "Swahili Cuisine"],
     category: "Beach Holiday",

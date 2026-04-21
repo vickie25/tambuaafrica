@@ -36,7 +36,11 @@ const FeaturedSafaris = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[400px]">
-          {isLoading ? null : (
+          {isLoading ? null : safaris.length === 0 ? (
+            <p className="col-span-full text-center text-muted-foreground py-12">
+              Safari packages will appear here once they are published in your catalogue.
+            </p>
+          ) : (
             safaris.slice(0, 6).map((safari, index) => (
               <div
               key={safari.id}
@@ -83,7 +87,8 @@ const FeaturedSafaris = () => {
                 </div>
               </div>
             </div>
-          )))}
+          ))
+          )}
         </div>
       </div>
       <BookingModal open={bookingOpen} onOpenChange={setBookingOpen} preselectedSafari={selectedSafari} />

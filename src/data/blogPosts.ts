@@ -7,6 +7,7 @@ export interface BlogPost {
   category: string;
   readTime: string;
   content: string;
+  status?: "draft" | "published";
 }
 
 export const posts: BlogPost[] = [

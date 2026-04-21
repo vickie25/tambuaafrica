@@ -5,17 +5,89 @@ import Footer from "@/components/layout/Footer";
 import PageTransition from "@/components/layout/PageTransition";
 import { Destination } from "@/data/destinations";
 import { destinationLodges, Lodge } from "@/data/destinations-lodges";
+import { useDestinationLodges } from "@/hooks/useDestinationLodges";
 import { useDestinations } from "@/hooks/useDestinations";
 import { ArrowRight, MapPin, Star, X, ChevronLeft, ChevronRight, Bed } from "lucide-react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useAuth } from "@/contexts/AuthContext";
 import OptimizedImage from "@/components/ui/optimized-image";
 import BookingModal from "@/components/booking/BookingModal";
+import { useReducedMotion } from "framer-motion";
+
+const DESTINATION_DISPLAY_ORDER = [
+  "tsavo",
+  "masai-mara",
+  "samburu",
+  "nakuru",
+  "naivasha",
+  "amboseli",
+  "mombasa",
+  "wasini",
+  "diani",
+  "chale-island",
+  "watamu",
+  "mombasa-north-coast",
+  "mombasa-south-coast",
+] as const;
+
+const DESTINATION_ID_ALIASES: Record<string, string[]> = {
+  tsavo: ["tsavo", "tsavo-east"],
+  "masai-mara": ["masai-mara", "maasai-mara"],
+  samburu: ["samburu"],
+  nakuru: ["nakuru", "lake-nakuru"],
+  naivasha: ["naivasha", "lake-naivasha"],
+  amboseli: ["amboseli"],
+  mombasa: ["mombasa"],
+  wasini: ["wasini", "wasini-island"],
+  diani: ["diani", "diani-beach"],
+  "chale-island": ["chale-island", "chale"],
+  watamu: ["watamu"],
+  "mombasa-north-coast": ["mombasa-north-coast", "north-coast"],
+  "mombasa-south-coast": ["mombasa-south-coast", "south-coast"],
+};
+
+const getCanonicalDestinationKey = (dest: Destination) => {
+  const id = dest.id.toLowerCase();
+  for (const [canonical, aliases] of Object.entries(DESTINATION_ID_ALIASES)) {
+    if (aliases.includes(id)) return canonical;
+  }
+
+  const name = dest.name.toLowerCase();
+  if (name.includes("tsavo")) return "tsavo";
+  if (name.includes("mara")) return "masai-mara";
+  if (name.includes("samburu")) return "samburu";
+  if (name.includes("nakuru")) return "nakuru";
+  if (name.includes("naivasha")) return "naivasha";
+  if (name.includes("amboseli")) return "amboseli";
+  if (name.includes("wasini")) return "wasini";
+  if (name.includes("diani")) return "diani";
+  if (name.includes("chale")) return "chale-island";
+  if (name.includes("watamu")) return "watamu";
+  if (name.includes("north coast")) return "mombasa-north-coast";
+  if (name.includes("south coast")) return "mombasa-south-coast";
+  if (name.includes("mombasa")) return "mombasa";
+  return id;
+};
+
+const getLodgeDataForDestination = (dest: Destination, groups: typeof destinationLodges) => {
+  const canonical = getCanonicalDestinationKey(dest);
+  return groups.find((d) => d.destinationId === canonical);
+};
 
 // ─────────────────────────────────────────────────────────
 // Image slider
 // ─────────────────────────────────────────────────────────
-const ImageSlider = ({ images, name, priority = false }: { images: string[]; name: string; priority?: boolean }) => {
+const ImageSlider = ({
+  images,
+  name,
+  priority = false,
+  shouldReduceMotion = false,
+}: {
+  images: string[];
+  name: string;
+  priority?: boolean;
+  shouldReduceMotion?: boolean;
+}) => {
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
@@ -29,12 +101,12 @@ const ImageSlider = ({ images, name, priority = false }: { images: string[]; nam
   }, [images, priority]);
 
   useEffect(() => {
-    if (images.length <= 1) return;
+    if (images.length <= 1 || shouldReduceMotion) return;
     const timer = setInterval(() => {
       setCurrent((p) => (p + 1) % images.length);
     }, 4000);
     return () => clearInterval(timer);
-  }, [images.length]);
+  }, [images.length, shouldReduceMotion]);
 
   return (
     <>
@@ -64,7 +136,8 @@ const LodgeCard = ({
   lodge: Lodge;
   onClick: () => void;
 }) => (
-  <div
+  <button
+    type="button"
     className="group cursor-pointer rounded-xl overflow-hidden border border-border bg-background hover:shadow-lg transition-all duration-300"
     onClick={onClick}
   >
@@ -84,7 +157,7 @@ const LodgeCard = ({
         <ArrowRight className="w-3 h-3" />
       </div>
     </div>
-  </div>
+  </button>
 );
 
 // ─────────────────────────────────────────────────────────
@@ -115,10 +188,14 @@ const LodgeModal = ({
     <div
       className="fixed inset-0 z-[60] bg-black/85 backdrop-blur-sm flex items-center justify-center p-4"
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="lodge-modal-title"
     >
       <div
         className="bg-background rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
         onClick={(e) => e.stopPropagation()}
+        tabIndex={-1}
       >
         {/* Hero image */}
         <div className="relative h-64 rounded-t-2xl overflow-hidden">
@@ -132,6 +209,7 @@ const LodgeModal = ({
           <button
             onClick={onClose}
             className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition"
+            aria-label="Close lodge details"
           >
             <X className="w-5 h-5" />
           </button>
@@ -140,7 +218,7 @@ const LodgeModal = ({
         {/* Content */}
         <div className="p-6">
           <div className="flex items-start justify-between gap-4 mb-1">
-            <h3 className="text-2xl font-bold text-foreground">{lodge.name}</h3>
+            <h3 id="lodge-modal-title" className="text-2xl font-bold text-foreground">{lodge.name}</h3>
           </div>
           <p className="text-accent font-semibold text-sm mb-4 flex items-center gap-1">
             <MapPin className="w-3 h-3" />
@@ -206,9 +284,11 @@ const LodgeModal = ({
 // ─────────────────────────────────────────────────────────
 const DestinationModal = ({
   dest,
+  lodgeGroups,
   onClose,
 }: {
   dest: Destination;
+  lodgeGroups: typeof destinationLodges;
   onClose: () => void;
 }) => {
   const { user } = useAuth();
@@ -216,7 +296,7 @@ const DestinationModal = ({
   const [selectedLodge, setSelectedLodge] = useState<Lodge | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<Lodge["category"] | "all">("all");
 
-  const lodgeData = destinationLodges.find((d) => d.destinationId === dest.id);
+  const lodgeData = getLodgeDataForDestination(dest, lodgeGroups);
   const lodges = lodgeData?.lodges ?? [];
 
   const filtered =
@@ -257,6 +337,9 @@ const DestinationModal = ({
       <div
         className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex flex-col overflow-auto"
         onClick={onClose}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="destination-modal-title"
       >
         <div
           className="min-h-screen w-full flex flex-col"
@@ -264,20 +347,22 @@ const DestinationModal = ({
         >
           {/* Header image */}
           <div className="relative h-72 md:h-96 shrink-0">
-            <img
+            <OptimizedImage
               src={dest.images?.[0] || dest.image}
               alt={dest.name}
               className="w-full h-full object-cover"
+              priority
             />
             <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/80" />
             <button
               onClick={onClose}
               className="absolute top-6 right-6 bg-black/50 hover:bg-black/70 text-white rounded-full p-2.5 transition"
+              aria-label="Close destination details"
             >
               <X className="w-5 h-5" />
             </button>
             <div className="absolute bottom-6 left-6 right-6">
-              <h2 className="text-3xl md:text-4xl font-bold text-white">{dest.name}</h2>
+              <h2 id="destination-modal-title" className="text-3xl md:text-4xl font-bold text-white">{dest.name}</h2>
               <p className="text-white/80 mt-1 flex items-center gap-1 text-sm">
                 <MapPin className="w-4 h-4" />
                 {dest.country}
@@ -410,10 +495,12 @@ const DestinationModal = ({
 // ─────────────────────────────────────────────────────────
 const Destinations = () => {
   const { user } = useAuth();
+  const shouldReduceMotion = useReducedMotion();
   const { ref, isVisible } = useScrollAnimation();
   const [selected, setSelected] = useState<Destination | null>(null);
   const [bookingOpen, setBookingOpen] = useState(false);
   const { data: destinations = [], isLoading } = useDestinations();
+  const { data: lodgeGroups = destinationLodges } = useDestinationLodges();
 
   return (
     <PageTransition>
@@ -424,7 +511,7 @@ const Destinations = () => {
           <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden bg-primary text-primary-foreground">
             <div className="absolute inset-0 z-0 opacity-20">
               <OptimizedImage 
-                src="/images/diani-beach-coast.webp" 
+                src="/images/chale-extra-1.webp" 
                 alt="Destinations Background" 
                 className="w-full h-full object-cover"
                 priority 
@@ -455,20 +542,38 @@ const Destinations = () => {
                 </div>
               ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {destinations.filter(dest => dest.country === 'Kenya').map((dest, index) => {
-                  const lodgeCount =
-                    destinationLodges.find((d) => d.destinationId === dest.id)?.lodges.length ?? 0;
+                {destinations
+                  .filter((dest) => dest.country === "Kenya")
+                  .filter((dest) => DESTINATION_DISPLAY_ORDER.includes(getCanonicalDestinationKey(dest) as (typeof DESTINATION_DISPLAY_ORDER)[number]))
+                  .sort((a, b) => {
+                    const aIndex = DESTINATION_DISPLAY_ORDER.indexOf(
+                      getCanonicalDestinationKey(a) as (typeof DESTINATION_DISPLAY_ORDER)[number]
+                    );
+                    const bIndex = DESTINATION_DISPLAY_ORDER.indexOf(
+                      getCanonicalDestinationKey(b) as (typeof DESTINATION_DISPLAY_ORDER)[number]
+                    );
+                    return aIndex - bIndex;
+                  })
+                  .map((dest, index) => {
+                  const lodgeCount = getLodgeDataForDestination(dest, lodgeGroups)?.lodges.length ?? 0;
 
                   return (
-                    <div
+                    <button
+                      type="button"
                       key={dest.id}
                       className={`group relative rounded-2xl overflow-hidden aspect-[4/3] cursor-pointer transition-all duration-500 ${
                         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
                       }`}
                       style={{ transitionDelay: `${index * 80}ms` }}
                       onClick={() => setSelected(dest)}
+                      aria-label={`Open details for ${dest.name}`}
                     >
-                      <ImageSlider images={dest.images || [dest.image]} name={dest.name} priority={index < 3} />
+                      <ImageSlider
+                        images={dest.images || [dest.image]}
+                        name={dest.name}
+                        priority={index < 3}
+                        shouldReduceMotion={!!shouldReduceMotion}
+                      />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                       <div className="absolute bottom-0 left-0 right-0 p-6">
                         <h3 className="text-white font-bold text-xl">{dest.name}</h3>
@@ -484,7 +589,7 @@ const Destinations = () => {
                             : "View Lodges"}
                         </div>
                       </div>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -500,7 +605,7 @@ const Destinations = () => {
 
       {/* Destination + lodge modal */}
       {selected && (
-        <DestinationModal dest={selected} onClose={() => setSelected(null)} />
+        <DestinationModal dest={selected} lodgeGroups={lodgeGroups} onClose={() => setSelected(null)} />
       )}
     </PageTransition>
   );

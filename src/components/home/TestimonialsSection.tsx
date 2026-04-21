@@ -10,6 +10,12 @@ const TestimonialsSection = () => {
   const next = () => setCurrent((prev) => (prev + 1) % testimonials.length);
   const prev = () => setCurrent((prev) => (prev - 1 + testimonials.length) % testimonials.length);
   const t = testimonials[current];
+  const initials = t.name
+    .split(" ")
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 
   return (
     <section className="section-padding bg-card" ref={ref}>
@@ -29,13 +35,27 @@ const TestimonialsSection = () => {
             "{t.quote}"
           </p>
           <div className="flex items-center justify-center gap-4 mb-4">
-            <div className="w-14 h-14 rounded-full flex items-center justify-center bg-accent/10 border-2 border-accent text-accent font-bold text-xl select-none">
-              {t.name
-                .split(' ')
-                .map(word => word[0])
-                .join('')
-                .toUpperCase()
-                .slice(0, 2)}
+            <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center bg-accent/10 border-2 border-accent text-accent font-bold text-xl select-none">
+              {t.avatar ? (
+                <img
+                  src={t.avatar}
+                  alt={t.name}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    target.style.display = "none";
+                    const fallback = target.nextElementSibling as HTMLSpanElement | null;
+                    if (fallback) fallback.style.display = "flex";
+                  }}
+                />
+              ) : null}
+              <span
+                className="w-full h-full items-center justify-center"
+                style={{ display: t.avatar ? "none" : "flex" }}
+              >
+                {initials}
+              </span>
             </div>
             <div className="text-left">
               <div className="font-bold text-foreground">{t.name}</div>

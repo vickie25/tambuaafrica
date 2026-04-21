@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageTransition from "@/components/layout/PageTransition";
@@ -17,6 +18,24 @@ const Contact = () => {
   const { ref, isVisible } = useScrollAnimation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState(emptyForm);
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const inquiry = searchParams.get("inquiry");
+    const destination = searchParams.get("destination");
+    const lodge = searchParams.get("lodge");
+    if (!inquiry && !destination && !lodge) return;
+
+    const destinationText = destination ? `Destination: ${destination}` : "";
+    const lodgeText = lodge ? `Lodge: ${lodge}` : "";
+    const composed = [destinationText, lodgeText].filter(Boolean).join(" | ");
+
+    setFormData((prev) => ({
+      ...prev,
+      subject: prev.subject || (inquiry === "booking" ? "Booking Inquiry" : prev.subject),
+      message: prev.message || (composed ? `Hello, I would like help with ${composed}.` : prev.message),
+    }));
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,7 +76,7 @@ const Contact = () => {
         <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden bg-primary text-primary-foreground">
           <div className="absolute inset-0 z-0 opacity-20">
             <OptimizedImage 
-              src="/images/nairobi-real.webp" 
+              src="/images/amboseli-real.webp" 
               alt="Contact Us Background" 
               className="w-full h-full object-cover"
               priority 

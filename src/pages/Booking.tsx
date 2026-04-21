@@ -28,8 +28,8 @@ const Booking = () => {
   const [searchParams] = useSearchParams();
   const { data: safaris = [] } = useSafaris();
   
-  const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const NO_SAFARI_VALUE = "none";
   const [formData, setFormData] = useState<BookingForm>({
     safari_id: "",
     preferred_date: "",
@@ -74,21 +74,44 @@ const Booking = () => {
       const safariTitle = selectedSafari?.title || 
         (destination ? `Destination: ${destination}${lodge ? ' - ' + lodge : ''}` : "Custom Safari");
 
-      const { data, error } = await supabase
+      const basePayload = {
+        safari_id: formData.safari_id || null,
+        safari_title: safariTitle,
+        preferred_date: formData.preferred_date,
+        guests: formData.guests,
+        total_amount: totalAmount,
+        currency: "USD",
+        notes: formData.notes,
+        user_id: user.id,
+        status: "pending",
+      };
+
+      let { data, error } = await supabase
         .from("bookings")
-        .insert({
-          safari_id: formData.safari_id || null,
-          safari_title: safariTitle,
-          travel_date: formData.preferred_date,
-          number_of_people: formData.guests,
-          total_amount: totalAmount,
-          currency: "USD",
-          notes: formData.notes,
-          user_id: user.id,
-          status: "pending",
-        })
+        .insert(basePayload)
         .select()
         .single();
+
+      const message = error?.message?.toLowerCase() || "";
+      const needsLegacyColumns =
+        message.includes("number_of_people") || message.includes("travel_date");
+
+      if (error && needsLegacyColumns) {
+        const fallback = await supabase
+          .from("bookings")
+          .insert({
+            ...basePayload,
+            travel_date: formData.preferred_date,
+            number_of_people: formData.guests,
+            contact_email: user.email || "",
+            contact_phone: null,
+            special_requests: formData.notes || null,
+          } as any)
+          .select()
+          .single();
+        data = fallback.data;
+        error = fallback.error;
+      }
 
       if (error) throw error;
 
@@ -155,14 +178,16 @@ const Booking = () => {
                         {destination ? "Select Safari Package (Optional)" : "Select Safari Package *"}
                       </Label>
                       <Select
-                        value={formData.safari_id}
-                        onValueChange={(value) => handleInputChange("safari_id", value)}
+                        value={formData.safari_id || NO_SAFARI_VALUE}
+                        onValueChange={(value) =>
+                          handleInputChange("safari_id", value === NO_SAFARI_VALUE ? "" : value)
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue placeholder={destination ? "Select a safari or skip for destination inquiry" : "Choose a safari package"} />
                         </SelectTrigger>
                         <SelectContent>
-                          {!destination && <SelectItem value="">No specific safari - destination inquiry only</SelectItem>}
+                          <SelectItem value={NO_SAFARI_VALUE}>No specific safari - destination inquiry only</SelectItem>
                           {safaris.map((safari) => (
                             <SelectItem key={safari.id} value={safari.id}>
                               <div className="flex flex-col">

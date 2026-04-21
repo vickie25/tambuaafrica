@@ -124,6 +124,7 @@ export interface Database {
           category: string
           read_time: string
           content: string
+          status: string
           created_at: string
           updated_at: string
         }
@@ -136,6 +137,7 @@ export interface Database {
           category: string
           read_time: string
           content: string
+          status?: string
           created_at?: string
           updated_at?: string
         }
@@ -148,6 +150,7 @@ export interface Database {
           category?: string
           read_time?: string
           content?: string
+          status?: string
           updated_at?: string
         }
       }
@@ -256,6 +259,7 @@ export interface Database {
           title: string
           description: string | null
           order: number
+          section?: string | null
           created_at: string
           updated_at: string
         }
@@ -265,6 +269,7 @@ export interface Database {
           title: string
           description?: string | null
           order: number
+          section?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -274,6 +279,7 @@ export interface Database {
           title?: string
           description?: string | null
           order?: number
+          section?: string | null
           updated_at?: string
         }
       }

@@ -4,32 +4,56 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import OptimizedImage from "@/components/ui/optimized-image";
+import { useCarouselImageItems } from "@/hooks/useCarouselImages";
 
-const photos = [
-  { src: "/images/beautiful-shot-three-cute-giraffes-field-with-trees-blue-sky.webp", alt: "Giraffes in the wild", category: "Wildlife" },
-  { src: "/images/pexels-maasai-magic-3752887-5574091.webp", alt: "Maasai Magic", category: "Culture" },
-  { src: "/images/ancient-ceramic-pots-found-ruins-building-pompeii-italy.webp", alt: "Ancient Ruins", category: "Culture" },
-  { src: "/images/pile-stones-with-city-background.webp", alt: "Cityscape Stones", category: "Landscape" },
-  { src: "/images/pexels-abelalemseged-17272121.webp", alt: "African Scenery", category: "Landscape" },
-  { src: "/images/pexels-alexandra-karnasopoulos-1962842-4017572.webp", alt: "Safari Adventure", category: "Safari" },
-  { src: "/images/pexels-andname-5536965.webp", alt: "Scenic Views", category: "Landscape" },
-  { src: "/images/pexels-joaoaguiar-7731450.webp", alt: "Wildlife Moments", category: "Wildlife" },
-  { src: "/images/pexels-kureng-workx-2546437-4314681.webp", alt: "Safari Highlights", category: "Safari" },
-  { src: "/images/pexels-kureng-workx-2546437-7637401.webp", alt: "Safari Expedition", category: "Safari" },
-  { src: "/images/pexels-lan-yao-324969-20879645.webp", alt: "Nature Detail", category: "Landscape" },
-  { src: "/images/pexels-marri-shyam-366418-7463697.webp", alt: "Beautiful Horizon", category: "Landscape" },
-  { src: "/images/pexels-ross-green-2159326053-36048575.webp", alt: "Cultural Portrait", category: "Culture" },
-  { src: "/images/pexels-sulimansallehi-1586662.webp", alt: "Animal Sightings", category: "Wildlife" },
-  { src: "/images/pexels-taryn-elliott-5214036.webp", alt: "Beach Retreat", category: "Beach" },
-];
-
-const categories = ["All", "Wildlife", "Beach", "Landscape", "Safari", "Culture", "Gorilla"];
+const folderGalleryImages = [
+  "/images/real images frm Tambua/at MAasai mara.jpeg",
+  "/images/real images frm Tambua/DR. Amos Shibale from Seattle USA.jpeg",
+  "/images/real images frm Tambua/A drive.jpeg",
+  "/images/real images frm Tambua/Maasai Culture.jpeg",
+  "/images/real images frm Tambua/Dr. Palca  Shibale from Seattle USa.jpeg",
+  "/images/real images frm Tambua/Tourists at Nairobi park.jpeg",
+  "/images/real images frm Tambua/Tourists with the team at the park.jpeg",
+  "/images/real images frm Tambua/lion at Nairobi park.jpeg",
+  "/images/real images frm Tambua/Nairobi park.jpeg",
+  "/images/real images frm Tambua/safari vehicle.jpeg",
+  "/images/real images frm Tambua/Team Bonding with Maasai Culture.jpeg",
+  "/images/real images frm Tambua/team outside.jpeg",
+  "/images/real images frm Tambua/Lion spotting.jpeg",
+  "/images/real images frm Tambua/Tourist learning about the culture.jpeg",
+  "/images/real images frm Tambua/Team.jpeg",
+  "/images/real images frm Tambua/Zebra at Nairobi park.jpeg",
+  "/images/real images frm Tambua/hotel.jpeg",
+  "/images/real images frm Tambua/A snap with tourist.jpeg",
+  "/images/real images frm Tambua/Tourist happy with Tambua africa Services.jpeg",
+  "/images/real images frm Tambua/Drive Vehicle.jpeg",
+  "/images/real images frm Tambua/Drive at the park.jpeg",
+  "/images/real images frm Tambua/ready for the tour.jpeg",
+  "/images/real images frm Tambua/St the park drive.jpeg",
+  "/images/real images frm Tambua/Tambua Africa safari vehicle.jpeg",
+  "/images/real images frm Tambua/Mrs Odilliah Sagali from Seattle USA.jpeg",
+  "/images/real images frm Tambua/the safari.jpeg",
+  "/images/real images frm Tambua/Eng. Briscan Shibale from Seattle USA.jpeg",
+] as const;
 
 const Gallery = () => {
-  const [activeCategory, setActiveCategory] = useState("All");
+  const { data: adminGallery = [] } = useCarouselImageItems("gallery");
   const [lightbox, setLightbox] = useState<number | null>(null);
 
-  const filtered = activeCategory === "All" ? photos : photos.filter((p) => p.category === activeCategory);
+  const photos =
+    adminGallery.length > 0
+      ? adminGallery.map((item) => ({
+          src: item.url,
+          alt: item.title || "Tambua Gallery Image",
+          category: "Gallery",
+        }))
+      : folderGalleryImages.map((src, index) => ({
+          src,
+          alt: `Tambua Gallery ${index + 1}`,
+          category: "Gallery",
+        }));
+
+  const filtered = photos;
 
   const navigateLightbox = (dir: 1 | -1) => {
     if (lightbox === null) return;
@@ -52,20 +76,6 @@ const Gallery = () => {
 
         <section className="section-padding bg-background">
           <div className="container-wide mx-auto">
-            <div className="flex items-center gap-2 mb-8 flex-wrap justify-center">
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                    activeCategory === cat ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-
             <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 space-y-4">
               {filtered.map((photo, i) => (
                 <motion.div

@@ -25,10 +25,12 @@ import {
 
 interface Booking {
   id: string;
-  safari_id: string;
+  safari_id?: string | null;
   safari_title: string;
-  travel_date: string;
-  number_of_people: number;
+  travel_date?: string | null;
+  preferred_date?: string | null;
+  number_of_people?: number | null;
+  guests?: number | null;
   total_amount: number;
   currency: string;
   status: string;
@@ -163,12 +165,21 @@ const Dashboard = () => {
     setIsPaying(true);
     try {
       if (paymentMethod === "card") {
+        const safariForBooking = safaris.find((safari) => safari.id === payingBooking.safari_id);
+        if (!safariForBooking?.stripePriceId) {
+          throw new Error("Card payment is unavailable for this safari. Please use M-Pesa or contact support.");
+        }
+
         // Stripe payment flow
-        const { data, error } = await supabase.functions.invoke("create-stripe-checkout", {
+        const { data, error } = await supabase.functions.invoke("create-checkout", {
           body: {
-            booking_id: payingBooking.id,
-            success_url: `${window.location.origin}/payment-success`,
-            cancel_url: `${window.location.origin}/dashboard`,
+            existingBookingId: payingBooking.id,
+            safariId: payingBooking.safari_id,
+            safariTitle: payingBooking.safari_title,
+            priceId: safariForBooking.stripePriceId,
+            guests: String(payingBooking.guests || payingBooking.number_of_people || 1),
+            preferredDate: payingBooking.preferred_date || payingBooking.travel_date,
+            notes: payingBooking.notes || "",
           },
         });
 
@@ -181,12 +192,23 @@ const Dashboard = () => {
           throw new Error("No checkout URL received");
         }
       } else if (paymentMethod === "mpesa") {
+        const safariForBooking = safaris.find((safari) => safari.id === payingBooking.safari_id);
+        const guestCount = payingBooking.guests || payingBooking.number_of_people || 1;
+        const mpesaAmount = safariForBooking
+          ? safariForBooking.price * guestCount * 130
+          : Math.max(1, Math.round((payingBooking.total_amount || 0) / 100));
+
         // M-Pesa payment flow
-        const { data, error } = await supabase.functions.invoke("initiate-mpesa-payment", {
+        const { data, error } = await supabase.functions.invoke("mpesa-stk-push", {
           body: {
-            booking_id: payingBooking.id,
-            phone_number: mpesaPhone,
-            amount: payingBooking.total_amount,
+            existingBookingId: payingBooking.id,
+            phone: mpesaPhone,
+            amount: mpesaAmount,
+            safariId: payingBooking.safari_id,
+            safariTitle: payingBooking.safari_title,
+            guests: String(guestCount),
+            preferredDate: payingBooking.preferred_date || payingBooking.travel_date,
+            notes: payingBooking.notes || "",
           },
         });
 

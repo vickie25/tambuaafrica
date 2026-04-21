@@ -60,7 +60,7 @@ const Index = () => {
             title="Connect with Local Roots"
             description="Immerse yourself in the vibrant traditions and hospitality of East Africa. Meet the people who call this land home and share in their stories."
             images={cultureFeatureImages.length > 0 ? cultureFeatureImages : cultureFallbackImages}
-            interval={6000}
+            interval={2600}
             align="right"
           />
 
@@ -70,7 +70,7 @@ const Index = () => {
             title="Premium Safari Lodging"
             description="Experience the perfect blend of wild adventure and modern luxury. Boutique stays in the heart of the savannah, tailored just for you."
             images={luxuryFeatureImages.length > 0 ? luxuryFeatureImages : luxuryFallbackImages}
-            interval={7000}
+            interval={2800}
             align="left"
           />
 

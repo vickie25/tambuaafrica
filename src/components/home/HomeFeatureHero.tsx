@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { MapPin, Info, ArrowRight } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import OptimizedImage from "@/components/ui/optimized-image";
 
 interface HomeFeatureHeroProps {
@@ -19,7 +19,7 @@ const HomeFeatureHero = ({
   slogan,
   title,
   description,
-  interval = 4000,
+  interval = 2600,
   align = "left",
 }: HomeFeatureHeroProps) => {
   const [currentImage, setCurrentImage] = useState(0);
@@ -28,7 +28,7 @@ const HomeFeatureHero = ({
     if (images.length <= 1) return;
     const timer = setInterval(() => {
       setCurrentImage((prev) => (prev + 1) % images.length);
-    }, Math.max(interval, 5000));
+    }, Math.max(interval, 2400));
     return () => clearInterval(timer);
   }, [images, interval]);
 
@@ -53,25 +53,24 @@ const HomeFeatureHero = ({
   return (
     <section className={`relative min-h-screen flex items-center overflow-hidden ${borderClass} shadow-2xl ${sectionBg}`}>
       {/* Background Slideshow - Smooth crossfade */}
-      <div className="absolute inset-0 z-0 bg-black">
-        <AnimatePresence mode="wait">
+      <div className="absolute inset-0 z-0">
+        {images.map((image, index) => (
           <motion.div
-            key={currentImage}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1, ease: "easeInOut" }}
+            key={image}
+            initial={false}
+            animate={{ opacity: index === currentImage ? 1 : 0 }}
+            transition={{ duration: 0.45, ease: "easeInOut" }}
             className="absolute inset-0"
           >
             <OptimizedImage
-              src={images[currentImage]}
-              alt={`${title} background ${currentImage + 1}`}
+              src={image}
+              alt={`${title} background ${index + 1}`}
               className="w-full h-full"
               quality={80}
-              priority={false}
+              priority={index === 0}
             />
           </motion.div>
-        </AnimatePresence>
+        ))}
         {/* Overlay */}
         <div className="absolute inset-0 bg-black/50" />
       </div>

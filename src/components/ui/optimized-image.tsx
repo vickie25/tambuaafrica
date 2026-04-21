@@ -11,6 +11,7 @@ interface OptimizedImageProps {
   placeholder?: 'blur' | 'empty';
   quality?: number;
   fetchPriority?: "high" | "low" | "auto";
+  sizes?: string;
 }
 
 // Ultra-fast LQIP (Low Quality Image Placeholder) - 1px data URL
@@ -27,6 +28,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   placeholder = 'blur',
   quality = 75,
   fetchPriority = "auto",
+  sizes,
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(priority);
@@ -120,6 +122,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
             height={height}
             loading={priority ? 'eager' : 'lazy'}
             fetchPriority={priority ? "high" : fetchPriority}
+            sizes={sizes}
             decoding="async"
             onLoad={() => setIsLoaded(true)}
             onError={() => setHasError(true)}

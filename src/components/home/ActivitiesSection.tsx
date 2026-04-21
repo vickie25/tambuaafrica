@@ -1,30 +1,24 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { Compass, Palmtree, Binoculars, Mountain, Activity, Wind } from "lucide-react";
 import OptimizedImage from "@/components/ui/optimized-image";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselDots,
-} from "@/components/ui/carousel";
-import Autoplay from "embla-carousel-autoplay";
-import { useCarouselImages } from "@/hooks/useCarouselImages";
+import { useCarouselImageItems } from "@/hooks/useCarouselImages";
+import { motion, useReducedMotion } from "framer-motion";
 
 const activities = [
   {
-    icon: Compass,
-    title: "Cultural Tours",
-    description: "Immerse yourself in the rich traditions and heritage of East African communities.",
+    icon: Binoculars,
+    title: "Game Drive",
+    description: "Track the Big Five with expert guides on sunrise and sunset drives across iconic savannah parks.",
     images: [
-      "/images/popular activities/culture tours.webp",
-      "/images/popular activities/culture tours (2).webp",
+      "/images/popular activities/game drives.webp",
+      "/images/popular activities/game drives1.webp",
     ],
   },
   {
     icon: Palmtree,
     title: "Beach Holidays",
-    description: "Relax on pristine white sand beaches along the beautiful Kenyan coastline.",
+    description: "Unwind on white-sand beaches, enjoy ocean views, and experience laid-back coastal island life.",
     images: [
       "/images/popular activities/beach.webp",
       "/images/popular activities/Diani Beach (2).webp",
@@ -33,18 +27,19 @@ const activities = [
     ],
   },
   {
-    icon: Binoculars,
-    title: "Game Drives",
-    description: "Experience thrilling wildlife encounters in Kenya's world-renowned national parks.",
+    icon: Wind,
+    title: "Zipline Canopy",
+    description: "Glide above forest canopies for adrenaline-filled aerial views and unforgettable nature thrills.",
     images: [
-      "/images/popular activities/game drives.webp",
-      "/images/popular activities/game drives1.webp",
+      "/images/popular activities/Zipline 2.webp",
+      "/images/popular activities/Zipline.webp",
+      "/images/popular activities/zipline (2).webp",
     ],
   },
   {
     icon: Mountain,
     title: "Hiking Adventures",
-    description: "Challenge yourself with spectacular treks across East Africa's majestic mountains.",
+    description: "Take guided trails through hills and mountains, from scenic day hikes to challenging summit routes.",
     images: [
       "/images/popular activities/Hiking.webp",
       "/images/popular activities/Hike.webp",
@@ -52,40 +47,52 @@ const activities = [
     ],
   },
   {
+    icon: Compass,
+    title: "Cultural Tours",
+    description: "Meet local communities, explore living traditions, and discover authentic East African heritage.",
+    images: [
+      "/images/popular activities/culture tours.webp",
+      "/images/popular activities/culture tours (2).webp",
+    ],
+  },
+  {
     icon: Activity,
     title: "Bungee & Jumping",
-    description: "Leap into adventure with heart-pounding bungee jumps over iconic landscapes.",
+    description: "Push your limits with high-energy jumps and bungee experiences designed for pure adventure.",
     images: [
       "/images/popular activities/Bangee and Jumping.webp",
       "/images/popular activities/Jumping (2).webp",
       "/images/popular activities/Jumping.webp",
     ],
   },
-  {
-    icon: Wind,
-    title: "Zipline Canopy",
-    description: "Soar through the air on breathtaking ziplines across lush tropical forests.",
-    images: [
-      "/images/popular activities/Zipline 2.webp",
-      "/images/popular activities/Zipline.webp",
-      "/images/popular activities/zipline (2).webp",
-    ],
-  },
 ];
 
 type ActivityItem = (typeof activities)[number];
+type ActivityIconKey = "compass" | "palmtree" | "binoculars" | "mountain" | "activity" | "wind";
+
+const activityIconMap: Record<ActivityIconKey, ActivityItem["icon"]> = {
+  compass: Compass,
+  palmtree: Palmtree,
+  binoculars: Binoculars,
+  mountain: Mountain,
+  activity: Activity,
+  wind: Wind,
+};
 
 const ActivityCard = ({
   activity,
   index,
   isVisible,
+  shouldReduceMotion,
 }: {
   activity: ActivityItem;
   index: number;
   isVisible: boolean;
+  shouldReduceMotion: boolean;
 }) => {
   const cardRef = useRef<HTMLDivElement | null>(null);
   const [isInView, setIsInView] = useState(false);
+  const [currentImage, setCurrentImage] = useState(0);
 
   useEffect(() => {
     const target = cardRef.current;
@@ -102,10 +109,19 @@ const ActivityCard = ({
     return () => observer.disconnect();
   }, []);
 
-  const autoplayPlugins = useMemo(
-    () => (isInView ? [Autoplay({ delay: 7000, stopOnInteraction: true })] : []),
-    [isInView]
-  );
+  useEffect(() => {
+    if (!isInView || shouldReduceMotion || activity.images.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentImage((prev) => (prev + 1) % activity.images.length);
+    }, 2200 + ((index % 6) * 350));
+    return () => clearInterval(timer);
+  }, [activity.images.length, index, isInView, shouldReduceMotion]);
+
+  useEffect(() => {
+    if (currentImage >= activity.images.length) {
+      setCurrentImage(0);
+    }
+  }, [activity.images.length, currentImage]);
 
   return (
     <div
@@ -115,24 +131,37 @@ const ActivityCard = ({
       }`}
       style={{ transitionDelay: `${index * 150}ms` }}
     >
-      <Carousel
-        className="w-full h-full absolute inset-0"
-        opts={{ loop: true, duration: 24 }}
-        plugins={autoplayPlugins}
-      >
-        <CarouselContent className="-ml-0 h-full">
-          {activity.images.map((image, i) => (
-            <CarouselItem key={image} className="pl-0 h-full">
-              <OptimizedImage
-                src={image}
-                alt={`${activity.title} image ${i + 1}`}
-                className="w-full h-full aspect-[4/5] object-cover transition-transform duration-700 md:group-hover:scale-110"
-              />
-            </CarouselItem>
+      <div className="absolute inset-0">
+        {activity.images.map((image, i) => (
+          <motion.div
+            key={image}
+            initial={false}
+            animate={{ opacity: i === currentImage ? 1 : 0 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.45, ease: "linear" }}
+            className="absolute inset-0"
+          >
+            <OptimizedImage
+              src={image}
+              alt={`${activity.title} image ${i + 1}`}
+              className="w-full h-full aspect-[4/5] object-cover transition-transform duration-700 md:group-hover:scale-110"
+            />
+          </motion.div>
+        ))}
+      </div>
+      {activity.images.length > 1 && (
+        <div className="absolute bottom-4 left-0 right-0 z-20 flex justify-center gap-1.5">
+          {activity.images.map((_, dotIndex) => (
+            <button
+              key={`${activity.title}-${dotIndex}`}
+              aria-label={`Go to activity image ${dotIndex + 1}`}
+              className={`h-2 rounded-full transition-all ${
+                dotIndex === currentImage ? "w-4 bg-white" : "w-2 bg-white/50"
+              }`}
+              onClick={() => setCurrentImage(dotIndex)}
+            />
           ))}
-        </CarouselContent>
-        <CarouselDots className="bottom-4 z-20" />
-      </Carousel>
+        </div>
+      )}
 
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
       <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
@@ -148,7 +177,40 @@ const ActivityCard = ({
 
 const ActivitiesSection = () => {
   const { ref, isVisible } = useScrollAnimation();
-  const { data: sectionImages = [] } = useCarouselImages("activities");
+  const shouldReduceMotion = useReducedMotion();
+  const { data: adminActivities = [] } = useCarouselImageItems("activities");
+
+  const activityByTitle = activities.reduce<Record<string, ActivityItem>>((acc, activity) => {
+    acc[activity.title.toLowerCase()] = activity;
+    return acc;
+  }, {});
+
+  const groupedAdminImages = adminActivities.reduce<Record<string, { images: string[]; iconKey?: string | null }>>(
+    (acc, item) => {
+      const titleKey = (item.title || "").trim().toLowerCase();
+      if (!titleKey || !activityByTitle[titleKey]) return acc;
+      if (!acc[titleKey]) acc[titleKey] = { images: [], iconKey: item.iconKey || null };
+      acc[titleKey].images.push(item.url);
+      if (item.iconKey) acc[titleKey].iconKey = item.iconKey;
+      return acc;
+    },
+    {}
+  );
+
+  const displayActivities: ActivityItem[] = activities.map((baseActivity) => {
+    const key = baseActivity.title.toLowerCase();
+    const adminGroup = groupedAdminImages[key];
+    const resolvedIcon =
+      adminGroup?.iconKey && activityIconMap[adminGroup.iconKey as ActivityIconKey]
+        ? activityIconMap[adminGroup.iconKey as ActivityIconKey]
+        : baseActivity.icon;
+
+    return {
+      ...baseActivity,
+      icon: resolvedIcon,
+      images: adminGroup?.images?.length ? adminGroup.images : baseActivity.images,
+    };
+  });
 
   return (
     <section className="section-padding bg-background" ref={ref}>
@@ -162,15 +224,13 @@ const ActivitiesSection = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-          {activities.map((activity, index) => (
+          {displayActivities.map((activity, index) => (
             <ActivityCard
               key={activity.title}
-              activity={{
-                ...activity,
-                images: sectionImages.length > 0 ? sectionImages : activity.images,
-              }}
+              activity={activity}
               index={index}
               isVisible={isVisible}
+              shouldReduceMotion={!!shouldReduceMotion}
             />
           ))}
         </div>

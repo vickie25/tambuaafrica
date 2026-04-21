@@ -8,7 +8,7 @@ import { toast } from "sonner";
 const navLinks = [
   { label: "Home", path: "/" },
   { label: "Safaris", path: "/safaris", dropdown: [
-    { label: "Kenya Safaris", path: "/safaris/kenya" },
+    { label: "Kenya Safaris", path: "/safaris" },
   ]},
   { label: "Destination", path: "/destinations" },
   { label: "Travel Info", path: "/travel-info", dropdown: [
@@ -71,31 +71,33 @@ const Navbar = () => {
         isScrolled ? "shadow-lg border-b-2 border-primary/20" : ""
       }`}
     >
-      <div className="w-full px-4 sm:px-8 lg:px-12">
+      <div className="w-full max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-10">
         <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
-            <div className="bg-white p-2 rounded-lg transition-all duration-300">
+          <Link to="/" className="flex items-center gap-2 min-w-0 shrink-0">
+            <div className="bg-white p-1.5 sm:p-2 rounded-lg transition-all duration-300">
               <img 
                 src="/tambua-logo.png" 
                 alt="Tambua Africa" 
-                className="h-10 sm:h-12 w-auto object-contain"
+                className="h-9 sm:h-10 lg:h-11 w-auto object-contain"
               />
             </div>
-            <span className="font-bold text-base sm:text-lg md:text-xl text-white">
-              Tambua Africa Tours & Safaris
+            <span className="font-bold text-sm sm:text-base lg:text-lg text-white leading-tight whitespace-nowrap">
+              <span className="hidden xl:inline">Tambua Africa Tours & Safaris</span>
+              <span className="hidden lg:inline xl:hidden">Tambua Africa Tours</span>
+              <span className="lg:hidden">Tambua Africa</span>
             </span>
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden lg:flex items-center gap-1" ref={dropdownRef}>
+          <div className="hidden lg:flex items-center gap-0.5 xl:gap-1 mx-4 flex-1 justify-center min-w-0" ref={dropdownRef}>
             {navLinks.map((link) => (
               <div key={link.path} className="relative">
                 {link.dropdown ? (
                   <button
                     onMouseEnter={() => setOpenDropdown(link.path)}
                     onClick={() => setOpenDropdown(openDropdown === link.path ? null : link.path)}
-                    className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                    className={`flex items-center gap-1 px-2.5 xl:px-3 py-2 rounded-lg text-[13px] xl:text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${
                       location.pathname.startsWith(link.path)
                         ? "bg-white/20 text-white"
                         : "text-white/90 hover:bg-white/10 hover:text-white"
@@ -107,7 +109,7 @@ const Navbar = () => {
                 ) : (
                   <Link
                     to={link.path}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`px-2.5 xl:px-3 py-2 rounded-lg text-[13px] xl:text-sm font-medium transition-colors whitespace-nowrap ${
                       location.pathname === link.path
                         ? "bg-white/20 text-white"
                         : "text-white/90 hover:bg-white/10 hover:text-white"
@@ -138,7 +140,7 @@ const Navbar = () => {
           </div>
 
           {/* Right Actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 xl:gap-2 shrink-0">
             {/* Auth Buttons */}
             {!user ? (
               <Button
@@ -156,14 +158,14 @@ const Navbar = () => {
                   <Button
                     asChild
                     variant="outline"
-                    className="bg-accent text-accent-foreground hover:bg-accent/90 font-bold border-none hidden sm:flex"
+                    className="bg-accent text-accent-foreground hover:bg-accent/90 font-bold border-none hidden xl:flex"
                   >
                     <Link to="/admin">Admin Dashboard</Link>
                   </Button>
                 )}
                 <Button
                   asChild
-                  className={"bg-transparent text-white hover:bg-white/10 font-semibold border-2 border-white"}
+                  className={"bg-transparent text-white hover:bg-white/10 font-semibold border-2 border-white px-3 xl:px-4"}
                 >
                   <Link to="/dashboard">My Bookings</Link>
                 </Button>

@@ -223,6 +223,20 @@ For support, email cresdynamics@gmail.com or create an issue in this repository.
 
 Follow the build process and deploy using your preferred hosting platform.
 
+### Bookings and payments (Phase 2)
+
+- **Stripe (card checkout)**  
+  - In Supabase, set `safaris.stripe_price_id` to a real **Stripe Price ID** (`price_...`) for each bookable package. An empty string blocks checkout.  
+  - `STRIPE_SECRET_KEY` is already expected in Supabase **Edge Function secrets** for `create-checkout` / `verify-payment`.  
+  - If JWT verification errors appear with ES256 tokens, deploy payment functions with **`--no-verify-jwt`** (app code still validates the user JWT in the function).  
+  - Optional: add `SMOKE_STRIPE_PRICE_ID=price_...` in `.env` to run `node scripts/smoke-booking-payments.cjs` when DB price IDs are not filled yet.  
+
+- **M-Pesa**  
+  - Set in Supabase secrets: `MPESA_CONSUMER_KEY`, `MPESA_CONSUMER_SECRET`, `MPESA_PASSKEY`, `MPESA_SHORTCODE`, and optionally `MPESA_ENVIRONMENT`, `SUPABASE_PROJECT_REF`, then deploy `mpesa-stk-push`.  
+
+- **Live smoke**  
+  - `node scripts/smoke-booking-payments.cjs` (creates a test user, booking, calls checkout/M-Pesa, then cleans up).
+
 ## Contributing
 
 Please ensure all tests pass and code follows the linting standards before submitting pull requests.

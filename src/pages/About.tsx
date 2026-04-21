@@ -45,7 +45,7 @@ const About = () => {
           <div className="container-wide mx-auto">
             <div className={`grid grid-cols-1 lg:grid-cols-2 gap-12 items-center transition-all duration-700 ${storyVisible ? "opacity-100" : "opacity-0 translate-y-8"}`}>
               <div className="rounded-2xl overflow-hidden aspect-[4/3]">
-                <img src="https://images.unsplash.com/photo-1549366021-9f761d450615?w=800&q=80" alt="East African safari landscape" className="w-full h-full object-cover" loading="lazy" />
+                <img src="/images/real images frm Tambua/Tourists at Nairobi park.jpeg" alt="Tourists at Nairobi park" className="w-full h-full object-cover" loading="lazy" />
               </div>
               <div className="space-y-5">
                 <h2 className="text-3xl font-bold text-foreground">Crafting East Africa Journeys Since 2008</h2>

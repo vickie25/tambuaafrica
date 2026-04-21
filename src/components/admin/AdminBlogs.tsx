@@ -1,16 +1,35 @@
 import { useState, memo, type ChangeEvent } from "react";
 import { useBlogs } from "@/hooks/useBlogs";
 import { supabase } from "@/integrations/supabase/client";
-import { BlogPost } from "@/data/blogPosts";
+import type { Database } from "@/types/supabase";
+import { BlogPost, posts as starterPosts } from "@/data/blogPosts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Edit, Plus, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { compressImage, createPreviewUrl, uploadFileToSupabase } from "@/lib/image-utils";
+
+type BlogInsert = Database["public"]["Tables"]["blogs"]["Insert"];
+
+const stripHtml = (html: string) => html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+
+const deriveReadTime = (content: string) => {
+  const words = stripHtml(content).split(" ").filter(Boolean).length;
+  const minutes = Math.max(1, Math.ceil(words / 220));
+  return `${minutes} min read`;
+};
+
+const toIsoDate = (dateDisplay: string | undefined) => {
+  if (!dateDisplay?.trim()) return new Date().toISOString().slice(0, 10);
+  const d = new Date(dateDisplay);
+  if (!Number.isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+  return new Date().toISOString().slice(0, 10);
+};
 
 const emptyBlog: Partial<BlogPost> = {
   id: "",
@@ -24,17 +43,51 @@ const emptyBlog: Partial<BlogPost> = {
 };
 
 export const AdminBlogs = () => {
-  const { data: blogs = [], isLoading } = useBlogs();
+  const { data: blogs = [], isLoading } = useBlogs({ includeDrafts: true });
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState<Partial<BlogPost> | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<"processing" | "uploading" | null>(null);
+  const [uploadMode, setUploadMode] = useState<"original" | "optimized">("original");
+  const [blogStatus, setBlogStatus] = useState<"draft" | "published">("published");
 
-  const handleEdit = (blog: BlogPost) => setEditing(blog);
+  const handleEdit = (blog: BlogPost) => {
+    setEditing(blog);
+    setBlogStatus((blog.status as "draft" | "published") || "published");
+  };
 
   const handleAdd = () => {
     setEditing({ ...emptyBlog, id: `blog-${Date.now()}` });
+    setBlogStatus("draft");
+  };
+
+  const handleSeedStarterBlogs = async () => {
+    setIsSubmitting(true);
+    try {
+      const payload: BlogInsert[] = starterPosts.map((post) => ({
+        id: post.id,
+        title: post.title,
+        excerpt: post.excerpt,
+        image: post.image,
+        date: toIsoDate(post.date),
+        category: post.category,
+        read_time: post.readTime,
+        content: post.content,
+        status: "published",
+      }));
+
+      const { error } = await supabase.from("blogs").upsert(payload);
+      if (error) throw error;
+
+      toast.success("Starter blogs posted to database");
+      queryClient.invalidateQueries({ queryKey: ["blogs"] });
+    } catch (error) {
+      console.error("Seed blogs failed:", error);
+      toast.error("Failed to post starter blogs");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -47,14 +100,14 @@ export const AdminBlogs = () => {
     setEditing((prev) => prev ? { ...prev, image: previewUrl } : null);
 
     setUploading(true);
-    setUploadStatus("processing");
+    setUploadStatus(uploadMode === "optimized" ? "processing" : "uploading");
     try {
-      // 2. Optimized compression
-      const compressedFile = await compressImage(file);
+      // 2. Optional optimization (based on selected mode)
+      const fileToUpload = uploadMode === "optimized" ? await compressImage(file) : file;
 
       setUploadStatus("uploading");
       // 3. Optimized upload
-      const publicUrl = await uploadFileToSupabase(compressedFile);
+      const publicUrl = await uploadFileToSupabase(fileToUpload);
 
       // 4. Final URL update
       setEditing((prev) => prev ? { ...prev, image: publicUrl } : null);
@@ -78,21 +131,25 @@ export const AdminBlogs = () => {
     try {
       const normalizedCategory = (editing.category || "Blog").trim();
       const normalizedReadTime = (editing.readTime || "").trim();
-      const metadataPrefix = `<!--meta:${JSON.stringify({
-        excerpt: editing.excerpt || "",
-        category: normalizedCategory,
-        readTime: normalizedReadTime,
-        date: editing.date || "",
-      })}-->`;
+      const contentHtml = (editing.content || "").trim();
+      let excerptForDb = (editing.excerpt || "").trim();
+      if (!excerptForDb) {
+        const plain = stripHtml(contentHtml);
+        excerptForDb = plain.slice(0, 180) + (plain.length > 180 ? "…" : "");
+      }
+      if (!excerptForDb.trim()) excerptForDb = " ";
+      const readTimeForDb = normalizedReadTime || deriveReadTime(contentHtml);
 
-      const payload = {
-        id: editing.id,
-        title: editing.title,
-        image: editing.image,
-        content: `${metadataPrefix}\n${editing.content || ""}`,
-        author: "Tambua Africa",
-        published: true,
-        tags: [normalizedCategory].filter(Boolean),
+      const payload: BlogInsert = {
+        id: editing.id!,
+        title: (editing.title || "").trim() || "Untitled",
+        excerpt: excerptForDb,
+        image: (editing.image || "").trim() || "/TRA.png",
+        date: toIsoDate(editing.date),
+        category: normalizedCategory,
+        read_time: readTimeForDb,
+        content: contentHtml || "<p></p>",
+        status: blogStatus,
       };
 
       // Optimistic Update: Update the local cache immediately
@@ -102,12 +159,13 @@ export const AdminBlogs = () => {
         const optimisticBlog = {
           id: payload.id!,
           title: payload.title || "",
-          excerpt: editing.excerpt || "",
+          excerpt: excerptForDb,
           image: payload.image || "",
           date: editing.date || "",
           category: normalizedCategory,
-          readTime: normalizedReadTime || "1 min read",
+          readTime: readTimeForDb,
           content: editing.content || "",
+          status: blogStatus,
         } as BlogPost;
         if (index > -1) {
           const updated = [...old];
@@ -121,8 +179,7 @@ export const AdminBlogs = () => {
 
       // Perform the actual cloud save with a timeout
       const cloudSync = async () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { error } = await (supabase as any).from("blogs").upsert(payload);
+        const { error } = await supabase.from("blogs").upsert(payload);
         if (error) throw error;
       };
 
@@ -134,13 +191,15 @@ export const AdminBlogs = () => {
         await Promise.race([cloudSync(), timeout]);
         toast.success("Blog post saved to cloud");
         queryClient.invalidateQueries({ queryKey: ["blogs"] });
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Cloud save failed:", error);
         // Revert optimistic update
         queryClient.setQueryData(["blogs"], previousData);
-        const msg = error.message === "Cloud Sync Timeout" 
-          ? "Cloud sync timed out. Data is saved locally but not in the database. Check your internet connection." 
-          : `Cloud save failed: ${error.message}. Ensure you ran the SQL script in Supabase.`;
+        const message = error instanceof Error ? error.message : "Unknown error";
+        const msg =
+          message === "Cloud Sync Timeout"
+            ? "Cloud sync timed out. Data is saved locally but not in the database. Check your internet connection."
+            : `Cloud save failed: ${message}. Ensure the blogs table matches the expected schema.`;
         toast.error(msg, { duration: 5000 });
       }
     } catch (error) {
@@ -154,8 +213,7 @@ export const AdminBlogs = () => {
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this blog post?")) return;
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any).from("blogs").delete().eq("id", id);
+      const { error } = await supabase.from("blogs").delete().eq("id", id);
       if (error) throw error;
       toast.success("Blog post deleted");
       queryClient.invalidateQueries({ queryKey: ["blogs"] });
@@ -173,7 +231,13 @@ export const AdminBlogs = () => {
           <h2 className="text-xl font-bold">Manage Blog Posts</h2>
           <p className="text-muted-foreground text-sm">Add, edit, or remove blog posts.</p>
         </div>
-        <Button onClick={handleAdd} className="bg-accent hover:bg-accent/90"><Plus className="w-4 h-4 mr-2"/> Add Blog Post</Button>
+        <div className="flex items-center gap-2">
+          <Button type="button" variant="outline" onClick={handleSeedStarterBlogs} disabled={isSubmitting}>
+            {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin"/> : null}
+            Post Starter Blogs
+          </Button>
+          <Button onClick={handleAdd} className="bg-accent hover:bg-accent/90"><Plus className="w-4 h-4 mr-2"/> Add Blog Post</Button>
+        </div>
       </div>
 
       <div className="bg-card rounded-2xl border border-border overflow-hidden">
@@ -184,6 +248,7 @@ export const AdminBlogs = () => {
                 <th className="text-left p-4 text-sm font-medium text-muted-foreground">Image</th>
                 <th className="text-left p-4 text-sm font-medium text-muted-foreground">Title</th>
                 <th className="text-left p-4 text-sm font-medium text-muted-foreground">Category</th>
+                <th className="text-left p-4 text-sm font-medium text-muted-foreground">Status</th>
                 <th className="text-left p-4 text-sm font-medium text-muted-foreground">Date</th>
                 <th className="text-right p-4 text-sm font-medium text-muted-foreground">Actions</th>
               </tr>
@@ -196,6 +261,17 @@ export const AdminBlogs = () => {
                   </td>
                   <td className="p-4 font-medium max-w-xs truncate">{blog.title}</td>
                   <td className="p-4">{blog.category}</td>
+                  <td className="p-4">
+                    <span
+                      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
+                        (blog.status || "published") === "published"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-amber-100 text-amber-800"
+                      }`}
+                    >
+                      {(blog.status || "published") === "published" ? "Published" : "Draft"}
+                    </span>
+                  </td>
                   <td className="p-4">{blog.date}</td>
                   <td className="p-4 text-right space-x-2">
                     <Button size="sm" variant="outline" onClick={() => handleEdit(blog as BlogPost)}><Edit className="w-4 h-4"/></Button>
@@ -229,7 +305,23 @@ export const AdminBlogs = () => {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Read Time</label>
-                <Input value={editing?.readTime || ""} onChange={(e) => setEditing(prev => ({ ...prev!, readTime: e.target.value }))} required />
+                <Input
+                  value={editing?.readTime || ""}
+                  onChange={(e) => setEditing((prev) => ({ ...prev!, readTime: e.target.value }))}
+                  placeholder="Auto from content if empty"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Status</label>
+                <Select value={blogStatus} onValueChange={(v) => setBlogStatus(v as "draft" | "published")}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="published">Published</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
@@ -248,6 +340,21 @@ export const AdminBlogs = () => {
               <div className="flex items-center gap-4">
                 {editing?.image && <img src={editing.image} alt="Preview" className="w-16 h-16 rounded object-cover" />}
                 <div className="flex-1">
+                  <div className="space-y-1 mb-2">
+                    <label className="text-sm font-medium">Upload Mode</label>
+                    <Select
+                      value={uploadMode}
+                      onValueChange={(v) => setUploadMode(v as "original" | "optimized")}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="original">Keep original quality</SelectItem>
+                        <SelectItem value="optimized">Optimize for speed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <Input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} />
                   {uploading && (
                     <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
@@ -263,7 +370,8 @@ export const AdminBlogs = () => {
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
               <Button type="submit" className="bg-accent hover:bg-accent/90" disabled={isSubmitting || uploading}>
-                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin"/> : null} Save
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin"/> : null}
+                {blogStatus === "published" ? "Save & Post" : "Save Draft"}
               </Button>
             </DialogFooter>
           </form>

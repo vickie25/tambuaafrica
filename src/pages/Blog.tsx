@@ -39,7 +39,7 @@ const Blog = () => {
           <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden bg-primary text-white">
             <div className="absolute inset-0 z-0 opacity-20">
               <OptimizedImage 
-                src="/images/game%20drives.jpg" 
+                src="/images/game drives.webp" 
                 alt="Blog Background" 
                 className="w-full h-full object-cover"
                 priority 
@@ -65,6 +65,10 @@ const Blog = () => {
                     <BlogSkeleton />
                     <BlogSkeleton />
                   </>
+                ) : posts.length === 0 ? (
+                  <p className="col-span-full text-center text-muted-foreground py-16">
+                    No blog posts are published yet.
+                  </p>
                 ) : (
                   posts.map((post, index) => (
                     <article
@@ -76,11 +80,11 @@ const Blog = () => {
                     >
                       <div className="relative aspect-video overflow-hidden">
                         <Link to={`/blog/${post.id}`}>
-                          <img
+                          <OptimizedImage
                             src={post.image}
                             alt={post.title}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            loading="lazy"
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           />
                         </Link>
                       </div>

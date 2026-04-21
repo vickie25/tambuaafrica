@@ -2,12 +2,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { SUPABASE_STORAGE_BUCKET, SUPABASE_STORAGE_BUCKET_FALLBACKS } from "./supabase-config";
 
 /**
- * Fast image compression - skips heavy canvas processing
- * Just uploads the file directly if it's small, or does minimal resize
+ * High-quality image optimization.
+ * Preserve source format and skip re-encoding unless the image is very large.
  */
-export const compressImage = async (file: File, maxWidth = 1920, quality = 0.85): Promise<File> => {
-  // If file is already small (< 500KB), skip compression entirely
-  if (file.size < 500 * 1024) {
+export const compressImage = async (file: File, maxWidth = 3840, quality = 0.92): Promise<File> => {
+  // Keep original file for normal upload sizes to avoid quality loss.
+  if (file.size < 4 * 1024 * 1024) {
     return file;
   }
 
@@ -26,13 +26,13 @@ export const compressImage = async (file: File, maxWidth = 1920, quality = 0.85)
       clearTimeout(timeout);
       URL.revokeObjectURL(objectUrl);
       
-      // If image is already small enough, return as-is
-      if (img.width <= maxWidth && file.size < 1024 * 1024) {
+      // If image dimensions are already reasonable, keep source intact.
+      if (img.width <= maxWidth) {
         resolve(file);
         return;
       }
       
-      // Simple resize using canvas - lower quality for speed
+      // Resize only when extremely wide, while preserving image type when possible.
       const canvas = document.createElement('canvas');
       let width = img.width;
       let height = img.height;
@@ -51,14 +51,25 @@ export const compressImage = async (file: File, maxWidth = 1920, quality = 0.85)
         return;
       }
 
-      // Fast draw - lower quality setting
       ctx.drawImage(img, 0, 0, width, height);
+
+      const sourceMime = file.type && file.type.startsWith("image/") ? file.type : "image/jpeg";
+      const targetMime = sourceMime === "image/gif" ? "image/png" : sourceMime;
+      const outputExtMap: Record<string, string> = {
+        "image/jpeg": "jpg",
+        "image/png": "png",
+        "image/webp": "webp",
+        "image/avif": "avif",
+        "image/bmp": "bmp",
+      };
+      const outputExt = outputExtMap[targetMime] || "jpg";
 
       canvas.toBlob(
         (blob) => {
-          if (blob && blob.size < file.size) {
-            const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
-              type: 'image/jpeg',
+          // Only replace when optimization provides meaningful savings.
+          if (blob && blob.size < file.size * 0.9) {
+            const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + `.${outputExt}`, {
+              type: targetMime,
               lastModified: Date.now(),
             });
             resolve(compressedFile);
@@ -66,7 +77,7 @@ export const compressImage = async (file: File, maxWidth = 1920, quality = 0.85)
             resolve(file); // Fall back to original if compression didn't help
           }
         },
-        'image/jpeg',
+        targetMime,
         quality
       );
     };

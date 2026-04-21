@@ -11,6 +11,7 @@ serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  let debugMode = false;
   try {
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -24,7 +25,9 @@ serve(async (req) => {
     const { data: { user } } = await supabaseClient.auth.getUser(token);
     if (!user) throw new Error("Not authenticated");
 
-    const { phone, amount, safariId, safariTitle, guests, preferredDate, notes, existingBookingId } = await req.json();
+    const payload = await req.json();
+    debugMode = Boolean(payload?.debug);
+    const { phone, amount, safariId, safariTitle, guests, preferredDate, notes, existingBookingId } = payload;
 
     const consumerKey = Deno.env.get("MPESA_CONSUMER_KEY");
     const consumerSecret = Deno.env.get("MPESA_CONSUMER_SECRET");
@@ -51,20 +54,43 @@ serve(async (req) => {
       }
       
       const guestCount = parseInt(guests) || 1;
-      const { data: booking, error: bookingError } = await supabaseAdmin
+      const bookingInsertPayload = {
+        user_id: user.id,
+        safari_id: safariId,
+        safari_title: safariTitle,
+        preferred_date: preferredDate,
+        guests: guestCount,
+        notes: notes || null,
+        status: "pending",
+        currency: "KES",
+      };
+
+      let { data: booking, error: bookingError } = await supabaseAdmin
         .from("bookings")
-        .insert({
-          user_id: user.id,
-          safari_id: safariId,
-          safari_title: safariTitle,
-          preferred_date: preferredDate,
-          guests: guestCount,
-          notes: notes || null,
-          status: "pending",
-          currency: "KES",
-        })
+        .insert(bookingInsertPayload)
         .select("id")
         .single();
+
+      const message = bookingError?.message?.toLowerCase() || "";
+      const needsLegacyColumns =
+        message.includes("number_of_people") || message.includes("travel_date");
+
+      if (bookingError && needsLegacyColumns) {
+        const fallback = await supabaseAdmin
+          .from("bookings")
+          .insert({
+            ...bookingInsertPayload,
+            travel_date: preferredDate,
+            number_of_people: guestCount,
+            contact_email: user.email || "",
+            contact_phone: phone || null,
+            special_requests: notes || null,
+          })
+          .select("id")
+          .single();
+        booking = fallback.data;
+        bookingError = fallback.error;
+      }
 
       if (bookingError || !booking) throw new Error("Could not create booking");
       bookingId = booking.id;
@@ -136,9 +162,12 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: (error as Error).message }), {
+    return new Response(JSON.stringify({
+      error: (error as Error).message,
+      ...(debugMode ? { debug: { message: (error as Error).message, stack: (error as Error).stack } } : {}),
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 400,
+      status: 500,
     });
   }
 });

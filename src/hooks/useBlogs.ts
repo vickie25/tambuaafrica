@@ -1,7 +1,9 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/types/supabase";
 import { BlogPost, posts as localPosts } from "@/data/blogPosts";
+
+type BlogRow = Database["public"]["Tables"]["blogs"]["Row"];
 
 const stripHtml = (html: string) => html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 
@@ -32,19 +34,25 @@ const formatBlogDate = (value?: string | null) => {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 };
 
-const mapRemoteBlogToUi = (item: any): BlogPost => {
+const mapRemoteBlogToUi = (item: BlogRow & { tags?: string[]; author?: string }): BlogPost => {
   const parsed = extractMetaFromContent(item.content || "");
   const content = parsed.body;
   const excerpt =
+    (item.excerpt && item.excerpt.trim()) ||
     parsed.meta?.excerpt ||
-    item.excerpt ||
     stripHtml(content).slice(0, 180) + (stripHtml(content).length > 180 ? "..." : "");
   const category =
+    (item.category && item.category.trim()) ||
     parsed.meta?.category ||
-    item.category ||
     (Array.isArray(item.tags) && item.tags.length > 0 ? item.tags[0] : "Blog");
-  const readTime = parsed.meta?.readTime || item.read_time || item.readTime || deriveReadTime(content);
-  const date = parsed.meta?.date || formatBlogDate(item.date || item.created_at || item.updated_at);
+  const readTime =
+    (item.read_time && item.read_time.trim()) ||
+    parsed.meta?.readTime ||
+    deriveReadTime(content);
+  const date =
+    (item.date && item.date.trim() && formatBlogDate(item.date)) ||
+    parsed.meta?.date ||
+    formatBlogDate(item.created_at || item.updated_at);
 
   return {
     id: item.id,
@@ -55,109 +63,59 @@ const mapRemoteBlogToUi = (item: any): BlogPost => {
     category,
     readTime,
     content,
+    status: ((item as { status?: string }).status as "draft" | "published" | undefined) || "published",
   };
 };
 
-const mergeBlogsWithLocal = (remoteBlogs: BlogPost[]) => {
-  const merged = [...localPosts];
-  remoteBlogs.forEach((remoteBlog) => {
-    const localIndex = merged.findIndex((item) => item.id === remoteBlog.id);
-    if (localIndex >= 0) {
-      merged[localIndex] = { ...merged[localIndex], ...remoteBlog };
-      return;
-    }
-    merged.push(remoteBlog);
-  });
-  return merged;
-};
-
-export const useBlogs = () => {
-  const queryClient = useQueryClient();
-
+export const useBlogs = ({ includeDrafts = false }: { includeDrafts?: boolean } = {}) => {
   const query = useQuery({
-    queryKey: ["blogs"],
+    queryKey: ["blogs", includeDrafts ? "all" : "published"],
     queryFn: async () => {
       try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data, error } = await (supabase as any)
-          .from("blogs")
-          .select("*")
-          .order("created_at", { ascending: false });
+        const { data, error } = await supabase.from("blogs").select("*").order("created_at", { ascending: false });
         if (error) throw error;
 
         if (!data || data.length === 0) {
-          return localPosts;
+          return includeDrafts ? localPosts : localPosts.filter((post) => (post.status || "published") === "published");
         }
 
-        const remoteBlogs = data.map((item) => mapRemoteBlogToUi(item)) as BlogPost[];
-
-        return mergeBlogsWithLocal(remoteBlogs);
+        const mapped = data.map((item) => mapRemoteBlogToUi(item as BlogRow & { tags?: string[] }));
+        return includeDrafts ? mapped : mapped.filter((post) => (post.status || "published") === "published");
       } catch (err) {
         console.warn("Supabase fetch failed. Falling back to local blog posts.", err);
-        return localPosts;
+        return includeDrafts ? localPosts : localPosts.filter((post) => (post.status || "published") === "published");
       }
     },
-    initialData: localPosts,
     staleTime: 1000 * 60 * 5, // 5 mins - reduced from 30 mins for faster updates
     gcTime: 1000 * 60 * 30,   // 30 mins - reduced from 1 hour
     refetchOnWindowFocus: true, // Enable to show updates when switching tabs
   });
 
-  // Real-time subscription for blogs - disabled due to subscription conflicts
-  // TODO: Re-enable once Supabase realtime is properly configured
-  /*
-  useEffect(() => {
-    const channel = supabase
-      .channel('blogs-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'blogs'
-        },
-        (payload) => {
-          console.log('Blogs real-time update:', payload);
-          queryClient.invalidateQueries({ queryKey: ["blogs"] });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient]);
-  */
-
   return query;
 };
 
-export const useBlog = (id?: string) => {
+export const useBlog = (id?: string, { includeDrafts = false }: { includeDrafts?: boolean } = {}) => {
   return useQuery({
-    queryKey: ["blog", id],
+    queryKey: ["blog", id, includeDrafts ? "all" : "published"],
     queryFn: async () => {
       if (!id) return null;
       try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data, error } = await (supabase as any)
-          .from("blogs")
-          .select("*")
-          .eq("id", id)
-          .maybeSingle();
+        const { data, error } = await supabase.from("blogs").select("*").eq("id", id).maybeSingle();
         if (error) throw error;
 
         if (data) {
-          return mapRemoteBlogToUi(data);
+          const mapped = mapRemoteBlogToUi(data as BlogRow & { tags?: string[] });
+          if (!includeDrafts && (mapped.status || "published") !== "published") return null;
+          return mapped;
         }
 
-        return localPosts.find((post) => post.id === id) || null;
+        return null;
       } catch (err) {
         console.warn(`Supabase fetch failed for blog post ${id}. Falling back to local post.`, err);
         return localPosts.find((post) => post.id === id) || null;
       }
     },
     enabled: !!id,
-    initialData: () => (id ? localPosts.find((post) => post.id === id) || null : null),
     staleTime: 1000 * 60 * 5,
   });
 };

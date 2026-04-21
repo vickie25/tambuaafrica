@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
+import { Helmet } from "react-helmet-async";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -27,6 +28,7 @@ const TravelInfo = lazy(() => import("./pages/TravelInfo").then(m => ({ default:
 const Blog = lazy(() => import("./pages/Blog").then(m => ({ default: m.default })));
 const BlogDetail = lazy(() => import("./pages/BlogDetail").then(m => ({ default: m.default })));
 const Terms = lazy(() => import("./pages/Terms").then(m => ({ default: m.default })));
+const Privacy = lazy(() => import("./pages/Privacy").then(m => ({ default: m.default })));
 const Contact = lazy(() => import("./pages/Contact").then(m => ({ default: m.default })));
 const Login = lazy(() => import("./pages/Login").then(m => ({ default: m.default })));
 const Signup = lazy(() => import("./pages/Signup").then(m => ({ default: m.default })));
@@ -57,10 +59,60 @@ const AnimatedRoutes = () => {
   const location = useLocation();
   // Activate performance optimizations
   usePerformanceOptimization();
+
+  const seoByRoute: Record<string, { title: string; description: string }> = {
+    "/": {
+      title: "Tambua Africa Tours & Safaris | Premium African Safaris",
+      description: "Expertly crafted safari journeys across East Africa with trusted guides, custom itineraries, and seamless support.",
+    },
+    "/safaris": {
+      title: "Safaris | Tambua Africa Tours & Safaris",
+      description: "Browse curated safari packages across Kenya and East Africa, with flexible durations and booking support.",
+    },
+    "/destinations": {
+      title: "Destinations | Tambua Africa Tours & Safaris",
+      description: "Explore top East African destinations, lodges, and experiences for your next wildlife and culture adventure.",
+    },
+    "/blog": {
+      title: "Blog | Tambua Africa Tours & Safaris",
+      description: "Latest travel stories, safari insights, and regional updates from Tambua Africa.",
+    },
+    "/contact": {
+      title: "Contact Us | Tambua Africa Tours & Safaris",
+      description: "Get in touch to plan your East Africa trip. Our team can help with custom itineraries and bookings.",
+    },
+    "/terms": {
+      title: "Terms of Service | Tambua Africa Tours & Safaris",
+      description: "Read Tambua Africa booking, cancellation, and refund terms.",
+    },
+    "/privacy": {
+      title: "Privacy Policy | Tambua Africa Tours & Safaris",
+      description: "Learn how Tambua Africa collects, uses, and protects your personal information.",
+    },
+    "/login": {
+      title: "Sign In | Tambua Africa Tours & Safaris",
+      description: "Sign in to manage your bookings and account securely.",
+    },
+    "/signup": {
+      title: "Create Account | Tambua Africa Tours & Safaris",
+      description: "Create your account to manage bookings and access personalized safari planning.",
+    },
+  };
+
+  const isBlogDetail = location.pathname.startsWith("/blog/");
+  const routeSeo = seoByRoute[location.pathname];
+  const shouldRenderRouteSeo = !isBlogDetail && !!routeSeo;
   
   return (
     <ErrorBoundary>
       <Suspense fallback={<SuspenseFallback />}>
+        {shouldRenderRouteSeo && (
+          <Helmet>
+            <title>{routeSeo.title}</title>
+            <meta name="description" content={routeSeo.description} />
+            <link rel="canonical" href={`https://www.tambuaafrica.com${location.pathname}`} />
+          </Helmet>
+        )}
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={<Index />} />
@@ -73,7 +125,7 @@ const AnimatedRoutes = () => {
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:id" element={<BlogDetail />} />
             <Route path="/terms" element={<Terms />} />
-            <Route path="/privacy" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />

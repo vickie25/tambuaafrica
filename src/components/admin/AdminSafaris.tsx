@@ -19,6 +19,93 @@ const emptySafari: Partial<Safari> = {
   image: "", description: "", highlights: [], category: "Wildlife Safari", stripePriceId: ""
 };
 
+const websiteSafaris = [
+  {
+    id: "2-days-masai-mara",
+    title: "2 Days Masai Mara From Nairobi",
+    location: "Maasai Mara National Reserve",
+    duration: "2 Days / 1 Night",
+    price: 500,
+    rating: 5,
+    reviews: 16,
+    image: "/images/maasai-mara-real.webp",
+    description: "Short but thrilling safari with classic game drives in the Maasai Mara.",
+    highlights: ["Big Five game drives", "Rift Valley route", "Professional guide"],
+    category: "Wildlife Safari",
+    stripe_price_id: null,
+  },
+  {
+    id: "4-days-mara-nakuru-amboseli",
+    title: "4 Days Masai Mara – Lake Nakuru-Amboseli Safari",
+    location: "Masai Mara, Lake Nakuru, Amboseli",
+    duration: "4 Days / 3 Nights",
+    price: 1800,
+    rating: 5,
+    reviews: 16,
+    image: "/images/olga-budko-bFmjyv5uiAU-unsplash.webp",
+    description: "Three-park safari combining predators, flamingo lakes, and Kilimanjaro views.",
+    highlights: ["Masai Mara", "Lake Nakuru", "Amboseli elephants"],
+    category: "Wildlife Safari",
+    stripe_price_id: null,
+  },
+  {
+    id: "3-days-masai-mara",
+    title: "3 Days Masai Mara Safari",
+    location: "Maasai Mara National Reserve",
+    duration: "3 Days / 2 Nights",
+    price: 900,
+    rating: 5,
+    reviews: 16,
+    image: "/images/maasai-mara-authentic.webp",
+    description: "Extended Maasai Mara adventure with more game drive time and rich wildlife encounters.",
+    highlights: ["Extended game drives", "Savannah wildlife", "Lodge stay"],
+    category: "Wildlife Safari",
+    stripe_price_id: null,
+  },
+  {
+    id: "4-days-wildebeest-migration",
+    title: "4 Days Wildebeest Migration Safari",
+    location: "Masai Mara Game Reserve",
+    duration: "4 Days / 3 Nights",
+    price: 1600,
+    rating: 5,
+    reviews: 16,
+    image: "/images/Wild beast migration 2.webp",
+    description: "Track migration action and predator-prey drama in peak wildlife territory.",
+    highlights: ["Migration tracking", "Predator sightings", "Mara river ecosystem"],
+    category: "Wildlife Safari",
+    stripe_price_id: null,
+  },
+  {
+    id: "5-days-mara-nakuru-naivasha",
+    title: "5 Days Masai Mara, Lake Nakuru, Lake Naivasha",
+    location: "Masai Mara, Lake Nakuru, Lake Naivasha",
+    duration: "5 Days / 4 Nights",
+    price: 1700,
+    rating: 5,
+    reviews: 16,
+    image: "/images/beautiful-shot-three-cute-giraffes-field-with-trees-blue-sky.webp",
+    description: "Multi-destination itinerary balancing big game, lakes, and scenic boat excursions.",
+    highlights: ["Three destinations", "Flamingos and rhinos", "Naivasha boat ride"],
+    category: "Wildlife Safari",
+    stripe_price_id: null,
+  },
+  {
+    id: "4-days-mara-nakuru",
+    title: "4 Days Masai Mara, Lake Nakuru Safari",
+    location: "Nairobi, Masai Mara, Nakuru",
+    duration: "4 Days / 3 Nights",
+    price: 1800,
+    rating: 5,
+    reviews: 16,
+    image: "/images/destiations/Lake Nakuru/lake elementaita.webp",
+    description: "Classic twin-park safari linking Mara plains with Nakuru's rift valley wildlife.",
+    highlights: ["Big cats and plains", "Rift valley lake park", "Rhino sanctuary"],
+    category: "Wildlife Safari",
+    stripe_price_id: null,
+  },
+] as const;
+
 export const AdminSafaris = () => {
   const { data: safaris = [], isLoading } = useSafaris();
   const queryClient = useQueryClient();
@@ -26,6 +113,7 @@ export const AdminSafaris = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<"processing" | "uploading" | null>(null);
+  const [uploadMode, setUploadMode] = useState<"original" | "optimized">("original");
   const [highlightsText, setHighlightsText] = useState("");
 
   const handleEdit = (safari: Safari) => {
@@ -36,6 +124,22 @@ export const AdminSafaris = () => {
   const handleAdd = () => {
     setEditing({ ...emptySafari, id: `safari-${Date.now()}` });
     setHighlightsText("");
+  };
+
+  const handleSyncWebsiteSafaris = async () => {
+    setIsSubmitting(true);
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase as any).from("safaris").upsert(websiteSafaris);
+      if (error) throw error;
+      toast.success("Website safaris synced");
+      queryClient.invalidateQueries({ queryKey: ["safaris"] });
+    } catch (error) {
+      console.error("Safari sync failed:", error);
+      toast.error("Failed to sync website safaris");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,14 +159,14 @@ export const AdminSafaris = () => {
     setEditing((prev) => prev ? { ...prev, image: previewUrl } : null);
     
     setUploading(true);
-    setUploadStatus("processing");
+    setUploadStatus(uploadMode === "optimized" ? "processing" : "uploading");
     try {
-      // 2. Optimized compression
-      const compressedFile = await compressImage(file);
+      // 2. Optional optimization (based on selected mode)
+      const fileToUpload = uploadMode === "optimized" ? await compressImage(file) : file;
       
       setUploadStatus("uploading");
       // 3. Optimized upload
-      const publicUrl = await uploadFileToSupabase(compressedFile);
+      const publicUrl = await uploadFileToSupabase(fileToUpload);
 
       // 4. Update with final URL
       setEditing((prev) => prev ? { ...prev, image: publicUrl } : null);
@@ -167,7 +271,13 @@ export const AdminSafaris = () => {
           <h2 className="text-xl font-bold">Manage Safaris</h2>
           <p className="text-muted-foreground text-sm">Add, edit, or remove safari packages.</p>
         </div>
-        <Button onClick={handleAdd} className="bg-accent hover:bg-accent/90"><Plus className="w-4 h-4 mr-2"/> Add Safari</Button>
+        <div className="flex items-center gap-2">
+          <Button type="button" variant="outline" onClick={handleSyncWebsiteSafaris} disabled={isSubmitting}>
+            {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+            Sync Website Safaris
+          </Button>
+          <Button onClick={handleAdd} className="bg-accent hover:bg-accent/90"><Plus className="w-4 h-4 mr-2"/> Add Safari</Button>
+        </div>
       </div>
 
       <div className="bg-card rounded-2xl border border-border overflow-hidden">
@@ -258,6 +368,21 @@ export const AdminSafaris = () => {
               <div className="flex items-center gap-4">
                 {editing?.image && <img src={editing.image} alt="Preview" className="w-16 h-16 rounded object-cover" />}
                 <div className="flex-1">
+                  <div className="space-y-1 mb-2">
+                    <label className="text-sm font-medium">Upload Mode</label>
+                    <Select
+                      value={uploadMode}
+                      onValueChange={(v) => setUploadMode(v as "original" | "optimized")}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="original">Keep original quality</SelectItem>
+                        <SelectItem value="optimized">Optimize for speed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <div className="flex gap-2">
                     <Input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} className="flex-1" />
                     {uploading && (

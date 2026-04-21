@@ -22,6 +22,7 @@ const AdminInsights = lazy(() => import("@/components/admin/AdminInsights").then
 const AdminInquiries = lazy(() => import("@/components/admin/AdminInquiries").then(m => ({ default: m.AdminInquiries })));
 const AdminHealth = lazy(() => import("@/components/admin/AdminHealth").then(m => ({ default: m.AdminHealth })));
 const AdminCarousel = lazy(() => import("@/components/admin/AdminCarousel").then(m => ({ default: m.AdminCarousel })));
+const AdminLodges = lazy(() => import("@/components/admin/AdminLodges").then(m => ({ default: m.AdminLodges })));
 
 import ErrorBoundary from "@/components/layout/ErrorBoundary";
 import SuspenseFallback from "@/components/layout/SuspenseFallback";
@@ -198,7 +199,7 @@ const Admin = () => {
           </div>
 
           <div className="flex gap-2 mb-8 border-b border-border pb-px overflow-x-auto whitespace-nowrap scrollbar-hide">
-            {["bookings", "carousel", "safaris", "destinations", "blogs", "messages", "insights", "health"].map(tab => (
+            {["bookings", "carousel", "safaris", "destinations", "lodges", "blogs", "messages", "insights", "health"].map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -220,6 +221,7 @@ const Admin = () => {
             {activeTab === "carousel" && <ErrorBoundary><AdminCarousel /></ErrorBoundary>}
             {activeTab === "safaris" && <ErrorBoundary><AdminSafaris /></ErrorBoundary>}
             {activeTab === "destinations" && <ErrorBoundary><AdminDestinations /></ErrorBoundary>}
+            {activeTab === "lodges" && <ErrorBoundary><AdminLodges /></ErrorBoundary>}
             {activeTab === "blogs" && <ErrorBoundary><AdminBlogs /></ErrorBoundary>}
             {activeTab === "messages" && <ErrorBoundary><AdminInquiries /></ErrorBoundary>}
             {activeTab === "insights" && <ErrorBoundary><AdminInsights /></ErrorBoundary>}

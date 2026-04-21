@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,8 @@ import PageTransition from "@/components/layout/PageTransition";
 const Login = () => {
   const { signIn } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -23,10 +25,16 @@ const Login = () => {
     try {
       console.log("Attempting login with:", email);
       await signIn(email, password);
-      console.log("Login successful, navigating to dashboard");
+      const fromState = (location.state as { from?: { pathname?: string; search?: string } } | null)?.from;
+      const redirectQuery = searchParams.get("redirect");
+      const redirectTarget =
+        (fromState?.pathname ? `${fromState.pathname}${fromState.search || ""}` : null) ||
+        redirectQuery ||
+        "/dashboard";
+
+      console.log("Login successful, navigating to:", redirectTarget);
       toast.success("Welcome back!");
-      // Use window.location for hard redirect to ensure page refresh
-      window.location.href = "/dashboard";
+      navigate(redirectTarget, { replace: true });
     } catch (err) {
       console.error("Login failed:", err);
       toast.error((err as Error).message || "Login failed");

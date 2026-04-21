@@ -320,6 +320,7 @@ export type Database = {
           title: string
           description: string | null
           order: number
+          section?: string | null
           created_at: string
           updated_at: string
         }
@@ -329,6 +330,7 @@ export type Database = {
           title: string
           description?: string | null
           order: number
+          section?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -338,6 +340,7 @@ export type Database = {
           title?: string
           description?: string | null
           order?: number
+          section?: string | null
           updated_at?: string
         }
         Relationships: []

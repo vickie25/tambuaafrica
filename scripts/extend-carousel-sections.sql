@@ -2,6 +2,7 @@
 -- - feature_wild
 -- - feature_culture
 -- - feature_luxury
+-- - gallery
 --
 -- Run this in Supabase SQL editor.
 
@@ -17,6 +18,7 @@ check (
     'hero',
     'activities',
     'destinations',
+    'gallery',
     'feature_wild',
     'feature_culture',
     'feature_luxury'

@@ -12,7 +12,20 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { session_id, booking_id } = await req.json();
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? Deno.env.get("VITE_SUPABASE_PUBLISHABLE_KEY") ?? Deno.env.get("SUPABASE_PUBLIC_ANON_KEY") ?? ""
+    );
+
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      throw new Error("Missing authorization header");
+    }
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user } } = await supabaseClient.auth.getUser(token);
+    if (!user?.id) throw new Error("Not authenticated");
+
+    const { session_id } = await req.json();
     if (!session_id) throw new Error("Missing session_id");
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
@@ -26,7 +39,20 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
+    const bookingIdFromMetadata =
+      typeof session.metadata?.booking_id === "string" ? session.metadata.booking_id : null;
+    const userIdFromMetadata =
+      typeof session.metadata?.user_id === "string" ? session.metadata.user_id : null;
+
     if (session.payment_status === "paid") {
+      if (!bookingIdFromMetadata || !userIdFromMetadata) {
+        throw new Error("Invalid payment session metadata");
+      }
+
+      if (userIdFromMetadata !== user.id) {
+        throw new Error("Unauthorized payment verification");
+      }
+
       // Update payment
       await supabase
         .from("payments")
@@ -40,16 +66,15 @@ serve(async (req) => {
         .eq("stripe_session_id", session_id);
 
       // Confirm booking
-      if (booking_id) {
-        await supabase
-          .from("bookings")
-          .update({
-            status: "confirmed",
-            total_amount: session.amount_total || 0,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", booking_id);
-      }
+      await supabase
+        .from("bookings")
+        .update({
+          status: "confirmed",
+          total_amount: session.amount_total || 0,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", bookingIdFromMetadata)
+        .eq("user_id", user.id);
 
       return new Response(JSON.stringify({ status: "paid", amount: session.amount_total, currency: session.currency }), {
         headers: corsHeaders,

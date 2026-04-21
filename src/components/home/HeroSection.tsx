@@ -3,22 +3,25 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Play } from "lucide-react";
 import OptimizedImage from "@/components/ui/optimized-image";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useCarouselImages } from "@/hooks/useCarouselImages";
 
 const HeroSection = () => {
   const { data: backgroundImages = [] } = useCarouselImages();
   const [currentImage, setCurrentImage] = useState(0);
+  const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
+    if (backgroundImages.length <= 1 || shouldReduceMotion) return;
     const timer = setInterval(() => {
       setCurrentImage((prev) => (prev + 1) % backgroundImages.length);
-    }, 5000);
+    }, 2500);
     return () => clearInterval(timer);
-  }, [backgroundImages.length]);
+  }, [backgroundImages.length, shouldReduceMotion]);
 
   // Preload all images on mount
   useEffect(() => {
+    if (backgroundImages.length === 0) return;
     backgroundImages.forEach((src) => {
       const img = new Image();
       img.src = src;
@@ -39,8 +42,8 @@ const HeroSection = () => {
           <motion.div
             key={image}
             initial={false}
-            animate={{ opacity: index === currentImage ? 1 : 0 }}
-            transition={{ duration: 1, ease: "linear" }}
+            animate={{ opacity: shouldReduceMotion ? (index === 0 ? 1 : 0) : index === currentImage ? 1 : 0 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.45, ease: "linear" }}
             className="absolute inset-0 will-change-[opacity]"
           >
             <OptimizedImage

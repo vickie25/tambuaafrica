@@ -31,7 +31,7 @@ export const usePerformanceMonitor = () => {
     const updateMetrics = () => {
       setMetrics({ ...metricsData });
       
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env.DEV) {
         console.log('🚀 Final Performance Metrics:', metricsData);
       }
     };
@@ -106,7 +106,7 @@ export const usePerformanceMonitor = () => {
 export const PerformanceReport: React.FC = () => {
   const metrics = usePerformanceMonitor();
 
-  if (process.env.NODE_ENV !== 'development') return null;
+  if (!import.meta.env.DEV) return null;
 
   const getScoreColor = (value: number, good: number, poor: number) => {
     if (value <= good) return 'text-green-600';

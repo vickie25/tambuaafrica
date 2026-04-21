@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { hasSupabaseEnv, supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
 interface AuthContextType {
@@ -60,8 +60,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const initializeAuth = async () => {
       try {
-        // Diagnostic check for environment variables
-        if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY) {
+        if (!hasSupabaseEnv) {
           console.error("CRITICAL: Missing Supabase Environment Variables!");
           return;
         }
@@ -102,6 +101,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     initializeAuth();
 
+    if (!hasSupabaseEnv) {
+      setLoading(false);
+      return () => {
+        mounted = false;
+      };
+    }
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       console.log("Auth state change:", _event, session?.user?.id);
       try {
@@ -134,6 +140,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signUp = async (email: string, password: string, fullName: string) => {
+    if (!hasSupabaseEnv) {
+      throw new Error("Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY in Vercel environment variables.");
+    }
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -146,6 +155,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signIn = async (email: string, password: string) => {
+    if (!hasSupabaseEnv) {
+      throw new Error("Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY in Vercel environment variables.");
+    }
     console.log("Attempting sign in for:", email);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
@@ -156,11 +168,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signOut = async () => {
+    if (!hasSupabaseEnv) {
+      return;
+    }
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
   };
 
   const resetPassword = async (email: string) => {
+    if (!hasSupabaseEnv) {
+      throw new Error("Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY in Vercel environment variables.");
+    }
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
     });
@@ -168,6 +186,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updatePassword = async (password: string) => {
+    if (!hasSupabaseEnv) {
+      throw new Error("Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY in Vercel environment variables.");
+    }
     const { error } = await supabase.auth.updateUser({ password });
     if (error) throw error;
   };

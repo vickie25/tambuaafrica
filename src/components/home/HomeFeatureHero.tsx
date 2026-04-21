@@ -32,12 +32,16 @@ const HomeFeatureHero = ({
     return () => clearInterval(timer);
   }, [images, interval]);
 
-  // Preload all images on mount
+  // Warm up only first and next frame to avoid flooding initial network.
   useEffect(() => {
-    images.forEach((src) => {
+    const preload = (src?: string) => {
+      if (!src) return;
       const img = new Image();
+      img.decoding = "async";
       img.src = src;
-    });
+    };
+    preload(images[0]);
+    preload(images[1]);
   }, [images]);
 
   // Alternate background and content alignment

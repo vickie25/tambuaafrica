@@ -7,10 +7,15 @@
     {
       "source": "/api/(.*)",
       "destination": "/api/$1"
+    }
+  ],
+  "routes": [
+    {
+      "handle": "filesystem"
     },
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ],
   "headers": [
@@ -37,6 +42,24 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/images/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, stale-while-revalidate=86400"
+        }
+      ]
+    },
+    {
+      "source": "/tambua-logo.png",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, stale-while-revalidate=86400"
         }
       ]
     }

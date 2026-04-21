@@ -19,13 +19,18 @@ const HeroSection = () => {
     return () => clearInterval(timer);
   }, [backgroundImages.length, shouldReduceMotion]);
 
-  // Preload all images on mount
+  // Warm up only the first frame and immediate next frame.
+  // Preloading every slide at once can delay first paint on slower networks.
   useEffect(() => {
     if (backgroundImages.length === 0) return;
-    backgroundImages.forEach((src) => {
+    const preload = (src?: string) => {
+      if (!src) return;
       const img = new Image();
+      img.decoding = "async";
       img.src = src;
-    });
+    };
+    preload(backgroundImages[0]);
+    preload(backgroundImages[1]);
   }, [backgroundImages]);
 
   useEffect(() => {

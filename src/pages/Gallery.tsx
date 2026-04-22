@@ -64,8 +64,16 @@ const Gallery = () => {
     <div className="min-h-screen">
       <Navbar />
       <main>
-        <section className="relative pt-32 pb-20 bg-primary text-primary-foreground">
-          <div className="container-wide mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden bg-primary text-primary-foreground">
+          <div className="absolute inset-0 z-0 opacity-20">
+            <OptimizedImage
+              src="/images/real images frm Tambua/Team Bonding with Maasai Culture.jpeg"
+              alt="Gallery Background"
+              className="w-full h-full object-cover"
+              priority
+            />
+          </div>
+          <div className="container-wide relative z-10 mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <span className="text-accent font-semibold text-sm uppercase tracking-wider">Gallery</span>
             <h1 className="text-4xl sm:text-5xl font-bold mt-3">Safari Moments</h1>
             <p className="text-primary-foreground/70 mt-4 max-w-2xl mx-auto text-lg">

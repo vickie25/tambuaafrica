@@ -3,6 +3,7 @@ import Footer from "@/components/layout/Footer";
 import PageTransition from "@/components/layout/PageTransition";
 import { useScrollAnimation, useCounter } from "@/hooks/useScrollAnimation";
 import { CheckCircle2, Heart, Leaf, Globe, Users, Award } from "lucide-react";
+import OptimizedImage from "@/components/ui/optimized-image";
 
 const values = [
   { icon: Heart, title: "Passion", description: "We are passionate about East Africa and crafting journeys that feel personal, immersive, and memorable." },
@@ -14,10 +15,21 @@ const values = [
 ];
 
 const team = [
-  { name: "James Kimani", role: "Founder & Safari Director", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=80" },
-  { name: "Grace Wanjiku", role: "Regional Operations Lead", image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&q=80" },
-  { name: "David Ochieng", role: "Lead Guide & Naturalist", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&q=80" },
-  { name: "Amina Hassan", role: "Guest Experience Manager", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&q=80" },
+  {
+    name: "Jorim Marenya",
+    role: "Executive Director",
+    image: "/images/real images frm Tambua/Team/Jorim Marenya ~ Executive Director.png",
+  },
+  {
+    name: "Isaac Wilson Marenya",
+    role: "Director (Operations)",
+    image: "/images/real images frm Tambua/Team/Isaac Wilson Marenya ~ Director (operations).jpeg",
+  },
+  {
+    name: "Ashley Marenya",
+    role: "Director (Marketing)",
+    image: "/images/real images frm Tambua/Team/Ashley Marenya ~ Director (Marketing).jpeg",
+  },
 ];
 
 const About = () => {
@@ -31,8 +43,16 @@ const About = () => {
     <div className="min-h-screen">
       <Navbar />
       <main>
-        <section className="relative pt-32 pb-20 bg-primary text-primary-foreground">
-          <div className="container-wide mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden bg-primary text-primary-foreground">
+          <div className="absolute inset-0 z-0 opacity-20">
+            <OptimizedImage
+              src="/images/real images frm Tambua/St the park drive.jpeg"
+              alt="Our Story Background"
+              className="w-full h-full object-cover"
+              priority
+            />
+          </div>
+          <div className="container-wide relative z-10 mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <span className="text-accent font-semibold text-sm uppercase tracking-wider">About Us</span>
             <h1 className="text-4xl sm:text-5xl font-bold mt-3">Our Story</h1>
             <p className="text-primary-foreground/70 mt-4 max-w-2xl mx-auto text-lg">
@@ -108,14 +128,14 @@ const About = () => {
               <span className="text-accent font-semibold text-sm uppercase tracking-wider">Our Team</span>
               <h2 className="text-3xl sm:text-4xl font-bold text-foreground mt-2">Meet the Experts</h2>
             </div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {team.map((member, i) => (
                 <div
                   key={member.name}
-                  className={`text-center transition-all duration-500 ${teamVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+                  className={`text-center transition-all duration-500 justify-self-center ${i === 0 ? "md:justify-self-start" : i === 1 ? "md:justify-self-center" : "md:justify-self-end"} ${teamVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
                   style={{ transitionDelay: `${i * 100}ms` }}
                 >
-                  <div className="aspect-square rounded-2xl overflow-hidden mb-4">
+                  <div className="aspect-square rounded-2xl overflow-hidden mb-4 w-64 max-w-full">
                     <img src={member.image} alt={member.name} className="w-full h-full object-cover" loading="lazy" />
                   </div>
                   <h3 className="font-bold text-foreground">{member.name}</h3>

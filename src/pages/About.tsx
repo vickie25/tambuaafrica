@@ -30,6 +30,11 @@ const team = [
     role: "Director (Marketing)",
     image: "/images/real images frm Tambua/Team/Ashley Marenya ~ Director (Marketing).jpeg",
   },
+  {
+    name: "Venus Grace Marenya",
+    role: "Director (Marketing)",
+    image: "/images/real images frm Tambua/Team/VENUS GRACE MARENYA ~ DIRECTOR (MARKETING).jpeg",
+  },
 ];
 
 const About = () => {
@@ -128,11 +133,11 @@ const About = () => {
               <span className="text-accent font-semibold text-sm uppercase tracking-wider">Our Team</span>
               <h2 className="text-3xl sm:text-4xl font-bold text-foreground mt-2">Meet the Experts</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
               {team.map((member, i) => (
                 <div
                   key={member.name}
-                  className={`text-center transition-all duration-500 justify-self-center ${i === 0 ? "md:justify-self-start" : i === 1 ? "md:justify-self-center" : "md:justify-self-end"} ${teamVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+                  className={`text-center transition-all duration-500 justify-self-center ${teamVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
                   style={{ transitionDelay: `${i * 100}ms` }}
                 >
                   <div className="aspect-square rounded-2xl overflow-hidden mb-4 w-64 max-w-full">

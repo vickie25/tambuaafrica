@@ -193,7 +193,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (error) throw error;
   };
 
-  const isAdmin = role?.toLowerCase() === "admin" || user?.email?.toLowerCase() === "tambuaafrica@gmail.com";
+  const isAdmin = role?.toLowerCase() === "admin" || user?.email?.toLowerCase() === "info@tambuaafrica.com";
 
   return (
     <AuthContext.Provider value={{ 

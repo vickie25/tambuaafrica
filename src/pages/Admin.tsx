@@ -71,7 +71,7 @@ const Admin = () => {
 
       if (error || profile?.role?.toLowerCase() !== "admin") {
         // Final fallback check
-        if (user?.email?.toLowerCase() === "tambuaafrica@gmail.com") {
+        if (user?.email?.toLowerCase() === "info@tambuaafrica.com") {
           setIsAdmin(true);
         } else {
           navigate("/dashboard");
@@ -82,7 +82,7 @@ const Admin = () => {
     } catch (err) {
       console.warn("Admin check failed:", err);
       // On error, use email fallback
-      if (user?.email?.toLowerCase() === "tambuaafrica@gmail.com") {
+      if (user?.email?.toLowerCase() === "info@tambuaafrica.com") {
         setIsAdmin(true);
       } else {
         navigate("/dashboard");
@@ -112,9 +112,9 @@ const Admin = () => {
       navigate("/login");
     } else if (user) {
       console.log("User found:", user.email);
-      // Immediately allow tambuaafrica@gmail.com without any checks
-      if (user.email?.toLowerCase() === "tambuaafrica@gmail.com") {
-        console.log("Allowing tambuaafrica@gmail.com as admin");
+      // Immediately allow info@tambuaafrica.com without any checks
+      if (user.email?.toLowerCase() === "info@tambuaafrica.com") {
+        console.log("Allowing info@tambuaafrica.com as admin");
         setIsAdmin(true);
         setLoading(false);
       } else if (isSuperAdmin) {
@@ -183,8 +183,8 @@ const Admin = () => {
     );
   }
 
-  // Always allow tambuaafrica@gmail.com, otherwise check admin status
-  if (user?.email?.toLowerCase() !== "tambuaafrica@gmail.com" && !isAdmin && !isSuperAdmin) return null;
+  // Always allow info@tambuaafrica.com, otherwise check admin status
+  if (user?.email?.toLowerCase() !== "info@tambuaafrica.com" && !isAdmin && !isSuperAdmin) return null;
 
   return (
     <PageTransition>

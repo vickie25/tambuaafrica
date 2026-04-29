@@ -31,11 +31,7 @@ with check (
     where p.id = auth.uid()
       and lower(coalesce(p.role, '')) = 'admin'
   )
-  or lower(coalesce(auth.jwt() ->> 'email', '')) in (
-    'tambuaafrica@gmail.com',
-    'admin@tambua.africa',
-    'admin@tambuaafrica.com'
-  )
+  or lower(coalesce(auth.jwt() ->> 'email', '')) in ('info@tambuaafrica.com')
 );
 
 drop policy if exists "admin_write_blogs_update" on public.blogs;
@@ -50,11 +46,7 @@ using (
     where p.id = auth.uid()
       and lower(coalesce(p.role, '')) = 'admin'
   )
-  or lower(coalesce(auth.jwt() ->> 'email', '')) in (
-    'tambuaafrica@gmail.com',
-    'admin@tambua.africa',
-    'admin@tambuaafrica.com'
-  )
+  or lower(coalesce(auth.jwt() ->> 'email', '')) in ('info@tambuaafrica.com')
 )
 with check (
   exists (
@@ -63,11 +55,7 @@ with check (
     where p.id = auth.uid()
       and lower(coalesce(p.role, '')) = 'admin'
   )
-  or lower(coalesce(auth.jwt() ->> 'email', '')) in (
-    'tambuaafrica@gmail.com',
-    'admin@tambua.africa',
-    'admin@tambuaafrica.com'
-  )
+  or lower(coalesce(auth.jwt() ->> 'email', '')) in ('info@tambuaafrica.com')
 );
 
 drop policy if exists "admin_write_blogs_delete" on public.blogs;
@@ -82,11 +70,7 @@ using (
     where p.id = auth.uid()
       and lower(coalesce(p.role, '')) = 'admin'
   )
-  or lower(coalesce(auth.jwt() ->> 'email', '')) in (
-    'tambuaafrica@gmail.com',
-    'admin@tambua.africa',
-    'admin@tambuaafrica.com'
-  )
+  or lower(coalesce(auth.jwt() ->> 'email', '')) in ('info@tambuaafrica.com')
 );
 
 -- =========================

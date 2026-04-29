@@ -1,7 +1,17 @@
+// @ts-ignore Deno runtime URL import
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
+// @ts-ignore Deno runtime URL import
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.99.2";
+// @ts-ignore Deno npm: import
 import { z } from "npm:zod@3.25.76";
+// @ts-ignore Deno npm: import
 import { Resend } from "npm:resend@3.2.0";
+
+declare const Deno: {
+  env: {
+    get(name: string): string | undefined;
+  };
+};
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -258,12 +268,14 @@ const appendInquiryToSheet = async (payload: InquiryPayload, submissionId: strin
       body: JSON.stringify({ values: [values] }),
     },
   );
+
+  return true;
 };
 
 const sendInquiryEmail = async (payload: InquiryPayload) => {
   const resendApiKey = getOptionalEnv("RESEND_API_KEY");
-  // Force all emails to go to tambuaafrica@gmail.com
-  const companyEmail = "tambuaafrica@gmail.com";
+  const companyEmail = getOptionalEnv("COMPANY_EMAIL") || "info@tambuaafrica.com";
+  const fromEmail = getOptionalEnv("RESEND_FROM_EMAIL") || "Tambua Africa <noreply@tambuaafrica.com>";
 
   if (!resendApiKey) {
     console.warn("RESEND_API_KEY not configured, skipping email notification.");
@@ -302,10 +314,11 @@ const sendInquiryEmail = async (payload: InquiryPayload) => {
   }
 
   await resend.emails.send({
-    from: "Tambua Africa <noreply@tambuaafrica.com>",
+    from: fromEmail,
     to: companyEmail,
     subject,
     html: htmlContent,
+    reply_to: payload.email,
   });
 };
 
@@ -351,11 +364,36 @@ serve(async (req) => {
       status: "pending",
     };
 
-    const { data: submission, error: insertError } = await supabase
+    let { data: submission, error: insertError } = await supabase
       .from("inquiry_submissions")
       .insert(insertPayload)
       .select("id, created_at")
       .single();
+
+    // Backward compatibility for older production schemas that still use "name"
+    // and do not contain the newer inquiry_* detail columns.
+    if (insertError?.message?.includes("full_name")) {
+      const legacyInsertPayload = {
+        name: payload.fullName,
+        email: payload.email,
+        phone: payload.phone || null,
+        message:
+          payload.inquiryType === "contact"
+            ? `[${payload.subject}] ${payload.message}`
+            : payload.message || `Booking inquiry for ${payload.safariTitle}`,
+        inquiry_type: payload.inquiryType,
+        status: "unread",
+      };
+
+      const legacyInsert = await supabase
+        .from("inquiry_submissions")
+        .insert(legacyInsertPayload)
+        .select("id, created_at")
+        .single();
+
+      submission = legacyInsert.data;
+      insertError = legacyInsert.error;
+    }
 
     if (insertError || !submission) {
       throw new Error(`Failed to save inquiry: ${insertError?.message || "Unknown insert error"}`);
@@ -369,17 +407,27 @@ serve(async (req) => {
       // Don't fail the request if email fails, just log it
     }
 
-    const sheetSynced = await appendInquiryToSheet(payload, submission.id, submission.created_at);
+    let sheetSynced = false;
+    try {
+      sheetSynced = await appendInquiryToSheet(payload, submission.id, submission.created_at);
+    } catch (sheetError) {
+      console.error("Google Sheets sync failed:", sheetError);
+      sheetSynced = false;
+    }
 
     if (sheetSynced) {
-      await supabase
-        .from("inquiry_submissions")
-        .update({
-          status: "synced",
-          google_sync_attempted_at: new Date().toISOString(),
-          google_sync_error: null,
-        })
-        .eq("id", submission.id);
+      try {
+        await supabase
+          .from("inquiry_submissions")
+          .update({
+            status: "synced",
+            google_sync_attempted_at: new Date().toISOString(),
+            google_sync_error: null,
+          })
+          .eq("id", submission.id);
+      } catch (updateError) {
+        console.error("Failed to update sync status:", updateError);
+      }
 
       return jsonResponse({
         success: true,
@@ -389,14 +437,18 @@ serve(async (req) => {
     }
 
     const syncMessage = "Google Sheets sync not configured or failed";
-    await supabase
-      .from("inquiry_submissions")
-      .update({
-        status: "sync_failed",
-        google_sync_attempted_at: new Date().toISOString(),
-        google_sync_error: syncMessage,
-      })
-      .eq("id", submission.id);
+    try {
+      await supabase
+        .from("inquiry_submissions")
+        .update({
+          status: "sync_failed",
+          google_sync_attempted_at: new Date().toISOString(),
+          google_sync_error: syncMessage,
+        })
+        .eq("id", submission.id);
+    } catch (updateError) {
+      console.error("Failed to update failed sync status:", updateError);
+    }
 
     return jsonResponse({
       success: true,

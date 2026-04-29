@@ -155,6 +155,14 @@ const Footer = () => {
       <div className="border-t border-primary-foreground/10">
         <div className="container-wide mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-primary-foreground/50">
           <p>© {new Date().getFullYear()} Tambua Africa Tours & Safaris. All rights reserved.</p>
+          <a
+            href="https://cresdynamics.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-primary-foreground transition-colors"
+          >
+            Built by Cres Dynamics Ltd.
+          </a>
         </div>
       </div>
     </footer>

@@ -13,7 +13,6 @@ import ErrorBoundary from "@/components/layout/ErrorBoundary";
 import BackToTop from "@/components/layout/BackToTop";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { AIAgentChat } from "@/components/chat/AIAgentChat";
-import { PerformanceReport } from "@/components/ui/performance-monitor";
 import { lazy, Suspense, useEffect } from "react";
 import { usePerformanceOptimization } from "@/hooks/usePerformanceOptimization";
 
@@ -162,7 +161,6 @@ const App = () => (
             <AIAgentChat />
             <CookieConsent />
             <BackToTop />
-            <PerformanceReport />
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>

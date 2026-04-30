@@ -126,7 +126,7 @@ const Footer = () => {
                   </div>
                   <div className="flex items-center gap-2 text-sm text-primary-foreground/70">
                     <Phone className="w-4 h-4 text-accent" />
-                    <span>WA: +254 704 548 878</span>
+                    <span>WA: +254 792 329 682</span>
                   </div>
                 </div>
               </li>

@@ -152,7 +152,7 @@ const Contact = () => {
                         <MessageCircle className="w-4 h-4 text-accent mt-0.5 shrink-0" />
                         <div>
                           <div className="font-medium text-foreground text-sm">WhatsApp</div>
-                          <div className="text-muted-foreground text-sm">+254 704 548 878</div>
+                          <div className="text-muted-foreground text-sm">+254 792 329 682</div>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">

@@ -83,7 +83,7 @@ export const AIAgentChat = () => {
     }
 
     if (hasAny(q, ["contact", "whatsapp", "phone", "email", "support"])) {
-      return "You can reach Tambua quickly via WhatsApp: +254 704 548 878. The Contact page form also opens direct WhatsApp follow-up for faster assistance.";
+      return "You can reach Tambua quickly via WhatsApp: +254 792 329 682. The Contact page form also supports direct inquiry submission for faster assistance.";
     }
 
     if (hasAny(q, ["destination", "where", "place", "visit"])) {

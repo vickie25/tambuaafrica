@@ -274,7 +274,10 @@ const appendInquiryToSheet = async (payload: InquiryPayload, submissionId: strin
 
 const sendInquiryEmail = async (payload: InquiryPayload) => {
   const resendApiKey = getOptionalEnv("RESEND_API_KEY");
-  const companyEmail = getOptionalEnv("COMPANY_EMAIL") || "tambuafricaa2@gmail.com";
+  const companyEmail =
+    getOptionalEnv("COMPANY_NOTIFICATION_EMAIL") ||
+    getOptionalEnv("COMPANY_EMAIL") ||
+    "tambuaafrica@gmail.com";
   const fromEmail = getOptionalEnv("RESEND_FROM_EMAIL") || "onboarding@resend.dev";
 
   if (!resendApiKey) {

@@ -17,11 +17,11 @@ interface EmailResponse {
 
 class EmailService {
   private resendApiKey: string;
-  private gmailForwardingAddress: string;
+  private companyNotificationEmail: string;
 
   constructor() {
     this.resendApiKey = import.meta.env.VITE_RESEND_API_KEY || '';
-    this.gmailForwardingAddress = import.meta.env.VITE_GMAIL_FORWARDING_ADDRESS || 'cresdynamics@gmail.com';
+    this.companyNotificationEmail = import.meta.env.VITE_GMAIL_FORWARDING_ADDRESS || 'tambuaafrica@gmail.com';
   }
 
   async sendEmail(options: EmailOptions): Promise<EmailResponse> {
@@ -33,8 +33,8 @@ class EmailService {
       const recipients = Array.isArray(options.to) ? options.to : [options.to];
       
       // Forward to Gmail address as well if not already included
-      if (!recipients.includes(this.gmailForwardingAddress)) {
-        recipients.push(this.gmailForwardingAddress);
+      if (!recipients.includes(this.companyNotificationEmail)) {
+        recipients.push(this.companyNotificationEmail);
       }
 
       const emailData = {
@@ -43,7 +43,7 @@ class EmailService {
         subject: options.subject,
         html: options.html || this.generateHtmlFromText(options.text || ''),
         text: options.text || '',
-        replyTo: options.replyTo || this.gmailForwardingAddress,
+        replyTo: options.replyTo || this.companyNotificationEmail,
       };
 
       const response = await fetch('https://api.resend.com/emails', {
@@ -116,7 +116,7 @@ class EmailService {
     `;
 
     return this.sendEmail({
-      to: bookingData.customerEmail,
+      to: this.companyNotificationEmail,
       subject: `Booking Confirmation: ${bookingData.safariTitle} - ${bookingData.bookingId}`,
       html,
       replyTo: bookingData.customerEmail,
@@ -156,7 +156,7 @@ class EmailService {
     `;
 
     return this.sendEmail({
-      to: this.gmailForwardingAddress,
+      to: this.companyNotificationEmail,
       subject: `Contact Form: ${formData.name} - ${formData.email}`,
       html,
       replyTo: formData.email,

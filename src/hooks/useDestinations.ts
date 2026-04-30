@@ -11,18 +11,29 @@ export const useDestinations = () => {
         if (error) throw error;
 
         if (!data || data.length === 0) {
-          return [] as Destination[];
+          return localDestinations;
         }
 
-        return data.map((item) => ({
-          ...item,
-          safariCount: item.safari_count ?? 0,
-          images: Array.isArray((item as { images?: unknown }).images)
+        const localById = new Map(localDestinations.map((dest) => [dest.id, dest]));
+
+        return data.map((item) => {
+          const local = localById.get(item.id);
+          const normalizedImages = Array.isArray((item as { images?: unknown }).images)
             ? ((item as { images?: string[] }).images as string[])
             : item.image
               ? [item.image]
-              : [],
-        })) as Destination[];
+              : [];
+
+          const finalImage = item.image || local?.image || "";
+          const finalImages = normalizedImages.length > 0 ? normalizedImages : (local?.images || (finalImage ? [finalImage] : []));
+
+          return {
+            ...item,
+            image: finalImage,
+            safariCount: item.safari_count ?? local?.safariCount ?? 0,
+            images: finalImages,
+          };
+        }) as Destination[];
       } catch (err) {
         console.warn("Supabase fetch failed. Falling back to local Destinations data.");
         return localDestinations;

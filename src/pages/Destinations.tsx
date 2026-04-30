@@ -91,9 +91,10 @@ const ImageSlider = ({
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
+    if (!priority) return;
     const shouldPreloadSecondImage =
       typeof window !== "undefined" && !window.matchMedia("(max-width: 768px)").matches;
-    const maxImagesToPreload = priority ? (shouldPreloadSecondImage ? 2 : 1) : 1;
+    const maxImagesToPreload = shouldPreloadSecondImage ? 2 : 1;
     images.slice(0, maxImagesToPreload).forEach((src) => {
       const img = new Image();
       img.src = src;
@@ -119,6 +120,7 @@ const ImageSlider = ({
             i === current ? "opacity-100" : "opacity-0"
           }`}
           priority={priority && i < 2}
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
       ))}
     </>
@@ -571,7 +573,7 @@ const Destinations = () => {
                       <ImageSlider
                         images={dest.images || [dest.image]}
                         name={dest.name}
-                        priority={index < 3}
+                        priority={index < 6}
                         shouldReduceMotion={!!shouldReduceMotion}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />

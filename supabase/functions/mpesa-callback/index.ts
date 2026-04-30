@@ -1,5 +1,39 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+import { Resend } from "npm:resend@3.2.0";
+
+const sendCompanyBookingEmail = async (payload: {
+  safariTitle: string;
+  preferredDate: string;
+  guests: string | number;
+  bookingId: string;
+  currency: string;
+  amount?: number | null;
+}) => {
+  const resendApiKey = Deno.env.get("RESEND_API_KEY");
+  if (!resendApiKey) return;
+
+  const resend = new Resend(resendApiKey);
+  const to = Deno.env.get("COMPANY_NOTIFICATION_EMAIL")
+    || Deno.env.get("COMPANY_EMAIL")
+    || "tambuaafrica@gmail.com";
+  const from = Deno.env.get("RESEND_FROM_EMAIL") || "onboarding@resend.dev";
+  const amountLine = payload.amount ? `<p><strong>Amount:</strong> ${payload.amount} ${payload.currency}</p>` : "";
+
+  await resend.emails.send({
+    from,
+    to,
+    subject: `M-Pesa Booking Confirmed: ${payload.safariTitle}`,
+    html: `
+      <h2>M-Pesa Booking Confirmed</h2>
+      <p><strong>Booking ID:</strong> ${payload.bookingId}</p>
+      <p><strong>Safari:</strong> ${payload.safariTitle}</p>
+      <p><strong>Date:</strong> ${payload.preferredDate}</p>
+      <p><strong>Guests:</strong> ${payload.guests}</p>
+      ${amountLine}
+    `,
+  });
+};
 
 serve(async (req) => {
   try {
@@ -40,6 +74,19 @@ serve(async (req) => {
             updated_at: new Date().toISOString()
           })
           .eq('id', booking.id);
+
+        try {
+          await sendCompanyBookingEmail({
+            safariTitle: booking.safari_title || "Safari Booking",
+            preferredDate: booking.preferred_date || "",
+            guests: booking.guests || 1,
+            bookingId: booking.id,
+            currency: "KES",
+            amount: booking.total_amount || null,
+          });
+        } catch (emailError) {
+          console.error("Failed to send M-Pesa booking email:", emailError);
+        }
       }
     } else {
       // Payment Failed or Cancelled by User

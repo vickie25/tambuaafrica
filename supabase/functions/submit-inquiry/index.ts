@@ -274,10 +274,8 @@ const appendInquiryToSheet = async (payload: InquiryPayload, submissionId: strin
 
 const sendInquiryEmail = async (payload: InquiryPayload) => {
   const resendApiKey = getOptionalEnv("RESEND_API_KEY");
-  const companyEmail =
-    getOptionalEnv("COMPANY_NOTIFICATION_EMAIL") ||
-    getOptionalEnv("COMPANY_EMAIL") ||
-    "tambuaafrica@gmail.com";
+  // Always deliver inquiry notifications to the company mailbox.
+  const companyEmail = "tambuaafrica@gmail.com";
   const fromEmail = getOptionalEnv("RESEND_FROM_EMAIL") || "onboarding@resend.dev";
 
   if (!resendApiKey) {
@@ -323,6 +321,7 @@ const sendInquiryEmail = async (payload: InquiryPayload) => {
     html: htmlContent,
     reply_to: payload.email,
   });
+  return true;
 };
 
 serve(async (req) => {
@@ -402,12 +401,14 @@ serve(async (req) => {
       throw new Error(`Failed to save inquiry: ${insertError?.message || "Unknown insert error"}`);
     }
 
+    let emailSent = false;
     // Send email notification
     try {
-      await sendInquiryEmail(payload);
+      emailSent = await sendInquiryEmail(payload);
     } catch (emailError) {
       console.error("Email sending failed:", emailError);
       // Don't fail the request if email fails, just log it
+      emailSent = false;
     }
 
     let sheetSynced = false;
@@ -436,6 +437,7 @@ serve(async (req) => {
         success: true,
         submissionId: submission.id,
         googleSheetsSynced: true,
+        emailSent,
       });
     }
 
@@ -457,6 +459,7 @@ serve(async (req) => {
       success: true,
       submissionId: submission.id,
       googleSheetsSynced: false,
+      emailSent,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown server error";

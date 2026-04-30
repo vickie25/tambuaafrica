@@ -50,16 +50,11 @@ const Contact = () => {
         subject: formData.subject,
         message: formData.message,
       });
-
-      const whatsappText = `Hello! My name is ${formData.name}.\n\nI have an inquiry regarding: ${formData.subject}\n\nEmail: ${formData.email}\nPhone: ${formData.phone}\n\nMessage:\n${formData.message}`;
-      const whatsappUrl = `https://wa.me/254704548878?text=${encodeURIComponent(whatsappText)}`;
-      window.open(whatsappUrl, '_blank');
-
-      toast.success(
-        result.googleSheetsSynced
-          ? "Message sent! Opening WhatsApp to connect directly with our team."
-          : "Message sent! Opening WhatsApp to connect directly with our team.",
-      );
+      if (result.emailSent === false) {
+        toast.warning("Message saved, but email delivery failed. Please check Resend/Supabase function secrets.");
+      } else {
+        toast.success("Message sent successfully. Our team will reply by email.");
+      }
       setFormData(emptyForm);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "We could not send your message right now.");

@@ -31,6 +31,7 @@ const inquiryResponseSchema = z.object({
   success: z.boolean(),
   submissionId: z.string(),
   googleSheetsSynced: z.boolean(),
+  emailSent: z.boolean().optional(),
   error: z.string().optional(),
 });
 

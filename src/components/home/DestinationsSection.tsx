@@ -27,7 +27,7 @@ const DestinationsSection = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 min-h-[400px]">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-6 min-h-[400px]">
           {isLoading ? null : featured.length === 0 ? (
             <p className="col-span-full text-center text-muted-foreground py-12">
               Featured destinations will appear here once they are published in your catalogue.

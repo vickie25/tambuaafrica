@@ -15,7 +15,7 @@ const BlogPreview = () => {
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground mt-2">Latest News & Stories</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
           {posts.map((post, index) => (
             <article
               key={post.id}

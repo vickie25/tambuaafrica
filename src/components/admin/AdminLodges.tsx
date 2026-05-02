@@ -221,18 +221,18 @@ export const AdminLodges = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center bg-card p-6 rounded-2xl border border-border">
+      <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 xl:flex-row xl:items-center xl:justify-between">
         <div>
           <h2 className="text-xl font-bold">Manage Destination Lodges</h2>
           <p className="text-muted-foreground text-sm">Add, edit, and delete lodges grouped by destination.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button type="button" variant="outline" onClick={handleSeedFromLocalData} disabled={isSubmitting}>
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <Button type="button" variant="outline" onClick={handleSeedFromLocalData} disabled={isSubmitting} className="shrink-0">
             {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
             Seed Lodges to DB
           </Button>
           <Select value={selectedDestination} onValueChange={setSelectedDestination}>
-            <SelectTrigger className="w-[220px]">
+            <SelectTrigger className="w-[220px] shrink-0">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -243,7 +243,7 @@ export const AdminLodges = () => {
               ))}
             </SelectContent>
           </Select>
-          <Button onClick={handleAdd} className="bg-accent hover:bg-accent/90">
+          <Button onClick={handleAdd} className="shrink-0 bg-accent hover:bg-accent/90">
             <Plus className="w-4 h-4 mr-2" />
             Add Lodge
           </Button>
@@ -251,7 +251,7 @@ export const AdminLodges = () => {
       </div>
 
       <div className="bg-card rounded-2xl border border-border overflow-hidden">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
+        <div className="grid grid-cols-2 gap-4 p-6 lg:grid-cols-3">
           {lodges.map((lodge) => (
             <div key={lodge.id} className="rounded-xl border border-border overflow-hidden bg-background">
               <img src={lodge.image} alt={lodge.name} className="w-full h-48 object-cover" />

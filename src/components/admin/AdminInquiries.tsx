@@ -112,16 +112,16 @@ export const AdminInquiries = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center bg-card p-6 rounded-2xl border border-border">
+      <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 xl:flex-row xl:items-center xl:justify-between">
         <div>
           <h2 className="text-xl font-bold">User Messages & Inquiries</h2>
           <p className="text-muted-foreground text-sm">Manage entries from contact forms and booking requests.</p>
         </div>
-        <div className="flex gap-2">
-          <Badge variant="outline" className="px-3 py-1">
+        <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <Badge variant="outline" className="shrink-0 px-3 py-1">
             Total: {inquiries.length}
           </Badge>
-          <Badge className="bg-red-500 hover:bg-red-600 px-3 py-1">
+          <Badge className="shrink-0 bg-red-500 px-3 py-1 hover:bg-red-600">
             New: {inquiries.filter(i => isNewInquiryStatus(i.status)).length}
           </Badge>
         </div>

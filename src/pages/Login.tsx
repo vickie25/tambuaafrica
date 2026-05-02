@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -8,16 +8,30 @@ import { Loader2, LogIn, Eye, EyeOff } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageTransition from "@/components/layout/PageTransition";
+import { ADMIN_LOGIN_EMAIL } from "@/lib/admin-email";
 
 const Login = () => {
   const { signIn } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
+  const fromState = (location.state as { from?: { pathname?: string; search?: string } } | null)?.from;
+  const redirectQuery = searchParams.get("redirect");
+  const redirectTarget =
+    (fromState?.pathname ? `${fromState.pathname}${fromState.search || ""}` : null) ||
+    redirectQuery ||
+    "/dashboard";
+  const isAdminLogin = redirectTarget === "/admin";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isAdminLogin && !email) {
+      setEmail(ADMIN_LOGIN_EMAIL);
+    }
+  }, [email, isAdminLogin]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,12 +39,6 @@ const Login = () => {
     try {
       console.log("Attempting login with:", email);
       await signIn(email, password);
-      const fromState = (location.state as { from?: { pathname?: string; search?: string } } | null)?.from;
-      const redirectQuery = searchParams.get("redirect");
-      const redirectTarget =
-        (fromState?.pathname ? `${fromState.pathname}${fromState.search || ""}` : null) ||
-        redirectQuery ||
-        "/dashboard";
 
       console.log("Login successful, navigating to:", redirectTarget);
       toast.success("Welcome back!");
@@ -50,14 +58,32 @@ const Login = () => {
         <div className="w-full max-w-md">
           <div className="bg-card rounded-2xl shadow-lg border border-border p-8">
             <div className="text-center mb-8">
-              <h1 className="text-2xl font-bold text-foreground">Welcome Back</h1>
-              <p className="text-muted-foreground mt-2">Sign in to manage your safari bookings</p>
+              <h1 className="text-2xl font-bold text-foreground">
+                {isAdminLogin ? "Admin Sign In" : "Welcome Back"}
+              </h1>
+              <p className="text-muted-foreground mt-2">
+                {isAdminLogin
+                  ? "Use the Tambua Africa admin account to access the control panel."
+                  : "Sign in to manage your safari bookings"}
+              </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {isAdminLogin && (
+                <div className="rounded-xl border border-accent/20 bg-accent/5 px-4 py-3 text-sm text-muted-foreground">
+                  Admin email: <span className="font-medium text-foreground">{ADMIN_LOGIN_EMAIL}</span>
+                </div>
+              )}
+
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-foreground">Email</label>
-                <Input type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                <Input
+                  type="email"
+                  placeholder={isAdminLogin ? ADMIN_LOGIN_EMAIL : "you@example.com"}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
               </div>
 
               <div className="space-y-1.5">

@@ -275,7 +275,7 @@ const appendInquiryToSheet = async (payload: InquiryPayload, submissionId: strin
 const sendInquiryEmail = async (payload: InquiryPayload) => {
   const resendApiKey = getOptionalEnv("RESEND_API_KEY");
   // Always deliver inquiry notifications to the company mailbox.
-  const companyEmail = "tambuaafrica@gmail.com";
+  const companyEmail = Deno.env.get("COMPANY_NOTIFICATION_EMAIL") || "info@tambuaafrica.com";
   const fromEmail = getOptionalEnv("RESEND_FROM_EMAIL") || "onboarding@resend.dev";
 
   if (!resendApiKey) {

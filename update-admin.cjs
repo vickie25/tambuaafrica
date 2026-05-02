@@ -1,69 +1,85 @@
-const { createClient } = require('@supabase/supabase-js');
-require('dotenv').config();
+const { createClient } = require("@supabase/supabase-js");
+require("dotenv").config();
+
+const ADMIN_EMAIL = "inf@tambuaafrica.com";
+const ADMIN_PASSWORD = "Isaacmarenya@2002/#";
+const ADMIN_NAME = "Tambua Africa Admin";
 
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
+  process.env.SUPABASE_SERVICE_ROLE_KEY,
 );
 
 async function updateAdminCredentials() {
   try {
-    console.log('Updating admin credentials...');
-    
-    // First, create the user account
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-      email: 'cresdynamics@gmail.com',
-      password: 'Cresdynamic1234',
-      email_confirm: true,
-      user_metadata: {
-        full_name: 'Admin User'
+    console.log(`Updating admin credentials for ${ADMIN_EMAIL}...`);
+
+    const {
+      data: { users },
+      error: listError,
+    } = await supabase.auth.admin.listUsers();
+
+    if (listError) {
+      throw listError;
+    }
+
+    const existingUser = users.find(
+      (user) => user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase(),
+    );
+
+    let adminUser = existingUser;
+
+    if (existingUser) {
+      const { data, error } = await supabase.auth.admin.updateUserById(existingUser.id, {
+        email: ADMIN_EMAIL,
+        password: ADMIN_PASSWORD,
+        email_confirm: true,
+        user_metadata: {
+          full_name: ADMIN_NAME,
+        },
+      });
+
+      if (error) {
+        throw error;
       }
+
+      adminUser = data.user || existingUser;
+    } else {
+      const { data, error } = await supabase.auth.admin.createUser({
+        email: ADMIN_EMAIL,
+        password: ADMIN_PASSWORD,
+        email_confirm: true,
+        user_metadata: {
+          full_name: ADMIN_NAME,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      adminUser = data.user;
+    }
+
+    if (!adminUser?.id) {
+      throw new Error("Admin user could not be created or updated.");
+    }
+
+    const { error: profileError } = await supabase.from("profiles").upsert({
+      id: adminUser.id,
+      full_name: ADMIN_NAME,
+      role: "admin",
+      updated_at: new Date().toISOString(),
     });
 
-    if (authError && !authError.message.includes('already registered')) {
-      throw authError;
+    if (profileError) {
+      throw profileError;
     }
 
-    const userId = authData.user?.id;
-
-    if (userId) {
-      // Update or create profile with admin role
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert({
-          id: userId,
-          full_name: 'Admin User',
-          role: 'admin',
-          updated_at: new Date().toISOString()
-        });
-
-      if (profileError) throw profileError;
-      
-      console.log('Admin credentials updated successfully!');
-      console.log('Email: cresdynamics@gmail.com');
-      console.log('Password: Cresdynamic1234');
-    } else {
-      // User might already exist, find them and update role
-      const { data: existingUser } = await supabase.auth.admin.listUsers();
-      const adminUser = existingUser.users.find(u => u.email === 'cresdynamics@gmail.com');
-      
-      if (adminUser) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .upsert({
-            id: adminUser.id,
-            full_name: 'Admin User',
-            role: 'admin',
-            updated_at: new Date().toISOString()
-          });
-          
-        if (profileError) throw profileError;
-        console.log('Existing user updated with admin role!');
-      }
-    }
-    
+    console.log(`Admin credentials updated successfully for ${ADMIN_EMAIL}.`);
   } catch (error) {
-    console.error('Error updating admin credentials:', error);
+    console.error("Error updating admin credentials:", error);
+    process.exitCode = 1;
   }
 }
 

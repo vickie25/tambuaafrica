@@ -228,17 +228,17 @@ export const AdminDestinations = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center bg-card p-6 rounded-2xl border border-border">
+      <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 xl:flex-row xl:items-center xl:justify-between">
         <div>
           <h2 className="text-xl font-bold">Manage Destinations</h2>
           <p className="text-muted-foreground text-sm">Add, edit, or remove travel destinations.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button type="button" variant="outline" onClick={handleLoadWebsiteDestinations} disabled={isSubmitting}>
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <Button type="button" variant="outline" onClick={handleLoadWebsiteDestinations} disabled={isSubmitting} className="shrink-0">
             {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
             Sync Website Destinations
           </Button>
-          <Button onClick={handleAdd} className="bg-accent hover:bg-accent/90"><Plus className="w-4 h-4 mr-2"/> Add Destination</Button>
+          <Button onClick={handleAdd} className="shrink-0 bg-accent hover:bg-accent/90"><Plus className="w-4 h-4 mr-2"/> Add Destination</Button>
         </div>
       </div>
 

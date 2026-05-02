@@ -27,7 +27,7 @@ const AboutPreview = () => {
               />
             </div>
             <div className="absolute -bottom-6 -right-4 sm:right-6 bg-card rounded-xl shadow-xl p-5 border border-border">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 {stats.map((stat) => (
                   <StatItem key={stat.label} {...stat} isVisible={isVisible} />
                 ))}

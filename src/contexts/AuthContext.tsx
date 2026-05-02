@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { hasSupabaseEnv, supabase } from "@/integrations/supabase/client";
+import { isAdminMailbox } from "@/lib/admin-email";
 import type { User, Session } from "@supabase/supabase-js";
 
 interface AuthContextType {
@@ -193,7 +194,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (error) throw error;
   };
 
-  const isAdmin = role?.toLowerCase() === "admin" || user?.email?.toLowerCase() === "info@tambuaafrica.com";
+  const isAdmin = role?.toLowerCase() === "admin" || isAdminMailbox(user?.email);
 
   return (
     <AuthContext.Provider value={{ 

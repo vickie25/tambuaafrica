@@ -90,12 +90,12 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.9, duration: 0.8 }}
-            className="flex flex-col sm:flex-row items-start sm:items-center justify-start gap-4 pt-4"
+            className="flex flex-row flex-wrap items-center justify-start gap-3 pt-4"
           >
             <Button
               asChild
               size="lg"
-              className="w-full sm:w-auto bg-accent text-accent-foreground hover:bg-accent/90 text-base px-8 py-6 rounded-xl font-semibold transition-transform hover:scale-105 active:scale-95"
+              className="min-w-0 flex-1 sm:flex-initial sm:w-auto bg-accent text-accent-foreground hover:bg-accent/90 text-base px-6 py-6 sm:px-8 rounded-xl font-semibold transition-transform hover:scale-105 active:scale-95"
             >
               <Link to="/safaris">
                 Explore Safaris <ChevronRight className="w-5 h-5 ml-1" />
@@ -104,7 +104,7 @@ const HeroSection = () => {
             <Button
               variant="outline"
               size="lg"
-              className="w-full sm:w-auto border-white/30 text-white hover:bg-white/10 text-base px-8 py-6 rounded-xl bg-transparent transition-transform hover:scale-105 active:scale-95"
+              className="min-w-0 flex-1 sm:flex-initial sm:w-auto border-white/30 text-white hover:bg-white/10 text-base px-6 py-6 sm:px-8 rounded-xl bg-transparent transition-transform hover:scale-105 active:scale-95"
             >
               <Play className="w-5 h-5 mr-2" /> Watch Our Story
             </Button>

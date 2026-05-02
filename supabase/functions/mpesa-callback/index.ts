@@ -16,7 +16,7 @@ const sendCompanyBookingEmail = async (payload: {
   const resend = new Resend(resendApiKey);
   const to = Deno.env.get("COMPANY_NOTIFICATION_EMAIL")
     || Deno.env.get("COMPANY_EMAIL")
-    || "tambuaafrica@gmail.com";
+    || "info@tambuaafrica.com";
   const from = Deno.env.get("RESEND_FROM_EMAIL") || "onboarding@resend.dev";
   const amountLine = payload.amount ? `<p><strong>Amount:</strong> ${payload.amount} ${payload.currency}</p>` : "";
 

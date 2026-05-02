@@ -22,7 +22,7 @@ const FeaturedSafaris = () => {
   return (
     <section className="section-padding bg-background" ref={ref}>
       <div className="container-wide mx-auto">
-        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-12 gap-4">
+        <div className="flex flex-row flex-wrap items-end justify-between gap-3 mb-12">
           <div>
             <span className="text-accent font-semibold text-sm uppercase tracking-wider">Our Packages</span>
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mt-2">Featured Safaris</h2>
@@ -35,7 +35,7 @@ const FeaturedSafaris = () => {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[400px]">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 min-h-[400px]">
           {isLoading ? null : safaris.length === 0 ? (
             <p className="col-span-full text-center text-muted-foreground py-12">
               Safari packages will appear here once they are published in your catalogue.

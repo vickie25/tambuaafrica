@@ -1,4 +1,5 @@
-// Email service integration using Resend API and Gmail forwarding
+// Email service integration using Resend API
+import { COMPANY_INBOX_EMAIL } from "@/lib/admin-email";
 
 interface EmailOptions {
   to: string | string[];
@@ -21,7 +22,8 @@ class EmailService {
 
   constructor() {
     this.resendApiKey = import.meta.env.VITE_RESEND_API_KEY || '';
-    this.companyNotificationEmail = import.meta.env.VITE_GMAIL_FORWARDING_ADDRESS || 'tambuaafrica@gmail.com';
+    this.companyNotificationEmail =
+      import.meta.env.VITE_GMAIL_FORWARDING_ADDRESS || COMPANY_INBOX_EMAIL;
   }
 
   async sendEmail(options: EmailOptions): Promise<EmailResponse> {
@@ -32,7 +34,6 @@ class EmailService {
 
       const recipients = Array.isArray(options.to) ? options.to : [options.to];
       
-      // Forward to Gmail address as well if not already included
       if (!recipients.includes(this.companyNotificationEmail)) {
         recipients.push(this.companyNotificationEmail);
       }

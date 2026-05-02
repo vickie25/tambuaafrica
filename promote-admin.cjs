@@ -15,7 +15,7 @@ if (!supabaseUrl || !supabaseServiceKey) {
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-const targetEmail = 'cresdynamics@gmail.com';
+const targetEmail = 'info@tambuaafrica.com';
 
 async function promoteToAdmin() {
   console.log(`Searching for user: ${targetEmail}...`);
@@ -43,7 +43,7 @@ async function promoteToAdmin() {
     .upsert({ 
       id: user.id, 
       role: 'admin',
-      full_name: user.user_metadata?.full_name || 'Admin',
+      full_name: user.user_metadata?.full_name || 'Tambua Africa Admin',
       updated_at: new Date().toISOString()
     });
 

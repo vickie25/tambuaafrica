@@ -272,7 +272,7 @@ const BookingModal = ({ open, onOpenChange, preselectedSafari }: BookingModalPro
               <SelectContent>
                 {safaris.map((s) => (
                   <SelectItem key={s.id} value={s.id}>
-                    {s.title} — ${s.price}/person
+                    {s.title},  ${s.price}/person
                   </SelectItem>
                 ))}
               </SelectContent>

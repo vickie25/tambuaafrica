@@ -12,6 +12,8 @@ interface OptimizedImageProps {
   quality?: number;
   fetchPriority?: "high" | "low" | "auto";
   sizes?: string;
+  /** If the primary `src` fails to load (404, etc.), swap to this URL once. */
+  fallbackSrc?: string;
 }
 
 // Ultra-fast LQIP (Low Quality Image Placeholder) - 1px data URL
@@ -29,10 +31,13 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   quality = 75,
   fetchPriority = "auto",
   sizes,
+  fallbackSrc,
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(priority);
   const [hasError, setHasError] = useState(false);
+  const [activeSrc, setActiveSrc] = useState(src);
+  const [triedFallback, setTriedFallback] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -64,7 +69,9 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   useEffect(() => {
     setIsLoaded(false);
     setHasError(false);
-  }, [src]);
+    setActiveSrc(src);
+    setTriedFallback(false);
+  }, [src, fallbackSrc]);
 
   const getOptimizedSrc = (originalSrc: string) => {
     const formatUrl = (url: string) => encodeURI(url);
@@ -84,7 +91,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
     return formatUrl(originalSrc);
   };
 
-  const optimizedSrc = getOptimizedSrc(src);
+  const optimizedActive = getOptimizedSrc(activeSrc);
   const lqip = generateLQIP();
 
   if (hasError) {
@@ -112,11 +119,11 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
         />
       )}
 
-      {/* Actual image — rendered only after the container enters the viewport */}
+      {/* Actual image,  rendered only after the container enters the viewport */}
       {isInView && (
         <>
           <img
-            src={optimizedSrc}
+            src={optimizedActive}
             alt={alt}
             width={width}
             height={height}
@@ -125,7 +132,15 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
             sizes={sizes}
             decoding="async"
             onLoad={() => setIsLoaded(true)}
-            onError={() => setHasError(true)}
+            onError={() => {
+              if (fallbackSrc && !triedFallback) {
+                setTriedFallback(true);
+                setActiveSrc(fallbackSrc);
+                setIsLoaded(false);
+                return;
+              }
+              setHasError(true);
+            }}
             className={cn(
               'w-full h-full transition-opacity duration-300',
               isLoaded ? 'opacity-100' : 'opacity-0'

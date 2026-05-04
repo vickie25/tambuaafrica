@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Safari, safaris as localSafaris } from "@/data/safaris";
+import { fallbackSafariImage } from "@/lib/remote-media-fallbacks";
 
 const BROKEN_SAFARI_IMAGE_MAP: Record<string, string> = {
   "/images/dawn-w-FmUx8z_Tz4A-unsplash.webp": "/images/destiations/Lake Nakuru/lake elementaita.webp",
@@ -20,14 +21,19 @@ export const useSafaris = () => {
         if (error) throw error;
 
         if (!data || data.length === 0) {
-          return [] as Safari[];
+          return localSafaris;
         }
 
-        return data.map((item) => ({
-          ...item,
-          image: normalizeSafariImage(item.image),
-          stripePriceId: item.stripe_price_id ?? "",
-        })) as Safari[];
+        return data.map((item) => {
+          const normalized = normalizeSafariImage(item.image) ?? item.image;
+          const image =
+            (typeof normalized === "string" && normalized.trim()) || fallbackSafariImage(String(item.id));
+          return {
+            ...item,
+            image,
+            stripePriceId: item.stripe_price_id ?? "",
+          };
+        }) as Safari[];
       } catch (err) {
         console.warn("Supabase fetch failed. Falling back to local Safari data.");
         return localSafaris;
@@ -52,9 +58,12 @@ export const useSafari = (id?: string) => {
         if (error) throw error;
 
         if (data) {
+          const normalized = normalizeSafariImage(data.image) ?? data.image;
+          const image =
+            (typeof normalized === "string" && normalized.trim()) || fallbackSafariImage(String(data.id));
           return {
             ...data,
-            image: normalizeSafariImage(data.image),
+            image,
             stripePriceId: data.stripe_price_id ?? "",
           } as Safari;
         }

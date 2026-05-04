@@ -21,7 +21,7 @@ const FloatingButtons = () => {
 
   return (
     <>
-      {/* Left side — Admin button */}
+      {/* Left side,  Admin button */}
       {isAdmin && (
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
@@ -38,7 +38,7 @@ const FloatingButtons = () => {
         </motion.div>
       )}
 
-      {/* Right side — Scroll top + WhatsApp */}
+      {/* Right side,  Scroll top + WhatsApp */}
       <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
         <AnimatePresence>
           {showScrollTop && (

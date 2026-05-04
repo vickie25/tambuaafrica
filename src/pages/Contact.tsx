@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageTransition from "@/components/layout/PageTransition";
@@ -24,6 +24,36 @@ const Contact = () => {
     const inquiry = searchParams.get("inquiry");
     const destination = searchParams.get("destination");
     const lodge = searchParams.get("lodge");
+    const topic = searchParams.get("topic");
+
+    const topicLabels: Record<string, { subject: string; message: string }> = {
+      ticketing: {
+        subject: "Air & road ticketing",
+        message:
+          "Hello, I would like help with domestic or international flights and/or long-distance road tickets for my trip. Here are my rough dates and route:\n\n",
+      },
+      transfers: {
+        subject: "Road & air transfers",
+        message:
+          "Hello, I need private road transfers and/or coordinated air hops (e.g. airport, hotel, park gates). Arrival details and preferred times:\n\n",
+      },
+      lodges: {
+        subject: "Lodge & camp booking",
+        message:
+          "Hello, I would like help booking lodges or camps (and city hotels if needed). Parks, budget, and style preferences:\n\n",
+      },
+    };
+
+    if (topic && topicLabels[topic]) {
+      const { subject, message } = topicLabels[topic];
+      setFormData((prev) => ({
+        ...prev,
+        subject: prev.subject || subject,
+        message: prev.message || message,
+      }));
+      return;
+    }
+
     if (!inquiry && !destination && !lodge) return;
 
     const destinationText = destination ? `Destination: ${destination}` : "";
@@ -81,7 +111,25 @@ const Contact = () => {
             <span className="text-accent font-semibold text-sm uppercase tracking-wider">Get In Touch</span>
             <h1 className="text-4xl sm:text-5xl font-bold mt-3">Contact Us</h1>
             <p className="text-primary-foreground/70 mt-4 max-w-2xl mx-auto text-lg">
-              Planning Kenya, Uganda, Tanzania, Rwanda, or a wider East Africa journey? We&apos;d love to help.
+              Planning Kenya, Uganda, Tanzania, Rwanda, or a wider East Africa journey? We&apos;d love to help, including
+              air & road ticketing, private transfers, and lodge or camp bookings alongside your safari.
+            </p>
+            <p className="mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm text-primary-foreground/85">
+              <Link to="/services" className="font-semibold underline-offset-2 hover:underline">
+                All services
+              </Link>
+              <span className="opacity-50" aria-hidden>
+                |
+              </span>
+              <Link to="/services/ticketing" className="hover:underline">
+                Ticketing
+              </Link>
+              <Link to="/services/transfers" className="hover:underline">
+                Transfers
+              </Link>
+              <Link to="/services/lodges-camps" className="hover:underline">
+                Lodges & camps
+              </Link>
             </p>
           </div>
         </section>
@@ -93,7 +141,9 @@ const Contact = () => {
                 <div>
                   <h2 className="text-2xl font-bold text-foreground mb-4">Get in Touch</h2>
                   <p className="text-muted-foreground">
-                    Have questions about safaris, gorilla trekking, beach extensions, or a custom East Africa itinerary? Reach out and our team will respond within 24 hours.
+                    Have questions about safaris, gorilla trekking, beach extensions, or a custom East Africa itinerary?
+                    We also arrange flight and coach tickets, road and light-air transfers, and lodge stays. Tell us what
+                    you need and our team will respond within 24 hours.
                   </p>
                 </div>
 

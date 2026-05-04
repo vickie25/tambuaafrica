@@ -6,6 +6,7 @@ import { useSafaris } from "@/hooks/useSafaris";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import BookingModal from "@/components/booking/BookingModal";
 import OptimizedImage from "@/components/ui/optimized-image";
+import { fallbackSafariImage } from "@/lib/remote-media-fallbacks";
 
 const FeaturedSafaris = () => {
   const { ref, isVisible } = useScrollAnimation();
@@ -52,7 +53,8 @@ const FeaturedSafaris = () => {
               <Link to={`/safaris/${safari.id}`} className="block">
                 <div className="relative aspect-[16/10] overflow-hidden">
                   <OptimizedImage 
-                    src={safari.image} 
+                    src={safari.image}
+                    fallbackSrc={fallbackSafariImage(safari.id)}
                     alt={safari.title} 
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
                   />

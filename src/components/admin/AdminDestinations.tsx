@@ -130,7 +130,7 @@ export const AdminDestinations = () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error } = await (supabase as any).from("destinations").upsert(websiteDestinations);
       if (error) throw error;
-      toast.success("Website destinations synced");
+      toast.success("Default destination rows updated");
       queryClient.invalidateQueries({ queryKey: ["destinations"] });
     } catch (error) {
       console.error("Destination sync failed:", error);
@@ -192,15 +192,16 @@ export const AdminDestinations = () => {
 
       try {
         await Promise.race([cloudSync(), timeout]);
-        toast.success("Destination saved to cloud");
+        toast.success("Saved");
         queryClient.invalidateQueries({ queryKey: ["destinations"] });
       } catch (error: any) {
         console.error("Cloud save failed:", error);
         // Revert optimistic update
         queryClient.setQueryData(["destinations"], previousData);
-        const msg = error.message === "Cloud Sync Timeout" 
-          ? "Cloud sync timed out. Data is saved locally but not in the database. Check your internet connection." 
-          : `Cloud save failed: ${error.message}. Ensure you ran the SQL script in Supabase.`;
+        const msg =
+          error.message === "Cloud Sync Timeout"
+            ? "Save timed out. Check the connection and try again."
+            : `Save failed: ${error.message}`;
         toast.error(msg, { duration: 5000 });
       }
     } catch (error) {
@@ -224,25 +225,32 @@ export const AdminDestinations = () => {
     }
   };
 
-  if (isLoading) return <div className="p-8 flex justify-center"><Loader2 className="animate-spin w-8 h-8 text-accent"/></div>;
+  if (isLoading)
+    return (
+      <div className="flex justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 xl:flex-row xl:items-center xl:justify-between">
+      <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-5 xl:flex-row xl:items-center xl:justify-between">
         <div>
-          <h2 className="text-xl font-bold">Manage Destinations</h2>
-          <p className="text-muted-foreground text-sm">Add, edit, or remove travel destinations.</p>
+          <h2 className="text-lg font-semibold text-foreground">Destinations</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Parks and regions on the site. Edits go to Supabase.</p>
         </div>
         <div className="flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <Button type="button" variant="outline" onClick={handleLoadWebsiteDestinations} disabled={isSubmitting} className="shrink-0">
             {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-            Sync Website Destinations
+            Load built-in list
           </Button>
-          <Button onClick={handleAdd} className="shrink-0 bg-accent hover:bg-accent/90"><Plus className="w-4 h-4 mr-2"/> Add Destination</Button>
+          <Button onClick={handleAdd} className="shrink-0 bg-accent hover:bg-accent/90">
+            <Plus className="mr-2 h-4 w-4" /> Add row
+          </Button>
         </div>
       </div>
 
-      <div className="bg-card rounded-2xl border border-border overflow-hidden">
+      <div className="overflow-hidden rounded-lg border border-border bg-card">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-muted/50 border-b border-border">
@@ -277,7 +285,7 @@ export const AdminDestinations = () => {
       <Dialog open={!!editing} onOpenChange={(open) => !open && setEditing(null)}>
         <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editing?.id?.startsWith("dest-") ? "Add New Destination" : "Edit Destination"}</DialogTitle>
+            <DialogTitle>{editing?.id?.startsWith("dest-") ? "New destination" : "Edit destination"}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -324,7 +332,7 @@ export const AdminDestinations = () => {
                   {uploading && (
                     <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                       <Loader2 className="w-3 h-3 animate-spin"/> 
-                      {uploadStatus === "processing" ? "Optimizing image..." : "Uploading to cloud..."}
+                      {uploadStatus === "processing" ? "Compressing..." : "Uploading..."}
                     </p>
                   )}
                 </div>

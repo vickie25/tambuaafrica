@@ -17,6 +17,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import PageTransition from "@/components/layout/PageTransition";
+import Navbar from "@/components/layout/Navbar";
+import { Helmet } from "react-helmet-async";
+import { SITE_NAME } from "@/lib/seo";
 import ErrorBoundary from "@/components/layout/ErrorBoundary";
 import SuspenseFallback from "@/components/layout/SuspenseFallback";
 import {
@@ -64,6 +67,9 @@ const AdminCarousel = lazy(() =>
 const AdminLodges = lazy(() =>
   import("@/components/admin/AdminLodges").then((m) => ({ default: m.AdminLodges })),
 );
+const AdminSiteCopy = lazy(() =>
+  import("@/components/admin/AdminSiteCopy").then((m) => ({ default: m.AdminSiteCopy })),
+);
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800",
@@ -73,51 +79,16 @@ const statusColors: Record<string, string> = {
 };
 
 const adminTabs = [
-  {
-    id: "bookings",
-    label: "Bookings",
-    description: "Review reservations, customer details, and booking status changes.",
-  },
-  {
-    id: "carousel",
-    label: "Carousel",
-    description: "Manage homepage hero images, activities, and gallery visuals.",
-  },
-  {
-    id: "safaris",
-    label: "Safaris",
-    description: "Add, edit, and sync safari packages shown on the website.",
-  },
-  {
-    id: "destinations",
-    label: "Destinations",
-    description: "Maintain destination content, imagery, and listing details.",
-  },
-  {
-    id: "lodges",
-    label: "Lodges",
-    description: "Update destination lodge options and supporting media assets.",
-  },
-  {
-    id: "blogs",
-    label: "Blogs",
-    description: "Publish blog content and keep editorial entries up to date.",
-  },
-  {
-    id: "messages",
-    label: "Messages",
-    description: "Track inquiries, customer messages, and follow-up activity.",
-  },
-  {
-    id: "insights",
-    label: "Insights",
-    description: "View summary metrics and AI-driven website recommendations.",
-  },
-  {
-    id: "health",
-    label: "Health",
-    description: "Check database, storage, and admin environment diagnostics.",
-  },
+  { id: "bookings", label: "Bookings", hint: "Look up reservations and change status." },
+  { id: "carousel", label: "Homepage images", hint: "Hero, activities, and gallery slides." },
+  { id: "site_copy", label: "Home & services text", hint: "Home services strip and lodges page hero." },
+  { id: "safaris", label: "Safaris", hint: "Packages and prices on the site." },
+  { id: "destinations", label: "Destinations", hint: "Park and region pages." },
+  { id: "lodges", label: "Lodges & camps", hint: "Per-destination lodge list in Supabase." },
+  { id: "blogs", label: "Blog", hint: "Posts and drafts." },
+  { id: "messages", label: "Inbox", hint: "Contact form and enquiries." },
+  { id: "insights", label: "At a glance", hint: "Quick counts from the live data." },
+  { id: "health", label: "System check", hint: "Database and storage smoke test." },
 ] as const;
 
 type AdminTab = (typeof adminTabs)[number]["id"];
@@ -139,19 +110,14 @@ const AdminSidebarContent = ({
 }: AdminSidebarContentProps) => {
   return (
     <div className="flex h-full flex-col">
-      <div className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-          Tambua Africa
+      <div className="px-1 pb-4">
+        <p className="text-sm font-semibold text-foreground">Tambua</p>
+        <p className="mt-0.5 break-all text-xs text-muted-foreground" title={userEmail || undefined}>
+          {userEmail || "Signed in"}
         </p>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Admin Panel</h1>
-          <p className="mt-1 break-all text-sm text-muted-foreground">
-            {userEmail || "Administrator"}
-          </p>
-        </div>
       </div>
 
-      <div className="mt-6 space-y-2">
+      <nav className="flex flex-1 flex-col gap-0.5" aria-label="Admin sections">
         {adminTabs.map((tab) => {
           const isActive = activeTab === tab.id;
 
@@ -159,18 +125,19 @@ const AdminSidebarContent = ({
             <button
               key={tab.id}
               type="button"
+              title={tab.hint}
               onClick={() => onSelectTab(tab.id)}
-              className={`flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left text-sm font-medium transition-colors ${
+              className={`flex w-full items-center justify-between rounded-md px-2.5 py-2 text-left text-sm transition-colors ${
                 isActive
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  ? "bg-muted font-medium text-foreground"
+                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
               }`}
             >
               <span>{tab.label}</span>
               {tab.id === "messages" && unreadCount > 0 ? (
                 <span
-                  className={`flex min-w-[1.5rem] items-center justify-center rounded-full px-2 py-0.5 text-[11px] font-bold ${
-                    isActive ? "bg-white/20 text-white" : "bg-red-500 text-white"
+                  className={`flex min-w-[1.25rem] items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-medium tabular-nums ${
+                    isActive ? "bg-primary/15 text-primary" : "bg-destructive/90 text-destructive-foreground"
                   }`}
                 >
                   {unreadCount}
@@ -179,12 +146,12 @@ const AdminSidebarContent = ({
             </button>
           );
         })}
-      </div>
+      </nav>
 
-      <div className="mt-6 border-t border-border pt-4">
-        <Button variant="outline" onClick={onSignOut} className="w-full justify-start rounded-2xl">
-          <LogOut className="mr-2 h-4 w-4" />
-          Sign Out
+      <div className="mt-auto border-t border-border pt-3">
+        <Button variant="ghost" size="sm" onClick={onSignOut} className="w-full justify-start px-2.5 text-muted-foreground hover:text-foreground">
+          <LogOut className="mr-2 h-4 w-4 shrink-0" />
+          Sign out
         </Button>
       </div>
     </div>
@@ -336,7 +303,12 @@ const Admin = () => {
   if (authLoading || loading) {
     return (
       <PageTransition>
-        <div className="min-h-screen bg-background">
+        <Helmet>
+          <title>{`Admin | ${SITE_NAME}`}</title>
+          <meta name="robots" content="noindex, nofollow" />
+        </Helmet>
+        <Navbar />
+        <div className="flex min-h-screen items-center justify-center bg-background pt-11">
           <SuspenseFallback />
         </div>
       </PageTransition>
@@ -349,25 +321,26 @@ const Admin = () => {
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-muted/20">
-        <div className="mx-auto flex min-h-screen w-full max-w-[1600px] flex-col gap-6 px-4 py-4 sm:px-6 lg:px-8">
-          <main className="min-w-0 flex-1 pb-6">
-            <div className="mb-4 flex items-center justify-between gap-3 rounded-[28px] border border-border bg-card p-4 shadow-sm">
+      <Helmet>
+        <title>{`Admin | ${SITE_NAME}`}</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
+      <Navbar />
+      <div className="min-h-screen bg-background pt-11">
+        <div className="mx-auto flex min-h-[calc(100vh-2.75rem)] w-full max-w-[1600px] flex-col">
+            <header className="sticky top-11 z-40 flex items-center justify-between gap-3 border-b border-border bg-background/95 px-3 py-2 backdrop-blur-sm sm:px-4">
               <Sheet open={isMobileNavOpen} onOpenChange={setIsMobileNavOpen}>
                 <SheetTrigger asChild>
-                  <Button size="icon" variant="outline" className="shrink-0 rounded-2xl" aria-label="Open admin menu">
+                  <Button size="icon" variant="outline" className="h-9 w-9 shrink-0" aria-label="Open sections menu">
                     <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-[88vw] max-w-sm">
-                  <SheetHeader>
-                    <SheetTitle>Admin Navigation</SheetTitle>
-                    <SheetDescription>
-                      Switch between admin sections and account actions.
-                    </SheetDescription>
+                <SheetContent side="left" className="w-[min(20rem,88vw)] p-0">
+                  <SheetHeader className="border-b border-border px-4 py-3 text-left">
+                    <SheetTitle className="text-base">Sections</SheetTitle>
+                    <SheetDescription className="text-xs">Choose a screen. Closes after you pick one.</SheetDescription>
                   </SheetHeader>
-
-                  <div className="mt-6">
+                  <div className="px-3 py-3">
                     <AdminSidebarContent
                       activeTab={activeTab}
                       unreadCount={unreadCount}
@@ -378,35 +351,30 @@ const Admin = () => {
                   </div>
                 </SheetContent>
               </Sheet>
+              <p className="min-w-0 truncate text-right text-sm text-muted-foreground">{activeTabMeta.label}</p>
+            </header>
 
-              <div className="min-w-0 flex-1 text-right">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                  Admin Panel
-                </p>
-                <h1 className="mt-1 text-lg font-bold text-foreground">Tambua Africa</h1>
-              </div>
-            </div>
-
-            <div className="mb-6 rounded-[28px] border border-border bg-card p-5 shadow-sm sm:p-6">
-              <p className="text-sm font-semibold text-accent">{activeTabMeta.label}</p>
-              <h2 className="mt-2 text-2xl font-bold text-foreground sm:text-3xl">
-                Admin Dashboard
-              </h2>
-              <p className="mt-2 max-w-3xl text-sm text-muted-foreground sm:text-base">
-                {activeTabMeta.description}
-              </p>
+            <main className="min-w-0 flex-1 px-3 py-4 sm:px-5 sm:py-5">
+            <div className="mb-6 border-b border-border pb-5">
+              <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">{activeTabMeta.label}</h1>
+              <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{activeTabMeta.hint}</p>
             </div>
 
             <Suspense
               fallback={
-                <div className="flex justify-center rounded-[28px] border border-border bg-card p-12 shadow-sm">
-                  <Loader2 className="h-8 w-8 animate-spin text-accent" />
+                <div className="flex justify-center rounded-lg border border-border bg-card p-10">
+                  <Loader2 className="h-7 w-7 animate-spin text-muted-foreground" />
                 </div>
               }
             >
               {activeTab === "carousel" && (
                 <ErrorBoundary>
                   <AdminCarousel />
+                </ErrorBoundary>
+              )}
+              {activeTab === "site_copy" && (
+                <ErrorBoundary>
+                  <AdminSiteCopy />
                 </ErrorBoundary>
               )}
               {activeTab === "safaris" && (
@@ -448,45 +416,45 @@ const Admin = () => {
 
             {activeTab === "bookings" && (
               <>
-                <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
-                  <div className="rounded-2xl border border-border bg-card p-6">
+                <div className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
+                  <div className="rounded-lg border border-border bg-card p-4 sm:p-5">
                     <div className="flex items-center gap-3">
-                      <BarChart3 className="h-8 w-8 text-accent" />
+                      <BarChart3 className="h-7 w-7 shrink-0 text-muted-foreground" />
                       <div>
-                        <p className="text-2xl font-bold text-foreground">{stats.total}</p>
-                        <p className="text-sm text-muted-foreground">Total Bookings</p>
+                        <p className="text-2xl font-semibold tabular-nums text-foreground">{stats.total}</p>
+                        <p className="text-sm text-muted-foreground">All bookings</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-border bg-card p-6">
+                  <div className="rounded-lg border border-border bg-card p-4 sm:p-5">
                     <div className="flex items-center gap-3">
-                      <Calendar className="h-8 w-8 text-primary" />
+                      <Calendar className="h-7 w-7 shrink-0 text-muted-foreground" />
                       <div>
-                        <p className="text-2xl font-bold text-foreground">{stats.confirmed}</p>
+                        <p className="text-2xl font-semibold tabular-nums text-foreground">{stats.confirmed}</p>
                         <p className="text-sm text-muted-foreground">Confirmed</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-border bg-card p-6">
+                  <div className="rounded-lg border border-border bg-card p-4 sm:p-5">
                     <div className="flex items-center gap-3">
-                      <DollarSign className="h-8 w-8 text-secondary" />
+                      <DollarSign className="h-7 w-7 shrink-0 text-muted-foreground" />
                       <div>
-                        <p className="text-2xl font-bold text-foreground">
+                        <p className="text-2xl font-semibold tabular-nums text-foreground">
                           ${(stats.revenue / 100).toLocaleString()}
                         </p>
-                        <p className="text-sm text-muted-foreground">Revenue</p>
+                        <p className="text-sm text-muted-foreground">From confirmed</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-border bg-card p-6">
+                  <div className="rounded-lg border border-border bg-card p-4 sm:p-5">
                     <div className="flex items-center gap-3">
-                      <Users className="h-8 w-8 text-accent" />
+                      <Users className="h-7 w-7 shrink-0 text-muted-foreground" />
                       <div>
-                        <p className="text-2xl font-bold text-foreground">{stats.pending}</p>
-                        <p className="text-sm text-muted-foreground">Pending</p>
+                        <p className="text-2xl font-semibold tabular-nums text-foreground">{stats.pending}</p>
+                        <p className="text-sm text-muted-foreground">Awaiting action</p>
                       </div>
                     </div>
                   </div>
@@ -496,15 +464,15 @@ const Admin = () => {
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                      placeholder="Search bookings..."
+                      placeholder="Search name, safari, phone…"
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
-                      className="rounded-xl pl-10"
+                      className="pl-10"
                     />
                   </div>
 
                   <Select value={filterStatus} onValueChange={setFilterStatus}>
-                    <SelectTrigger className="w-full rounded-xl sm:w-[180px]">
+                    <SelectTrigger className="w-full sm:w-[180px]">
                       <SelectValue placeholder="Filter by status" />
                     </SelectTrigger>
                     <SelectContent>
@@ -517,7 +485,7 @@ const Admin = () => {
                   </Select>
                 </div>
 
-                <div className="overflow-hidden rounded-2xl border border-border bg-card">
+                <div className="overflow-hidden rounded-lg border border-border bg-card">
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
@@ -564,7 +532,7 @@ const Admin = () => {
                             <td className="p-4 text-sm text-foreground">
                               {booking.total_amount > 0
                                 ? `$${(booking.total_amount / 100).toLocaleString()}`
-                                : "—"}
+                                : "N/A"}
                             </td>
                             <td className="p-4">
                               <Badge className={statusColors[booking.status] || "bg-muted text-muted-foreground"}>
@@ -618,6 +586,7 @@ const Admin = () => {
               </>
             )}
           </main>
+          </div>
         </div>
 
         <Dialog
@@ -628,7 +597,7 @@ const Admin = () => {
         >
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Booking Details</DialogTitle>
+              <DialogTitle>Booking</DialogTitle>
             </DialogHeader>
 
             {selectedBooking && (
@@ -683,7 +652,6 @@ const Admin = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
     </PageTransition>
   );
 };

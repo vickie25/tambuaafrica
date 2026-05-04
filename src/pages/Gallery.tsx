@@ -4,6 +4,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import OptimizedImage from "@/components/ui/optimized-image";
+import { fallbackSafariImage } from "@/lib/remote-media-fallbacks";
 import { useCarouselImageItems } from "@/hooks/useCarouselImages";
 
 const folderGalleryImages = [
@@ -68,6 +69,7 @@ const Gallery = () => {
           <div className="absolute inset-0 z-0 opacity-20">
             <OptimizedImage
               src="/images/real images frm Tambua/Team Bonding with Maasai Culture.jpeg"
+              fallbackSrc={fallbackSafariImage("gallery-hero")}
               alt="Gallery Background"
               className="w-full h-full object-cover"
               priority
@@ -99,6 +101,7 @@ const Gallery = () => {
                   <div className="relative rounded-2xl overflow-hidden">
                     <OptimizedImage
                       src={photo.src}
+                      fallbackSrc={fallbackSafariImage(`gallery-tile-${i}`)}
                       alt={photo.alt}
                       className="w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
@@ -152,7 +155,7 @@ const Gallery = () => {
               onClick={(e) => e.stopPropagation()}
             />
             <div className="absolute bottom-6 text-white/70 text-sm">
-              {lightbox + 1} / {filtered.length} — {filtered[lightbox].alt}
+              {lightbox + 1} / {filtered.length}: {filtered[lightbox].alt}
             </div>
           </motion.div>
         )}

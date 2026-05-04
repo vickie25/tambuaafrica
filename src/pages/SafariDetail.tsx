@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -7,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { useSafari } from "@/hooks/useSafaris";
 import BookingModal from "@/components/booking/BookingModal";
 import { Star, MapPin, Clock, CheckCircle2, ArrowLeft, Users, Calendar, Shield, Loader2 } from "lucide-react";
+import OptimizedImage from "@/components/ui/optimized-image";
+import { fallbackSafariImage } from "@/lib/remote-media-fallbacks";
+import { SITE_NAME, SITE_ORIGIN, absoluteUrl, truncateMetaDescription } from "@/lib/seo";
 
 const itineraries: Record<string, string[]> = {
   "masai-mara-serengeti-circuit": [
@@ -73,6 +77,10 @@ const SafariDetail = () => {
   if (!safari) {
     return (
       <div className="min-h-screen">
+        <Helmet>
+          <title>{`Safari not found | ${SITE_NAME}`}</title>
+          <meta name="robots" content="noindex, follow" />
+        </Helmet>
         <Navbar />
         <div className="pt-32 pb-20 text-center">
           <h1 className="text-3xl font-bold text-foreground">Safari not found</h1>
@@ -84,13 +92,62 @@ const SafariDetail = () => {
   }
 
   const days = itineraries[safari.id] || ["Contact us for a detailed itinerary."];
+  const pageUrl = `${SITE_ORIGIN}/safaris/${safari.id}`;
+  const metaDescription = truncateMetaDescription(`${safari.description} ${safari.location}. ${safari.duration}.`);
+  const ogImage = absoluteUrl(safari.image);
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "TouristTrip",
+    name: safari.title,
+    description: safari.description,
+    touristType: "Safari",
+    image: ogImage,
+    provider: {
+      "@type": "TravelAgency",
+      name: SITE_NAME,
+      url: SITE_ORIGIN,
+    },
+    ...(safari.price > 0
+      ? {
+          offers: {
+            "@type": "Offer",
+            price: safari.price,
+            priceCurrency: "USD",
+            url: pageUrl,
+          },
+        }
+      : {}),
+  };
 
   return (
     <div className="min-h-screen">
+      <Helmet>
+        <title>{`${safari.title} | ${SITE_NAME}`}</title>
+        <meta name="description" content={metaDescription} />
+        <link rel="canonical" href={pageUrl} />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content={SITE_NAME} />
+        <meta property="og:url" content={pageUrl} />
+        <meta property="og:title" content={`${safari.title} | ${SITE_NAME}`} />
+        <meta property="og:description" content={metaDescription} />
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:locale" content="en_US" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={safari.title} />
+        <meta name="twitter:description" content={metaDescription} />
+        <meta name="twitter:image" content={ogImage} />
+        <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
+      </Helmet>
       <Navbar />
       <main>
         <section className="relative h-[60vh] min-h-[400px]">
-          <img src={safari.image} alt={safari.title} className="absolute inset-0 w-full h-full object-cover" />
+          <OptimizedImage
+            src={safari.image}
+            fallbackSrc={fallbackSafariImage(safari.id)}
+            alt={safari.title}
+            className="absolute inset-0 h-full w-full object-cover"
+            priority
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/20" />
           <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10">
             <div className="container-wide mx-auto">
@@ -123,7 +180,7 @@ const SafariDetail = () => {
                   <h2 className="text-2xl font-bold text-foreground mb-4">Overview</h2>
                   <p className="text-muted-foreground leading-relaxed">{safari.description}</p>
                   <p className="text-muted-foreground leading-relaxed mt-3">
-                    This carefully planned itinerary combines standout wildlife, local culture, and well-paced travel across East Africa, giving you a richer regional perspective without losing comfort or flexibility.
+                    This carefully planned itinerary combines standout wildlife, local culture, and well-paced travel across East Africa, giving you a richer regional perspective without losing comfort or flexibility. Ask us to layer in domestic flights, lodge upgrades, or private transfers so the trip feels turnkey from arrival to departure.
                   </p>
                 </motion.div>
 

@@ -9,6 +9,8 @@ import { Calendar, Users, MapPin, LogOut, Loader2, CreditCard, Download, ShieldC
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageTransition from "@/components/layout/PageTransition";
+import { Helmet } from "react-helmet-async";
+import { SITE_NAME } from "@/lib/seo";
 import EditBookingModal from "@/components/booking/EditBookingModal";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -244,6 +246,10 @@ const Dashboard = () => {
 
   return (
     <PageTransition>
+      <Helmet>
+        <title>{`My bookings | ${SITE_NAME}`}</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <Navbar />
       <div className="min-h-screen bg-background pt-24 pb-12 px-4 shadow-sm text-foreground">
         <div className="max-w-5xl mx-auto">

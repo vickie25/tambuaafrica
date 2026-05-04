@@ -4,6 +4,7 @@ import PageTransition from "@/components/layout/PageTransition";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Plane, ShieldCheck, ThermometerSun, Wallet, Camera, HelpCircle } from "lucide-react";
 import OptimizedImage from "@/components/ui/optimized-image";
+import { fallbackSafariImage } from "@/lib/remote-media-fallbacks";
 
 const TravelInfo = () => {
   return (
@@ -15,7 +16,8 @@ const TravelInfo = () => {
         <div className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden bg-primary text-white">
           <div className="absolute inset-0 z-0 opacity-20">
             <OptimizedImage 
-              src="/images/maasai-mara-authentic.webp" 
+              src="/images/maasai-mara-authentic.webp"
+              fallbackSrc={fallbackSafariImage("travel-info-hero")}
               alt="Travel Info Background" 
               className="w-full h-full object-cover"
               priority 
@@ -28,6 +30,29 @@ const TravelInfo = () => {
             </p>
           </div>
         </div>
+
+        <section className="border-b border-border bg-muted/25 py-10">
+          <div className="container-wide mx-auto grid gap-6 px-4 sm:grid-cols-3 sm:px-6 lg:px-8">
+            <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-wider text-accent">Before you fly</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                eTA rules, passport validity, and yellow-fever notes. Start here so immigration stays smooth.
+              </p>
+            </div>
+            <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-wider text-accent">On safari</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Packing colours, layers for dawn drives, and soft bags for light aircraft. Small details that matter.
+              </p>
+            </div>
+            <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-wider text-accent">Money & phones</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Cash vs card, tipping culture, and local SIM tips so you stay connected in the bush and on the coast.
+              </p>
+            </div>
+          </div>
+        </section>
 
         {/* Content Section */}
         <main className="container-wide mx-auto px-4 py-16 sm:py-24">

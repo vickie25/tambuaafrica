@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Destination, destinations as localDestinations } from "@/data/destinations";
+import { fallbackDestinationImage } from "@/lib/remote-media-fallbacks";
 
 export const useDestinations = () => {
   const query = useQuery({
@@ -24,8 +25,14 @@ export const useDestinations = () => {
               ? [item.image]
               : [];
 
-          const finalImage = item.image || local?.image || "";
-          const finalImages = normalizedImages.length > 0 ? normalizedImages : (local?.images || (finalImage ? [finalImage] : []));
+          const finalImage =
+            (item.image || local?.image || "").trim() || fallbackDestinationImage(String(item.id || "destination"));
+          const finalImages =
+            normalizedImages.length > 0
+              ? normalizedImages
+              : local?.images?.length
+                ? local.images
+                : [finalImage];
 
           return {
             ...item,

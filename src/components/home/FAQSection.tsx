@@ -9,7 +9,7 @@ import {
 const faqs = [
   {
     q: "What is the best time to visit East Africa for a safari?",
-    a: "The dry seasons (June–October and January–March) are ideal for wildlife viewing across Kenya and Tanzania. The Great Migration moves through the Serengeti and Masai Mara from July to October. Uganda and Rwanda are great year-round for gorilla trekking, with drier months (June–September, December–February) preferred.",
+    a: "The dry seasons (June to October and January to March) are ideal for wildlife viewing across Kenya and Tanzania. The Great Migration moves through the Serengeti and Masai Mara from July to October. Uganda and Rwanda are great year round for gorilla trekking, with drier months (June to September, December to February) preferred.",
   },
   {
     q: "Do I need visas for multiple East African countries?",
@@ -25,7 +25,7 @@ const faqs = [
   },
   {
     q: "Can I combine multiple countries in one trip?",
-    a: "Absolutely! Multi-country itineraries are our specialty. Popular combinations include Kenya–Tanzania (Mara & Serengeti), Uganda–Rwanda (gorilla trekking), and Tanzania–Zanzibar (bush to beach). We handle all cross-border logistics seamlessly.",
+    a: "Absolutely! Multi-country itineraries are our specialty. Popular combinations include Kenya to Tanzania (Mara & Serengeti), Uganda to Rwanda (gorilla trekking), and Tanzania to Zanzibar (bush to beach). We handle all cross-border logistics seamlessly.",
   },
   {
     q: "Are your safaris suitable for children?",
@@ -38,6 +38,14 @@ const faqs = [
   {
     q: "What is included in the safari price?",
     a: "Our prices typically include accommodation, meals as specified, park entry fees, game drives with professional guides, airport transfers, and transport in a 4x4 safari vehicle. International flights and visa fees are not included.",
+  },
+  {
+    q: "Can Tambua Africa help with flights, buses, or transfers?",
+    a: "Yes. We arrange air and road ticketing where it fits your itinerary, plus private road transfers and coordinated air hops when available. Share your arrival details and park schedule on the Contact page or WhatsApp and we’ll line everything up with your safari dates.",
+  },
+  {
+    q: "Do you book lodges and hotels outside of packaged safaris?",
+    a: "Absolutely. We help clients book lodges, camps, and city hotels across East Africa, matched to park location, budget, and style. We’ll suggest options and handle reservations as part of your wider trip plan.",
   },
 ];
 

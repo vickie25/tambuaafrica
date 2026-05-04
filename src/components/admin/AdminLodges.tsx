@@ -1,4 +1,4 @@
-import { memo, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -27,22 +27,6 @@ type LodgeEditor = {
   order: number;
 };
 
-const destinationOptions = [
-  { id: "tsavo", name: "Tsavo" },
-  { id: "masai-mara", name: "Maasai Mara" },
-  { id: "samburu", name: "Samburu" },
-  { id: "nakuru", name: "Lake Nakuru" },
-  { id: "naivasha", name: "Lake Naivasha" },
-  { id: "amboseli", name: "Amboseli National Park" },
-  { id: "mombasa", name: "Mombasa" },
-  { id: "wasini", name: "Wasini Island" },
-  { id: "diani", name: "Diani" },
-  { id: "chale-island", name: "Chale Island" },
-  { id: "watamu", name: "Watamu" },
-  { id: "mombasa-north-coast", name: "Mombasa North Coast" },
-  { id: "mombasa-south-coast", name: "Mombasa South Coast" },
-];
-
 const emptyLodge: LodgeEditor = {
   id: "",
   destinationId: "tsavo",
@@ -60,12 +44,26 @@ const emptyLodge: LodgeEditor = {
 
 export const AdminLodges = () => {
   const { data: grouped = [], isLoading } = useDestinationLodges();
+  const destinationOptions = useMemo(() => {
+    const localOrder = new Map(localDestinationLodges.map((g, i) => [g.destinationId, i]));
+    const opts = grouped.map((g) => ({ id: g.destinationId, name: g.destinationName }));
+    opts.sort((a, b) => (localOrder.get(a.id) ?? 500) - (localOrder.get(b.id) ?? 500));
+    return opts;
+  }, [grouped]);
+
   const [selectedDestination, setSelectedDestination] = useState<string>("tsavo");
   const [editing, setEditing] = useState<LodgeEditor | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadMode, setUploadMode] = useState<"original" | "optimized">("original");
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!destinationOptions.length) return;
+    if (!destinationOptions.some((o) => o.id === selectedDestination)) {
+      setSelectedDestination(destinationOptions[0].id);
+    }
+  }, [destinationOptions, selectedDestination]);
 
   const lodges = useMemo(
     () =>
@@ -83,7 +81,11 @@ export const AdminLodges = () => {
   );
 
   const handleAdd = () => {
-    const option = destinationOptions.find((item) => item.id === selectedDestination) || destinationOptions[0];
+    const option = destinationOptions.find((item) => item.id === selectedDestination) ?? destinationOptions[0];
+    if (!option) {
+      toast.error("No destinations available yet.");
+      return;
+    }
     setEditing({
       ...emptyLodge,
       id: typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `lodge-${Date.now()}`,
@@ -117,11 +119,13 @@ export const AdminLodges = () => {
       const { error } = await (supabase as any).from("destination_lodges").upsert(seedRows);
       if (error) throw error;
 
-      toast.success("Lodges seeded to database");
+      toast.success("Lodges copied to database");
       queryClient.invalidateQueries({ queryKey: ["destination-lodges"] });
     } catch (error) {
       console.error(error);
-      toast.error("Failed to seed lodges. Run scripts/create-destination-lodges-table.sql first.");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to seed lodges. Run create-destination-lodges-table.sql and fix-destination-lodges-rls.sql."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -154,7 +158,9 @@ export const AdminLodges = () => {
       queryClient.invalidateQueries({ queryKey: ["destination-lodges"] });
     } catch (error) {
       console.error(error);
-      toast.error("Failed to delete lodge. Ensure destination_lodges table exists.");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete lodge. Check table and RLS (fix-destination-lodges-rls.sql)."
+      );
     }
   };
 
@@ -205,7 +211,9 @@ export const AdminLodges = () => {
       queryClient.invalidateQueries({ queryKey: ["destination-lodges"] });
     } catch (error) {
       console.error(error);
-      toast.error("Failed to save lodge. Run scripts/create-destination-lodges-table.sql in Supabase.");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to save lodge. Run create-destination-lodges-table.sql and fix-destination-lodges-rls.sql."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -214,22 +222,25 @@ export const AdminLodges = () => {
   if (isLoading) {
     return (
       <div className="p-8 flex justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-accent" />
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 xl:flex-row xl:items-center xl:justify-between">
+      <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-5 xl:flex-row xl:items-center xl:justify-between">
         <div>
-          <h2 className="text-xl font-bold">Manage Destination Lodges</h2>
-          <p className="text-muted-foreground text-sm">Add, edit, and delete lodges grouped by destination.</p>
+          <h2 className="text-lg font-semibold text-foreground">Lodges & camps</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Rows in Supabase override the bundled list when IDs match. &quot;Copy built-in&quot; runs once to populate the table,
+            then edit here.
+          </p>
         </div>
         <div className="flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <Button type="button" variant="outline" onClick={handleSeedFromLocalData} disabled={isSubmitting} className="shrink-0">
             {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-            Seed Lodges to DB
+            Copy built-in list
           </Button>
           <Select value={selectedDestination} onValueChange={setSelectedDestination}>
             <SelectTrigger className="w-[220px] shrink-0">
@@ -250,7 +261,7 @@ export const AdminLodges = () => {
         </div>
       </div>
 
-      <div className="bg-card rounded-2xl border border-border overflow-hidden">
+      <div className="overflow-hidden rounded-lg border border-border bg-card">
         <div className="grid grid-cols-2 gap-4 p-6 lg:grid-cols-3">
           {lodges.map((lodge) => (
             <div key={lodge.id} className="rounded-xl border border-border overflow-hidden bg-background">
@@ -278,7 +289,7 @@ export const AdminLodges = () => {
       <Dialog open={!!editing} onOpenChange={(open) => !open && setEditing(null)}>
         <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editing?.name ? "Edit Lodge" : "Add Lodge"}</DialogTitle>
+            <DialogTitle>{editing?.name?.trim() ? "Edit lodge / camp" : "Add lodge / camp"}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
@@ -320,15 +331,36 @@ export const AdminLodges = () => {
                     <SelectItem value="luxury">Luxury</SelectItem>
                     <SelectItem value="mid-range">Mid-range</SelectItem>
                     <SelectItem value="budget">Budget</SelectItem>
-                    <SelectItem value="camp">Camp</SelectItem>
+                    <SelectItem value="camp">Tented camp / camp</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-sm font-medium">Lodge Name</label>
-              <Input value={editing?.name || ""} onChange={(e) => setEditing((prev) => (prev ? { ...prev, name: e.target.value } : prev))} required />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-sm font-medium">Lodge or camp name</label>
+                <Input
+                  value={editing?.name || ""}
+                  onChange={(e) => setEditing((prev) => (prev ? { ...prev, name: e.target.value } : prev))}
+                  required
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-sm font-medium">Display order</label>
+                <Input
+                  type="number"
+                  min={0}
+                  step={1}
+                  value={editing?.order ?? 0}
+                  onChange={(e) =>
+                    setEditing((prev) =>
+                      prev ? { ...prev, order: Number.parseInt(e.target.value, 10) || 0 } : prev
+                    )
+                  }
+                />
+                <p className="text-xs text-muted-foreground">Lower numbers appear first in the list.</p>
+              </div>
             </div>
 
             <div className="space-y-1">
@@ -375,7 +407,7 @@ export const AdminLodges = () => {
               </Button>
               <Button type="submit" className="bg-accent hover:bg-accent/90" disabled={isSubmitting || uploading}>
                 {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                Save Lodge
+                Save
               </Button>
             </DialogFooter>
           </form>

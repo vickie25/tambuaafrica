@@ -39,7 +39,7 @@ export const destinations: Destination[] = [
     description:
       "A vast red-earth wilderness comprising Tsavo East and West, famous for its 'red elephants', the Mzima Springs, and rugged volcanic landscapes.",
     story:
-      "Tsavo is the wild Africa that exists in your imagination—vast, untamed, and refreshingly free from the complexities of tourism infrastructure. This colossal park draws you into genuine frontier territory where red dust hangs in the air like an ancient signature, where enormous bull elephants roam freely, and where your game drive might reveal lions that have never seen a tourist vehicle before.",
+      "Tsavo is the wild Africa that exists in your imagination, vast, untamed, and refreshingly free from the complexities of tourism infrastructure. This colossal park draws you into genuine frontier territory where red dust hangs in the air like an ancient signature, where enormous bull elephants roam freely, and where your game drive might reveal lions that have never seen a tourist vehicle before.",
     features: [
       "Africa's largest park complex: Tsavo East and West combine to create over 20,000 km² of pristine wilderness",
       "Red elephant phenomenon: Famous red dust covers both elephants and landscape, creating striking safari photographs",
@@ -62,10 +62,10 @@ export const destinations: Destination[] = [
     description:
       "The world-renowned home of the Great Migration, offering the highest density of predators and breath-taking savannah vistas.",
     story:
-      "Masai Mara stands as the crown jewel of African safaris, where the rhythm of nature beats in thunderous hoofbeats and golden dust clouds. Each year, the phenomenon of the Great Migration transforms the landscape into a living stage where survival hangs in the balance—thousands of wildebeest and zebras navigate crocodile-filled rivers while prides of lions watch from the grasslands. The Mara's amber plains stretch endlessly beneath impossibly vast African skies, where every game drive reveals a new chapter: a cheetah sprint at dawn, a rare leopard in an acacia tree, or a family of elephants moving serenely through the bush.",
+      "Masai Mara stands as the crown jewel of African safaris, where the rhythm of nature beats in thunderous hoofbeats and golden dust clouds. Each year, the phenomenon of the Great Migration transforms the landscape into a living stage where survival hangs in the balance, thousands of wildebeest and zebras navigate crocodile-filled rivers while prides of lions watch from the grasslands. The Mara's amber plains stretch endlessly beneath impossibly vast African skies, where every game drive reveals a new chapter: a cheetah sprint at dawn, a rare leopard in an acacia tree, or a family of elephants moving serenely through the bush.",
     features: [
       "The Great Migration: Witness up to 1.5 million wildebeest, zebras, and gazelles crossing the Mara River in the spectacle of nature's most dramatic annual event",
-      "Exceptional predator viewing: One of Africa's highest concentrations of lions, leopards, and cheetahs—ideal for photography and wildlife encounters",
+      "Exceptional predator viewing: One of Africa's highest concentrations of lions, leopards, and cheetahs, ideal for photography and wildlife encounters",
       "Pristine ecosystem: Covers 1,510 square kilometers of intact savannah with diverse habitats from riverine forests to open plains",
       "Maasai cultural immersion: Home to the Maasai people, offering authentic visits to traditional warrior bomas and insights into pastoral life",
     ],
@@ -84,9 +84,9 @@ export const destinations: Destination[] = [
     description:
       "A rugged northern frontier known for rare wildlife species, the Ewaso Ng'iro River, and the vibrant Samburu culture.",
     story:
-      "Samburu is Kenya's northern secret — a semi-desert landscape where the Ewaso Ng'iro River cuts a ribbon of improbable green through the heat shimmer, and where wildlife evolution has taken its own remarkable path. The animals here exist nowhere else on Earth in the same combination, shaped by millions of years of adaptation to this precise, beautiful harshness.",
+      "Samburu is Kenya's northern secret,  a semi-desert landscape where the Ewaso Ng'iro River cuts a ribbon of improbable green through the heat shimmer, and where wildlife evolution has taken its own remarkable path. The animals here exist nowhere else on Earth in the same combination, shaped by millions of years of adaptation to this precise, beautiful harshness.",
     features: [
-      "Samburu Special Five: Grevy's zebra, reticulated giraffe, gerenuk, Somali ostrich, and Beisa oryx — all endemic to this region",
+      "Samburu Special Five: Grevy's zebra, reticulated giraffe, gerenuk, Somali ostrich, and Beisa oryx,  all endemic to this region",
       "Ewaso Ng'iro River: Permanent water source creating dense wildlife corridors with crocodile, hippo, and 350+ bird species",
       "Remote northern wilderness: Far fewer visitors than southern parks, delivering authentic encounters",
       "Samburu culture: One of Kenya's most vivid indigenous communities, famed for beadwork, ochre, and warrior traditions",
@@ -106,7 +106,7 @@ export const destinations: Destination[] = [
     description:
       "A sanctuary for rhinos and flamingos set against the backdrop of the Great Rift Valley, featuring dramatic escarpments and acacia woodlands.",
     story:
-      "Lake Nakuru turns pink at dawn — not from the light, but from the flamingos. Millions of them sometimes ring the lake's edges in an unbroken coral necklace, so dense and so vivid that first-time visitors literally stop breathing. Behind this spectacle, rhinos graze on the hillside above, leopards move between the yellow fever trees, and the Great Rift Valley escarpment frames everything in geological magnificence.",
+      "Lake Nakuru turns pink at dawn,  not from the light, but from the flamingos. Millions of them sometimes ring the lake's edges in an unbroken coral necklace, so dense and so vivid that first-time visitors literally stop breathing. Behind this spectacle, rhinos graze on the hillside above, leopards move between the yellow fever trees, and the Great Rift Valley escarpment frames everything in geological magnificence.",
     features: [
       "Lake Nakuru flamingos: Up to 2 million pink flamingos can ring the lake simultaneously in one of the world's greatest ornithological spectacles",
       "Rhino sanctuary: Both endangered black and southern white rhinos find refuge in the park's protected sanctuary",
@@ -129,7 +129,7 @@ export const destinations: Destination[] = [
     description:
       "A beautiful freshwater lake in the Rift Valley, perfect for boat safaris, birdwatching, and exploring Crescent Island.",
     story:
-      "Lake Naivasha is where the Rift Valley exhales. After the drama of Nakuru's flamingos and the red dust of Tsavo, Naivasha offers the lushness and cool that only 1,800 metres of altitude and a freshwater lake can provide. Hippos graze the lawn at dusk, eagles soar over papyrus beds, and the cycling trail through Hell's Gate — where geothermal steam vents beside a gorge that could swallow a city block — is unlike anything else in Kenya.",
+      "Lake Naivasha is where the Rift Valley exhales. After the drama of Nakuru's flamingos and the red dust of Tsavo, Naivasha offers the lushness and cool that only 1,800 metres of altitude and a freshwater lake can provide. Hippos graze the lawn at dusk, eagles soar over papyrus beds, and the cycling trail through Hell's Gate,  where geothermal steam vents beside a gorge that could swallow a city block,  is unlike anything else in Kenya.",
     features: [
       "Freshwater Rift Valley lake: Africa's only major freshwater lake in the Rift Valley, surrounded by papyrus and fever trees",
       "Hell's Gate National Park: Unique cycling-inside-the-park experience through gorges and hot springs",
@@ -186,11 +186,11 @@ export const destinations: Destination[] = [
     name: "Chale Island",
     country: "Kenya",
     description:
-      "A breathtaking private coral island rising from the turquoise Indian Ocean off Diani Beach — Kenya's most exclusive island escape, accessible only by boat.",
+      "A breathtaking private coral island rising from the turquoise Indian Ocean off Diani Beach,  Kenya's most exclusive island escape, accessible only by boat.",
     story:
-      "Chale Island is Kenya's best-kept coastal secret — a coral jewel adrift in the glittering Indian Ocean, separated from the rest of the world by five minutes of blue water. The island wears its age lightly: ancient coral rock formations frame a modern luxury retreat where the heart-shaped infinity pool becomes less a amenity than a statement of intent. Each dawn brings new sea turtle sightings in the shallows, each dusk a sunset that sets the Indian Ocean on fire. Dining here, with bare feet in the sand and fresh Swahili seafood on the table, is as close to paradise as East Africa gets.",
+      "Chale Island is Kenya's best-kept coastal secret,  a coral jewel adrift in the glittering Indian Ocean, separated from the rest of the world by five minutes of blue water. The island wears its age lightly: ancient coral rock formations frame a modern luxury retreat where the heart-shaped infinity pool becomes less a amenity than a statement of intent. Each dawn brings new sea turtle sightings in the shallows, each dusk a sunset that sets the Indian Ocean on fire. Dining here, with bare feet in the sand and fresh Swahili seafood on the table, is as close to paradise as East Africa gets.",
     features: [
-      "Private coral island: A 10-acre paradise rising from the Indian Ocean, accessible exclusively by motorboat — total seclusion from the mainland",
+      "Private coral island: A 10-acre paradise rising from the Indian Ocean, accessible exclusively by motorboat,  total seclusion from the mainland",
       "Iconic heart-shaped infinity pool: Carved into the coral cliff edge with a jaw-dropping drop into the turquoise sea below",
       "World-class marine biodiversity: A pristine house reef supports sea turtles, dolphins, over 200 coral fish species, and vibrant coral gardens",
       "Swahili-Arabic heritage architecture: Hand-carved timber, painted tiles, and ocean-facing verandas echo centuries of coastal craftsmanship",
@@ -210,14 +210,14 @@ export const destinations: Destination[] = [
     name: "Watamu",
     country: "Kenya",
     description:
-      "A pristine coastal paradise north of Mombasa, where the Indian Ocean meets Kenya's most spectacular marine park — famous for coral reefs, sea turtles, world-class game fishing, and warm turquoise waters.",
+      "A pristine coastal paradise north of Mombasa, where the Indian Ocean meets Kenya's most spectacular marine park,  famous for coral reefs, sea turtles, world-class game fishing, and warm turquoise waters.",
     story:
-      "Watamu is where Kenya's coast reveals its most untouched face. The town sits between two of the country's greatest natural treasures — a marine park of extraordinary coral richness and a coastal forest that predates recorded history. Sport fishing boats leave at dawn in search of world-record marlin; by mid-morning the reef is alive with snorkelers chasing sea turtles through coral gardens. The pace here is dictated entirely by the Indian Ocean: slow when the tide is out, unhurried when it's in, and always accompanied by the kind of light that makes every moment feel golden.",
+      "Watamu is where Kenya's coast reveals its most untouched face. The town sits between two of the country's greatest natural treasures,  a marine park of extraordinary coral richness and a coastal forest that predates recorded history. Sport fishing boats leave at dawn in search of world-record marlin; by mid-morning the reef is alive with snorkelers chasing sea turtles through coral gardens. The pace here is dictated entirely by the Indian Ocean: slow when the tide is out, unhurried when it's in, and always accompanied by the kind of light that makes every moment feel golden.",
     features: [
-      "Watamu Marine National Park: One of Kenya's most biodiverse marine reserves — pristine coral gardens, whale sharks, manta rays, and nesting sea turtles",
+      "Watamu Marine National Park: One of Kenya's most biodiverse marine reserves,  pristine coral gardens, whale sharks, manta rays, and nesting sea turtles",
       "World-class game fishing: Blue-water fisheries ranked among Africa's best for marlin, sailfish, wahoo, and yellowfin tuna",
-      "Arabuko-Sokoke Forest: Adjacent to Africa's largest coastal forest — home to rare elephants, golden-rumped elephant shrews, and 230+ bird species",
-      "Watamu Beach: A sweeping arc of white sand with warm, calm turquoise waters sheltered by a natural bay — one of Kenya's most beautiful beaches",
+      "Arabuko-Sokoke Forest: Adjacent to Africa's largest coastal forest,  home to rare elephants, golden-rumped elephant shrews, and 230+ bird species",
+      "Watamu Beach: A sweeping arc of white sand with warm, calm turquoise waters sheltered by a natural bay,  one of Kenya's most beautiful beaches",
     ],
     image: "/images/watamu-beach.webp",
     images: [
@@ -234,7 +234,7 @@ export const destinations: Destination[] = [
     description:
       "A serene, vehicle-free coral island off Kenya's southern coast. Gateway to Kisite Mpunguti Marine Park, offering spectacular dolphin spotting, pristine snorkeling, and authentic Swahili culture.",
     story:
-      "Wasini Island forces you to slow down. The moment you step off the boat onto its sandy paths, time seems to stretch. There are no engines here—only the rustle of wind through massive baobab trees and the lap of the ocean against coral cliffs. Days are spent sailing out on traditional dhows to Kisite Mpunguti, sliding into warm waters to swim alongside pods of playful dolphins, and returning to mainland to feast on Swahili seafood platters. It's a glimpse into the Kenyan coast as it was centuries ago.",
+      "Wasini Island forces you to slow down. The moment you step off the boat onto its sandy paths, time seems to stretch. There are no engines here, only the rustle of wind through massive baobab trees and the lap of the ocean against coral cliffs. Days are spent sailing out on traditional dhows to Kisite Mpunguti, sliding into warm waters to swim alongside pods of playful dolphins, and returning to mainland to feast on Swahili seafood platters. It's a glimpse into the Kenyan coast as it was centuries ago.",
     features: [
       "Kisite Mpunguti Marine Park: Simply the best snorkeling and diving in Kenya, heavily populated with resident dolphins and untouched coral.",
       "Traditional dhow sailing: The only way to access the marine park is via traditional wooden dhows, preserving ancient seafaring culture.",

@@ -1,9 +1,7 @@
-/** Admin sign-in address (see update-admin.js). Legacy info@ still grants admin. */
-export const ADMIN_LOGIN_EMAIL = "inf@tambuaafrica.com";
+/** Prefilled on /login?redirect=/admin. Must match a Supabase Auth user you control. */
+export const ADMIN_LOGIN_EMAIL = "info@tambuaafrica.com";
 
-const ADMIN_EMAILS = new Set(
-  [ADMIN_LOGIN_EMAIL, "info@tambuaafrica.com"].map((e) => e.toLowerCase()),
-);
+const ADMIN_EMAILS = new Set([ADMIN_LOGIN_EMAIL.toLowerCase()]);
 
 export function isAdminMailbox(email: string | null | undefined): boolean {
   const e = email?.toLowerCase().trim();

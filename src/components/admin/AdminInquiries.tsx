@@ -105,7 +105,7 @@ export const AdminInquiries = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-12">
-        <Loader2 className="w-8 h-8 animate-spin text-accent" />
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -127,7 +127,7 @@ export const AdminInquiries = () => {
         </div>
       </div>
 
-      <div className="bg-card rounded-2xl border border-border overflow-hidden">
+      <div className="overflow-hidden rounded-lg border border-border bg-card">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
@@ -206,7 +206,7 @@ export const AdminInquiries = () => {
       <Dialog open={!!selectedInquiry} onOpenChange={(open) => !open && setSelectedInquiry(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Inquiry Details</DialogTitle>
+            <DialogTitle>Message</DialogTitle>
           </DialogHeader>
           {selectedInquiry && (
             <div className="space-y-4">
@@ -242,7 +242,7 @@ export const AdminInquiries = () => {
                 {selectedInquiry.inquiry_type === "booking" && (
                   <>
                     <div className="col-span-2 mt-2 pt-2 border-t border-border">
-                      <p className="text-accent font-bold text-xs uppercase">Booking Details</p>
+                      <p className="text-xs font-medium text-muted-foreground">Trip details</p>
                     </div>
                     <div>
                       <p className="text-muted-foreground font-medium truncate">Safari</p>

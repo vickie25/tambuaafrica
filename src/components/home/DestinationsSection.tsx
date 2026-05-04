@@ -1,9 +1,21 @@
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import type { Destination } from "@/data/destinations";
 import { useDestinations } from "@/hooks/useDestinations";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import OptimizedImage from "@/components/ui/optimized-image";
 import { useCarouselImages } from "@/hooks/useCarouselImages";
+import { fallbackDestinationImage } from "@/lib/remote-media-fallbacks";
+
+const PREFERRED_FEATURED_IDS = [
+  "masai-mara",
+  "tsavo",
+  "amboseli",
+  "diani",
+  "nakuru",
+  "naivasha",
+];
 
 const DestinationsSection = () => {
   const { ref, isVisible } = useScrollAnimation();
@@ -11,10 +23,13 @@ const DestinationsSection = () => {
   const { data: destinations = [], isLoading } = useDestinations();
   const { data: sectionImages = [] } = useCarouselImages("destinations");
 
-  // Show a curated selection of 6 across different countries
-  const featured = destinations.filter((d) =>
-    ["masai-mara", "serengeti", "bwindi", "zanzibar", "volcanoes-rwanda", "kilimanjaro"].includes(d.id)
-  );
+  const featured = useMemo(() => {
+    const preferred = destinations.filter((d) => PREFERRED_FEATURED_IDS.includes(d.id));
+    if (preferred.length > 0) {
+      return PREFERRED_FEATURED_IDS.map((id) => preferred.find((d) => d.id === id)).filter(Boolean) as Destination[];
+    }
+    return destinations.slice(0, 6);
+  }, [destinations]);
 
   return (
     <section className="section-padding bg-background" ref={ref}>
@@ -47,6 +62,7 @@ const DestinationsSection = () => {
                 >
                   <OptimizedImage
                     src={destinationImage}
+                    fallbackSrc={fallbackDestinationImage(dest.id)}
                     alt={dest.name}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     priority={index === 0}

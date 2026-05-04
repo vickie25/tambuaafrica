@@ -1,8 +1,9 @@
+import { Link } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageTransition from "@/components/layout/PageTransition";
 import { useScrollAnimation, useCounter } from "@/hooks/useScrollAnimation";
-import { CheckCircle2, Heart, Leaf, Globe, Users, Award } from "lucide-react";
+import { CheckCircle2, Heart, Leaf, Globe, Users, Award, Plane, Bus, Hotel } from "lucide-react";
 import OptimizedImage from "@/components/ui/optimized-image";
 
 const values = [
@@ -39,6 +40,7 @@ const team = [
 
 const About = () => {
   const { ref: storyRef, isVisible: storyVisible } = useScrollAnimation();
+  const { ref: servicesRef, isVisible: servicesVisible } = useScrollAnimation();
   const { ref: valuesRef, isVisible: valuesVisible } = useScrollAnimation();
   const { ref: teamRef, isVisible: teamVisible } = useScrollAnimation();
   const { ref: statsRef, isVisible: statsVisible } = useScrollAnimation();
@@ -98,6 +100,59 @@ const About = () => {
                 { value: 50, suffix: "+", label: "Safari Packages" },
               ].map((s) => (
                 <StatBlock key={s.label} {...s} isVisible={statsVisible} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="section-padding bg-background" ref={servicesRef}>
+          <div className="container-wide mx-auto">
+            <div className={`text-center mb-12 transition-all duration-700 ${servicesVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
+              <span className="text-accent font-semibold text-sm uppercase tracking-wider">Full-trip support</span>
+              <h2 className="text-3xl sm:text-4xl font-bold text-foreground mt-2">Ticketing, transfers & lodges</h2>
+              <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
+                Alongside safaris, we help travellers with air and road tickets, reliable transfers, and lodge or camp
+                reservations, so the journey from your front door to the bush stays coordinated.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                {
+                  icon: Plane,
+                  title: "Air & road ticketing",
+                  text: "Domestic and international flights, plus coach and shuttle options when they fit your route and budget.",
+                  path: "/services/ticketing",
+                },
+                {
+                  icon: Bus,
+                  title: "Road & air transfers",
+                  text: "Airport and hotel pickups, park gate transfers, and light-air connections arranged around your itinerary.",
+                  path: "/services/transfers",
+                },
+                {
+                  icon: Hotel,
+                  title: "Lodge & hotel booking",
+                  text: "Curated stays from city hotels to bush camps, chosen for location, comfort, and how they pair with your parks.",
+                  path: "/services/lodges-camps",
+                },
+              ].map((item, i) => (
+                <div
+                  key={item.title}
+                  className={`rounded-2xl border border-border bg-card p-6 transition-all duration-500 ${servicesVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+                  style={{ transitionDelay: `${i * 80}ms` }}
+                >
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
+                    <item.icon className="h-6 w-6 text-accent" />
+                  </div>
+                  <h3 className="font-bold text-lg text-foreground">{item.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.text}</p>
+                  <Link
+                    to={item.path}
+                    className="mt-4 inline-block text-sm font-semibold text-primary underline-offset-4 hover:underline"
+                  >
+                    How this works
+                  </Link>
+                </div>
               ))}
             </div>
           </div>

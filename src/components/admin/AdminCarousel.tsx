@@ -27,13 +27,13 @@ interface CarouselImage {
 }
 
 const sectionLabelMap: Record<CarouselImage["section"], string> = {
-  hero: "Hero Section",
-  activities: "Activities Section",
-  destinations: "Destinations Section",
-  gallery: "Gallery Section",
-  feature_wild: "Experience the Wild",
-  feature_culture: "Our Cultural Heritage",
-  feature_luxury: "Luxury Reimagined",
+  hero: "Hero",
+  activities: "Activities",
+  destinations: "Destinations",
+  gallery: "Gallery",
+  feature_wild: "Wild strip",
+  feature_culture: "Culture strip",
+  feature_luxury: "Luxury strip",
 };
 
 const activityIconOptions = [
@@ -244,7 +244,7 @@ export const AdminCarousel = () => {
       const { error } = await supabase.from("carousel_images").upsert(payload);
       if (error) throw error;
 
-      toast.success("Default activities loaded successfully");
+      toast.success("Activities reset from template");
       await fetchImages();
       queryClient.invalidateQueries({ queryKey: ["carousel-images"] });
       queryClient.invalidateQueries({ queryKey: ["carousel-image-items"] });
@@ -277,7 +277,7 @@ export const AdminCarousel = () => {
       const { error } = await supabase.from("carousel_images").upsert(payload);
       if (error) throw error;
 
-      toast.success("Gallery loaded from real images folder");
+      toast.success("Gallery rows replaced");
       await fetchImages();
       queryClient.invalidateQueries({ queryKey: ["carousel-images"] });
       queryClient.invalidateQueries({ queryKey: ["carousel-image-items"] });
@@ -316,7 +316,7 @@ export const AdminCarousel = () => {
     } catch (error) {
       console.error("Carousel upload error:", error);
       setEditing((prev) => (prev ? { ...prev, url: previousImage } : null));
-      toast.error("Image upload failed. Please try again or paste a URL.");
+      toast.error("Upload failed. Paste a URL or try again.");
     } finally {
       setUploading(false);
       setUploadStatus(null);
@@ -328,7 +328,7 @@ export const AdminCarousel = () => {
     e.preventDefault();
     if (!editing) return;
     if (!editing.url || editing.url.startsWith("blob:")) {
-      toast.error("Please wait for upload to complete or paste a valid image URL.");
+      toast.error("Wait for upload to finish, or paste a direct image URL.");
       return;
     }
 
@@ -398,7 +398,7 @@ export const AdminCarousel = () => {
 
       if (error) throw error;
 
-      toast.success("Carousel image deleted successfully");
+      toast.success("Removed");
       await fetchImages();
       queryClient.invalidateQueries({ queryKey: ["carousel-images"] });
       queryClient.invalidateQueries({ queryKey: ["carousel-image-items"] });
@@ -473,14 +473,12 @@ export const AdminCarousel = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 xl:flex-row xl:items-center xl:justify-between">
+      <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-5 xl:flex-row xl:items-center xl:justify-between">
         <div>
-          <h2 className="text-xl font-bold">Manage Hero Carousel</h2>
-          <p className="text-muted-foreground text-sm">
-            Add, edit, or reorder carousel images displayed on the homepage.
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Currently editing: <span className="font-medium">{sectionLabelMap[selectedSection]}</span>
+          <h2 className="text-lg font-semibold text-foreground">Homepage images</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Slides and strips by section. Order is saved per row.</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Section: <span className="font-medium text-foreground">{sectionLabelMap[selectedSection]}</span>
           </p>
         </div>
         <div className="flex items-center gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -489,17 +487,17 @@ export const AdminCarousel = () => {
               <SelectValue placeholder="Select section" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="hero">Hero Section</SelectItem>
-              <SelectItem value="activities">Activities Section</SelectItem>
-              <SelectItem value="destinations">Destinations Section</SelectItem>
-              <SelectItem value="gallery">Gallery Section</SelectItem>
-                <SelectItem value="feature_wild">Experience the Wild</SelectItem>
-                <SelectItem value="feature_culture">Our Cultural Heritage</SelectItem>
-                <SelectItem value="feature_luxury">Luxury Reimagined</SelectItem>
+              <SelectItem value="hero">Hero</SelectItem>
+              <SelectItem value="activities">Activities</SelectItem>
+              <SelectItem value="destinations">Destinations</SelectItem>
+              <SelectItem value="gallery">Gallery</SelectItem>
+              <SelectItem value="feature_wild">Wild strip</SelectItem>
+              <SelectItem value="feature_culture">Culture strip</SelectItem>
+              <SelectItem value="feature_luxury">Luxury strip</SelectItem>
             </SelectContent>
           </Select>
           <Button onClick={handleAdd} className="shrink-0 bg-accent hover:bg-accent/90">
-            <Plus className="w-4 h-4 mr-2" /> Add Image
+            <Plus className="mr-2 h-4 w-4" /> Add image
           </Button>
           {selectedSection === "activities" && (
             <Button
@@ -510,7 +508,7 @@ export const AdminCarousel = () => {
               className="shrink-0"
             >
               {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-              Load Default Activities
+              Reset activities
             </Button>
           )}
           {selectedSection === "gallery" && (
@@ -528,8 +526,8 @@ export const AdminCarousel = () => {
         </div>
       </div>
 
-      <div className="bg-card rounded-2xl border border-border overflow-hidden">
-        <div className="p-6 space-y-6">
+      <div className="overflow-hidden rounded-lg border border-border bg-card">
+        <div className="space-y-6 p-5 sm:p-6">
           {selectedSection === "activities" && groupedActivityImages ? (
             Object.entries(groupedActivityImages).map(([activityTitle, imagesInGroup]) => (
               <div key={activityTitle} className="space-y-3">
@@ -679,7 +677,7 @@ export const AdminCarousel = () => {
       <Dialog open={!!editing} onOpenChange={(open) => !open && setEditing(null)}>
         <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editing?.id?.startsWith("carousel-") ? "Add New Image" : "Edit Image"}</DialogTitle>
+            <DialogTitle>{editing?.id?.startsWith("carousel-") ? "New image" : "Edit image"}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">

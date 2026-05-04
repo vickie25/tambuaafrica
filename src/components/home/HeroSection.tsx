@@ -83,7 +83,7 @@ const HeroSection = () => {
             transition={{ delay: 0.7, duration: 0.8 }}
             className="text-lg sm:text-xl text-white/80 max-w-2xl leading-relaxed"
           >
-            Discover tailor-made adventures across Kenya, Tanzania, Uganda, Rwanda, and the Indian Ocean coast — from migration safaris to gorilla treks and beach escapes.
+            Discover tailor-made adventures across Kenya, Tanzania, Uganda, Rwanda, and the Indian Ocean coast, from migration safaris to gorilla treks and beach escapes.
           </motion.p>
 
           <motion.div 

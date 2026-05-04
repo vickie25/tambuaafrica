@@ -2,3 +2,6 @@ project_id = "tulnrphqshxiybdreqec"
 
 [functions.submit-inquiry]
 verify_jwt = false
+
+[functions.gemini-chat]
+verify_jwt = false

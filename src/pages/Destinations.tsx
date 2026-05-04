@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -13,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import OptimizedImage from "@/components/ui/optimized-image";
 import BookingModal from "@/components/booking/BookingModal";
 import { useReducedMotion } from "framer-motion";
+import { fallbackDestinationImage, fallbackLodgeImage } from "@/lib/remote-media-fallbacks";
 
 const DESTINATION_DISPLAY_ORDER = [
   "tsavo",
@@ -80,11 +81,13 @@ const getLodgeDataForDestination = (dest: Destination, groups: typeof destinatio
 const ImageSlider = ({
   images,
   name,
+  destinationId,
   priority = false,
   shouldReduceMotion = false,
 }: {
   images: string[];
   name: string;
+  destinationId: string;
   priority?: boolean;
   shouldReduceMotion?: boolean;
 }) => {
@@ -115,6 +118,7 @@ const ImageSlider = ({
         <OptimizedImage
           key={i}
           src={src}
+          fallbackSrc={fallbackDestinationImage(`${destinationId}-${i}-${src}`)}
           alt={`${name} ${i + 1}`}
           className={`absolute inset-0 w-full h-full object-cover transition-all duration-1000 md:group-hover:scale-110 ${
             i === current ? "opacity-100" : "opacity-0"
@@ -146,6 +150,7 @@ const LodgeCard = ({
     <div className="relative h-48 overflow-hidden">
       <OptimizedImage
         src={lodge.image}
+        fallbackSrc={fallbackLodgeImage(lodge.id)}
         alt={lodge.name}
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
       />
@@ -203,6 +208,7 @@ const LodgeModal = ({
         <div className="relative h-64 rounded-t-2xl overflow-hidden">
           <OptimizedImage
             src={lodge.image}
+            fallbackSrc={fallbackLodgeImage(lodge.id)}
             alt={lodge.name}
             className="w-full h-full object-cover"
             priority={true}
@@ -216,6 +222,21 @@ const LodgeModal = ({
             <X className="w-5 h-5" />
           </button>
         </div>
+
+        {lodge.images && lodge.images.length > 1 ? (
+          <div className="flex gap-2 overflow-x-auto border-b border-border bg-muted/25 px-3 py-3">
+            {lodge.images.slice(0, 10).map((img, idx) => (
+              <div key={`${lodge.id}-thumb-${idx}`} className="relative h-16 w-28 shrink-0 overflow-hidden rounded-lg border border-border">
+                <OptimizedImage
+                  src={img}
+                  fallbackSrc={fallbackLodgeImage(`${lodge.id}-thumb-${idx}`)}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        ) : null}
 
         {/* Content */}
         <div className="p-6">
@@ -504,6 +525,16 @@ const Destinations = () => {
   const { data: destinations = [], isLoading } = useDestinations();
   const { data: lodgeGroups = destinationLodges } = useDestinationLodges();
 
+  const displayedDestinations = useMemo(() => {
+    const kenya = destinations.filter((d) => d.country === "Kenya" || !d.country?.trim());
+    const ordered = DESTINATION_DISPLAY_ORDER.map((canonical) =>
+      kenya.find((d) => getCanonicalDestinationKey(d) === canonical),
+    ).filter((d): d is Destination => Boolean(d));
+    const seen = new Set(ordered.map((d) => d.id));
+    const rest = kenya.filter((d) => !seen.has(d.id));
+    return [...ordered, ...rest];
+  }, [destinations]);
+
   return (
     <PageTransition>
       <div className="min-h-screen">
@@ -513,7 +544,8 @@ const Destinations = () => {
           <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden bg-primary text-primary-foreground">
             <div className="absolute inset-0 z-0 opacity-20">
               <OptimizedImage 
-                src="/images/chale-extra-1.webp" 
+                src="/images/chale-extra-1.webp"
+                fallbackSrc={fallbackDestinationImage("page-hero")}
                 alt="Destinations Background" 
                 className="w-full h-full object-cover"
                 priority 
@@ -525,7 +557,8 @@ const Destinations = () => {
               </span>
               <h1 className="text-4xl sm:text-5xl font-bold mt-3">Destinations</h1>
               <p className="text-primary-foreground/70 mt-4 max-w-2xl mx-auto text-lg">
-                Explore Kenya's premier safari destinations
+                Explore Kenya&apos;s premier safari destinations, coast, and lakes, each card opens curated lodges and
+                camp ideas you can book with Tambua.
               </p>
             </div>
           </section>
@@ -543,20 +576,51 @@ const Destinations = () => {
                   </div>
                 </div>
               ) : (
+              <>
+              <div
+                className={`mb-12 grid gap-6 rounded-2xl border border-border bg-card/80 p-6 sm:p-8 shadow-sm sm:grid-cols-3 transition-all duration-700 ${
+                  isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+                }`}
+              >
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-accent">Wildlife circuits</p>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    Mara, Tsavo, Amboseli, Samburu, and the Rift lakes, with classic game drives, migration windows, and
+                    family-friendly pacing.
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-accent">Coast & islands</p>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    Diani, Watamu, Chale, and Wasini pair reef blues with bush time, ideal for honeymoon or bush-to-beach
+                    combos.
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-accent">Where you sleep</p>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    Lodges, tented camps, and boutique stays we know personally. Filter by luxury, mid-range, budget, or
+                    camp style inside each destination.
+                  </p>
+                </div>
+              </div>
+
+              {displayedDestinations.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-border bg-muted/30 py-16 text-center">
+                  <p className="text-muted-foreground">
+                    No destinations are available from the server right now. Please refresh in a moment or contact us on
+                    WhatsApp and we&apos;ll send sample itineraries.
+                  </p>
+                  <Link
+                    to="/contact"
+                    className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-accent hover:underline"
+                  >
+                    Contact Tambua <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {destinations
-                  .filter((dest) => dest.country === "Kenya")
-                  .filter((dest) => DESTINATION_DISPLAY_ORDER.includes(getCanonicalDestinationKey(dest) as (typeof DESTINATION_DISPLAY_ORDER)[number]))
-                  .sort((a, b) => {
-                    const aIndex = DESTINATION_DISPLAY_ORDER.indexOf(
-                      getCanonicalDestinationKey(a) as (typeof DESTINATION_DISPLAY_ORDER)[number]
-                    );
-                    const bIndex = DESTINATION_DISPLAY_ORDER.indexOf(
-                      getCanonicalDestinationKey(b) as (typeof DESTINATION_DISPLAY_ORDER)[number]
-                    );
-                    return aIndex - bIndex;
-                  })
-                  .map((dest, index) => {
+                {displayedDestinations.map((dest, index) => {
                   const lodgeCount = getLodgeDataForDestination(dest, lodgeGroups)?.lodges.length ?? 0;
 
                   return (
@@ -573,6 +637,7 @@ const Destinations = () => {
                       <ImageSlider
                         images={dest.images || [dest.image]}
                         name={dest.name}
+                        destinationId={dest.id}
                         priority={index < 6}
                         shouldReduceMotion={!!shouldReduceMotion}
                       />
@@ -595,6 +660,8 @@ const Destinations = () => {
                   );
                 })}
               </div>
+              )}
+              </>
               )}
             </div>
           </section>

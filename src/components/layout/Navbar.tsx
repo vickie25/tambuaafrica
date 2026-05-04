@@ -1,6 +1,17 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Sun, Moon, User, LogIn, LogOut, ChevronDown } from "lucide-react";
+import {
+  Menu,
+  X,
+  Sun,
+  Moon,
+  User,
+  LogIn,
+  LogOut,
+  ChevronDown,
+  ExternalLink,
+  Calendar,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -11,6 +22,15 @@ const navLinks = [
     { label: "Kenya Safaris", path: "/safaris" },
   ]},
   { label: "Destination", path: "/destinations" },
+  {
+    label: "Services",
+    path: "/services",
+    dropdown: [
+      { label: "Ticketing (air & road)", path: "/services/ticketing" },
+      { label: "Transfers (road & air)", path: "/services/transfers" },
+      { label: "Lodge & camp booking", path: "/services/lodges-camps" },
+    ],
+  },
   { label: "Travel Info", path: "/travel-info", dropdown: [
     { label: "About Us", path: "/about" },
     { label: "Gallery Page", path: "/gallery" },
@@ -65,32 +85,108 @@ const Navbar = () => {
     document.documentElement.classList.toggle("dark");
   };
 
+  const isAdminRoute = location.pathname === "/admin";
+
+  if (isAdminRoute) {
+    return (
+      <nav className="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-primary shadow-sm">
+        <div className="mx-auto grid h-11 max-w-[1600px] grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-2 sm:gap-3 sm:px-4">
+          <Link
+            to="/"
+            className="flex min-w-0 items-center gap-1.5 text-white sm:gap-2"
+            title="Tambua Africa home"
+          >
+            <div className="shrink-0 rounded-md bg-white p-0.5 sm:p-1">
+              <img
+                src="/tambua-logo.png"
+                alt=""
+                className="h-6 w-auto object-contain sm:h-7"
+                aria-hidden
+              />
+            </div>
+            <span className="min-w-0 truncate text-sm font-medium">Admin</span>
+          </Link>
+          <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="h-8 shrink-0 px-2 text-xs text-white hover:bg-white/10 sm:px-3 sm:text-sm"
+            >
+              <Link
+                to="/"
+                className="inline-flex items-center justify-center gap-1.5"
+                title="View site"
+                aria-label="View site"
+              >
+                <ExternalLink className="h-4 w-4 sm:hidden" aria-hidden />
+                <span className="hidden sm:inline">View site</span>
+              </Link>
+            </Button>
+            {user ? (
+              <>
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="sm"
+                  className="hidden h-8 shrink-0 px-2 text-xs text-white hover:bg-white/10 sm:inline-flex sm:px-3 sm:text-sm"
+                >
+                  <Link to="/dashboard">Bookings</Link>
+                </Button>
+                <Button
+                  onClick={handleSignOut}
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8 shrink-0 text-white hover:bg-white/10"
+                  aria-label="Sign out"
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </>
+            ) : (
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
+                className="h-8 shrink-0 px-2 text-xs text-white hover:bg-white/10 sm:text-sm"
+              >
+                <Link to="/login?redirect=/admin">Sign in</Link>
+              </Button>
+            )}
+          </div>
+        </div>
+      </nav>
+    );
+  }
+
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-primary ${
         isScrolled ? "shadow-lg border-b-2 border-primary/20" : ""
       }`}
     >
-      <div className="w-full max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-10">
-        <div className="flex items-center justify-between h-16 sm:h-20">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 min-w-0 shrink-0">
-            <div className="bg-white p-1.5 sm:p-2 rounded-lg transition-all duration-300">
-              <img 
-                src="/tambua-logo.png" 
-                alt="Tambua Africa" 
-                className="h-9 sm:h-10 lg:h-11 w-auto object-contain"
+      <div className="mx-auto w-full min-w-0 max-w-[1600px] px-3 sm:px-6 lg:px-10">
+        {/* Below lg only two columns (center nav is not displayed); brand column must shrink */}
+        <div className="grid h-16 min-h-16 w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:h-20 sm:min-h-20 sm:gap-4 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)_auto] xl:grid-cols-[minmax(0,17rem)_minmax(0,1fr)_auto] 2xl:grid-cols-[minmax(0,20rem)_minmax(0,1fr)_auto]">
+          <Link to="/" className="flex min-w-0 max-w-full items-center gap-1.5 sm:gap-2" title="Tambua Africa Tours & Safaris">
+            <div className="shrink-0 rounded-lg bg-white p-1.5 transition-all duration-300 sm:p-2">
+              <img
+                src="/tambua-logo.png"
+                alt="Tambua Africa"
+                className="h-8 w-auto object-contain sm:h-9 sm:h-10 lg:h-11"
               />
             </div>
-            <span className="font-bold text-sm sm:text-base lg:text-lg text-white leading-tight whitespace-nowrap">
+            <span className="block min-w-0 truncate font-bold text-sm text-white leading-tight sm:text-base lg:text-lg">
               <span className="hidden xl:inline">Tambua Africa Tours & Safaris</span>
               <span className="hidden lg:inline xl:hidden">Tambua Africa Tours</span>
               <span className="lg:hidden">Tambua Africa</span>
             </span>
           </Link>
 
-          {/* Desktop Nav */}
-          <div className="hidden lg:flex items-center gap-0.5 xl:gap-1 mx-4 flex-1 justify-center min-w-0" ref={dropdownRef}>
+          <div
+            className="mx-4 hidden min-w-0 items-center justify-center gap-0.5 lg:flex xl:gap-1"
+            ref={dropdownRef}
+          >
             {navLinks.map((link) => (
               <div key={link.path} className="relative">
                 {link.dropdown ? (
@@ -121,7 +217,7 @@ const Navbar = () => {
                 {/* Dropdown Menu */}
                 {link.dropdown && openDropdown === link.path && (
                   <div 
-                    className="absolute top-full left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-border py-1 animate-in fade-in slide-in-from-top-2 duration-200"
+                    className="absolute top-full left-0 mt-1 min-w-[13.5rem] w-max max-w-[16rem] bg-white rounded-lg shadow-lg border border-border py-1 animate-in fade-in slide-in-from-top-2 duration-200"
                     onMouseLeave={() => setOpenDropdown(null)}
                   >
                     {link.dropdown.map((item) => (
@@ -140,7 +236,7 @@ const Navbar = () => {
           </div>
 
           {/* Right Actions */}
-          <div className="flex items-center gap-1.5 xl:gap-2 shrink-0">
+          <div className="flex shrink-0 items-center justify-self-end gap-1 sm:gap-1.5 xl:gap-2">
             {/* Auth Buttons */}
             {!user ? (
               <Button
@@ -153,38 +249,54 @@ const Navbar = () => {
                 </Link>
               </Button>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex shrink-0 items-center gap-1 sm:gap-2">
                 {isAdmin && (
                   <Button
                     asChild
                     variant="outline"
-                    className="bg-accent text-accent-foreground hover:bg-accent/90 font-bold border-none hidden xl:flex"
+                    className="hidden border-none bg-accent px-2.5 font-bold text-accent-foreground hover:bg-accent/90 lg:inline-flex lg:px-3 2xl:px-4"
+                    title="Admin dashboard"
                   >
-                    <Link to="/admin">Admin Dashboard</Link>
+                    <Link to="/admin" className="whitespace-nowrap">
+                      <span className="2xl:hidden">Admin</span>
+                      <span className="hidden 2xl:inline">Admin Dashboard</span>
+                    </Link>
                   </Button>
                 )}
                 <Button
                   asChild
-                  className={"bg-transparent text-white hover:bg-white/10 font-semibold border-2 border-white px-3 xl:px-4"}
+                  className="h-9 shrink-0 border-2 border-white bg-transparent px-2 font-semibold text-white hover:bg-white/10 sm:h-10 sm:px-3 xl:px-4"
                 >
-                  <Link to="/dashboard">My Bookings</Link>
+                  <Link
+                    to="/dashboard"
+                    title="My bookings"
+                    aria-label="My bookings"
+                    className="inline-flex items-center justify-center gap-1.5"
+                  >
+                    <Calendar className="h-4 w-4 sm:hidden" aria-hidden />
+                    <span className="hidden max-w-[9rem] truncate sm:inline md:hidden">Bookings</span>
+                    <span className="hidden md:inline">My Bookings</span>
+                  </Link>
                 </Button>
                 <Button
                   onClick={handleSignOut}
                   size="icon"
-                  className={"bg-white/10 text-white hover:bg-white/20 border border-white/30"}
+                  className="h-9 w-9 shrink-0 border border-white/30 bg-white/10 text-white hover:bg-white/20 sm:h-10 sm:w-10"
+                  aria-label="Sign out"
                 >
-                  <LogOut className="w-5 h-5" />
+                  <LogOut className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               </div>
             )}
 
             {/* Mobile Menu Toggle */}
             <button
+              type="button"
               onClick={() => setIsMobileOpen(!isMobileOpen)}
-              className="lg:hidden p-2 rounded-lg transition-colors hover:bg-white/10 text-white"
+              className="shrink-0 rounded-lg p-2 text-white transition-colors hover:bg-white/10 lg:hidden"
+              aria-label={isMobileOpen ? "Close menu" : "Open menu"}
             >
-              {isMobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {isMobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
         </div>

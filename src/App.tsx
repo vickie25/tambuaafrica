@@ -39,8 +39,20 @@ const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess").then(m => ({ 
 const Booking = lazy(() => import("./pages/Booking").then(m => ({ default: m.default })));
 const NotFound = lazy(() => import("./pages/NotFound").then(m => ({ default: m.default })));
 const ConnectionDiagnostics = lazy(() => import("./pages/ConnectionDiagnostics").then(m => ({ default: m.default })));
+const ServicesHub = lazy(() => import("./pages/ServicesHub").then(m => ({ default: m.default })));
+const TicketingService = lazy(() => import("./pages/TicketingService").then(m => ({ default: m.default })));
+const TransfersService = lazy(() => import("./pages/TransfersService").then(m => ({ default: m.default })));
+const LodgesCampsService = lazy(() => import("./pages/LodgesCampsService").then(m => ({ default: m.default })));
 
 import SuspenseFallback from "@/components/layout/SuspenseFallback";
+import {
+  SEO_BY_ROUTE,
+  SITE_NAME,
+  SITE_ORIGIN,
+  absoluteUrl,
+  DEFAULT_OG_IMAGE_PATH,
+  truncateMetaDescription,
+} from "@/lib/seo";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -59,57 +71,36 @@ const AnimatedRoutes = () => {
   // Activate performance optimizations
   usePerformanceOptimization();
 
-  const seoByRoute: Record<string, { title: string; description: string }> = {
-    "/": {
-      title: "Tambua Africa Tours & Safaris | Premium African Safaris",
-      description: "Expertly crafted safari journeys across East Africa with trusted guides, custom itineraries, and seamless support.",
-    },
-    "/safaris": {
-      title: "Safaris | Tambua Africa Tours & Safaris",
-      description: "Browse curated safari packages across Kenya and East Africa, with flexible durations and booking support.",
-    },
-    "/destinations": {
-      title: "Destinations | Tambua Africa Tours & Safaris",
-      description: "Explore top East African destinations, lodges, and experiences for your next wildlife and culture adventure.",
-    },
-    "/blog": {
-      title: "Blog | Tambua Africa Tours & Safaris",
-      description: "Latest travel stories, safari insights, and regional updates from Tambua Africa.",
-    },
-    "/contact": {
-      title: "Contact Us | Tambua Africa Tours & Safaris",
-      description: "Get in touch to plan your East Africa trip. Our team can help with custom itineraries and bookings.",
-    },
-    "/terms": {
-      title: "Terms of Service | Tambua Africa Tours & Safaris",
-      description: "Read Tambua Africa booking, cancellation, and refund terms.",
-    },
-    "/privacy": {
-      title: "Privacy Policy | Tambua Africa Tours & Safaris",
-      description: "Learn how Tambua Africa collects, uses, and protects your personal information.",
-    },
-    "/login": {
-      title: "Sign In | Tambua Africa Tours & Safaris",
-      description: "Sign in to manage your bookings and account securely.",
-    },
-    "/signup": {
-      title: "Create Account | Tambua Africa Tours & Safaris",
-      description: "Create your account to manage bookings and access personalized safari planning.",
-    },
-  };
-
   const isBlogDetail = location.pathname.startsWith("/blog/");
-  const routeSeo = seoByRoute[location.pathname];
-  const shouldRenderRouteSeo = !isBlogDetail && !!routeSeo;
-  
+  const isSafariDetail = location.pathname.startsWith("/safaris/") && location.pathname !== "/safaris";
+  const routeSeo = SEO_BY_ROUTE[location.pathname];
+  const shouldRenderRouteSeo = !isBlogDetail && !isSafariDetail && !!routeSeo;
+  const canonicalUrl = `${SITE_ORIGIN}${location.pathname}`;
+  const metaDescription = routeSeo ? truncateMetaDescription(routeSeo.description) : "";
+  const ogImageUrl = routeSeo ? absoluteUrl(routeSeo.ogImage ?? DEFAULT_OG_IMAGE_PATH) : DEFAULT_OG_IMAGE_PATH;
+
   return (
     <ErrorBoundary>
       <Suspense fallback={<SuspenseFallback />}>
-        {shouldRenderRouteSeo && (
+        {shouldRenderRouteSeo && routeSeo && (
           <Helmet>
             <title>{routeSeo.title}</title>
-            <meta name="description" content={routeSeo.description} />
-            <link rel="canonical" href={`https://www.tambuaafrica.com${location.pathname}`} />
+            <meta name="description" content={metaDescription} />
+            {routeSeo.robots ? <meta name="robots" content={routeSeo.robots} /> : <meta name="robots" content="index, follow" />}
+            <link rel="canonical" href={canonicalUrl} />
+
+            <meta property="og:site_name" content={SITE_NAME} />
+            <meta property="og:type" content="website" />
+            <meta property="og:url" content={canonicalUrl} />
+            <meta property="og:title" content={routeSeo.title} />
+            <meta property="og:description" content={metaDescription} />
+            <meta property="og:image" content={ogImageUrl} />
+            <meta property="og:locale" content="en_US" />
+
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:title" content={routeSeo.title} />
+            <meta name="twitter:description" content={metaDescription} />
+            <meta name="twitter:image" content={ogImageUrl} />
           </Helmet>
         )}
         <AnimatePresence mode="wait">
@@ -126,6 +117,10 @@ const AnimatedRoutes = () => {
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/services" element={<ServicesHub />} />
+            <Route path="/services/ticketing" element={<TicketingService />} />
+            <Route path="/services/transfers" element={<TransfersService />} />
+            <Route path="/services/lodges-camps" element={<LodgesCampsService />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />

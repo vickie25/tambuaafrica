@@ -36,7 +36,7 @@ const websiteSafaris = [
   },
   {
     id: "4-days-mara-nakuru-amboseli",
-    title: "4 Days Masai Mara – Lake Nakuru-Amboseli Safari",
+    title: "4 Days Masai Mara, Lake Nakuru-Amboseli Safari",
     location: "Masai Mara, Lake Nakuru, Amboseli",
     duration: "4 Days / 3 Nights",
     price: 1800,
@@ -132,11 +132,11 @@ export const AdminSafaris = () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error } = await (supabase as any).from("safaris").upsert(websiteSafaris);
       if (error) throw error;
-      toast.success("Website safaris synced");
+      toast.success("Default safari rows updated");
       queryClient.invalidateQueries({ queryKey: ["safaris"] });
     } catch (error) {
       console.error("Safari sync failed:", error);
-      toast.error("Failed to sync website safaris");
+      toast.error("Could not sync rows");
     } finally {
       setIsSubmitting(false);
     }
@@ -149,7 +149,7 @@ export const AdminSafaris = () => {
     // Check if it's already a URL - use directly without upload
     if (file.name.startsWith('http')) {
       setEditing((prev) => prev ? { ...prev, image: file.name } : null);
-      toast.success("Image URL set!");
+      toast.success("URL set");
       return;
     }
 
@@ -170,12 +170,12 @@ export const AdminSafaris = () => {
 
       // 4. Update with final URL
       setEditing((prev) => prev ? { ...prev, image: publicUrl } : null);
-      toast.success("Image uploaded!");
+      toast.success("Uploaded");
     } catch (error) {
       console.error("Upload error:", error);
       // Revert to previous image
       setEditing((prev) => prev ? { ...prev, image: previousImage } : null);
-      toast.error("Upload failed. Paste a URL instead - it's faster!");
+      toast.error("Upload failed. Paste an image URL if needed.");
     } finally {
       setUploading(false);
       setUploadStatus(null);
@@ -236,9 +236,10 @@ export const AdminSafaris = () => {
         console.error("Cloud save failed:", error);
         // Revert optimistic update
         queryClient.setQueryData(["safaris"], previousData);
-        const msg = error.message === "Cloud Sync Timeout" 
-          ? "Cloud sync timed out. Data is saved locally but not in the database. Check your internet connection." 
-          : `Cloud save failed: ${error.message}. Ensure you ran the SQL script in Supabase.`;
+        const msg =
+          error.message === "Cloud Sync Timeout"
+            ? "Save timed out. Check the connection and try again."
+            : `Save failed: ${error.message}`;
         toast.error(msg, { duration: 5000 });
       }
     } catch (error) {
@@ -262,7 +263,12 @@ export const AdminSafaris = () => {
     }
   };
 
-  if (isLoading) return <div className="p-8 flex justify-center"><Loader2 className="animate-spin w-8 h-8 text-accent"/></div>;
+  if (isLoading)
+    return (
+      <div className="flex justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
 
   return (
     <div className="space-y-6">
@@ -315,7 +321,7 @@ export const AdminSafaris = () => {
       <Dialog open={!!editing} onOpenChange={(open) => !open && setEditing(null)}>
         <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editing?.id?.startsWith("safari-") ? "Add New Safari" : "Edit Safari"}</DialogTitle>
+            <DialogTitle>{editing?.id?.startsWith("safari-") ? "New package" : "Edit package"}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -364,7 +370,7 @@ export const AdminSafaris = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Image Cover</label>
+              <label className="text-sm font-medium">Cover image</label>
               <div className="flex items-center gap-4">
                 {editing?.image && <img src={editing.image} alt="Preview" className="w-16 h-16 rounded object-cover" />}
                 <div className="flex-1">
@@ -378,8 +384,8 @@ export const AdminSafaris = () => {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="original">Keep original quality</SelectItem>
-                        <SelectItem value="optimized">Optimize for speed</SelectItem>
+                        <SelectItem value="original">Original file</SelectItem>
+                        <SelectItem value="optimized">Compress first</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -389,7 +395,7 @@ export const AdminSafaris = () => {
                       <Button type="button" variant="outline" size="sm" onClick={() => {
                         setUploading(false);
                         setUploadStatus(null);
-                        toast.info("Upload cancelled. Use URL instead.");
+                        toast.info("Upload cancelled.");
                       }}>
                         Cancel
                       </Button>
@@ -403,19 +409,18 @@ export const AdminSafaris = () => {
                   )}
                 </div>
               </div>
-              {/* Quick URL paste - faster than upload */}
-              <div className="flex items-center gap-2 mt-2">
-                <span className="text-xs text-muted-foreground shrink-0">🌐 Paste URL:</span>
-                <Input 
-                  placeholder="https://... (faster than upload)" 
-                  value={editing?.image?.startsWith('http') ? editing.image : ''} 
+              <div className="mt-2 flex items-center gap-2">
+                <span className="shrink-0 text-xs text-muted-foreground">Or URL</span>
+                <Input
+                  placeholder="https://..."
+                  value={editing?.image?.startsWith("http") ? editing.image : ""}
                   onChange={(e) => {
                     const url = e.target.value;
-                    if (url.startsWith('http')) {
-                      setEditing(prev => ({ ...prev!, image: url }));
-                      toast.success("Image URL set!");
+                    if (url.startsWith("http")) {
+                      setEditing((prev) => ({ ...prev!, image: url }));
+                      toast.success("Image URL saved");
                     }
-                  }} 
+                  }}
                   className="flex-1"
                 />
               </div>
@@ -424,7 +429,8 @@ export const AdminSafaris = () => {
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
               <Button type="submit" className="bg-accent hover:bg-accent/90" disabled={isSubmitting || uploading}>
-                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin"/> : null} Save Safari
+                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Save
               </Button>
             </DialogFooter>
           </form>

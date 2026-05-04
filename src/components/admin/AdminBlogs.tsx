@@ -222,25 +222,32 @@ export const AdminBlogs = () => {
     }
   };
 
-  if (isLoading) return <div className="p-8 flex justify-center"><Loader2 className="animate-spin w-8 h-8 text-accent"/></div>;
+  if (isLoading)
+    return (
+      <div className="flex justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 xl:flex-row xl:items-center xl:justify-between">
+      <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-5 xl:flex-row xl:items-center xl:justify-between">
         <div>
-          <h2 className="text-xl font-bold">Manage Blog Posts</h2>
-          <p className="text-muted-foreground text-sm">Add, edit, or remove blog posts.</p>
+          <h2 className="text-lg font-semibold text-foreground">Blog</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Posts shown on /blog. Starter set is optional.</p>
         </div>
         <div className="flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <Button type="button" variant="outline" onClick={handleSeedStarterBlogs} disabled={isSubmitting} className="shrink-0">
-            {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin"/> : null}
-            Post Starter Blogs
+            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            Add starter posts
           </Button>
-          <Button onClick={handleAdd} className="shrink-0 bg-accent hover:bg-accent/90"><Plus className="w-4 h-4 mr-2"/> Add Blog Post</Button>
+          <Button onClick={handleAdd} className="shrink-0 bg-accent hover:bg-accent/90">
+            <Plus className="mr-2 h-4 w-4" /> New post
+          </Button>
         </div>
       </div>
 
-      <div className="bg-card rounded-2xl border border-border overflow-hidden">
+      <div className="overflow-hidden rounded-lg border border-border bg-card">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-muted/50 border-b border-border">
@@ -287,7 +294,7 @@ export const AdminBlogs = () => {
       <Dialog open={!!editing} onOpenChange={(open) => !open && setEditing(null)}>
         <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editing?.id?.startsWith("blog-") ? "Add New Blog Post" : "Edit Blog Post"}</DialogTitle>
+            <DialogTitle>{editing?.id?.startsWith("blog-") ? "New post" : "Edit post"}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">

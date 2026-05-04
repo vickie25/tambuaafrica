@@ -8,6 +8,7 @@ import { useSafaris } from "@/hooks/useSafaris";
 import BookingModal from "@/components/booking/BookingModal";
 import { Star, MapPin, Clock, Filter, Loader2 } from "lucide-react";
 import OptimizedImage from "@/components/ui/optimized-image";
+import { fallbackSafariImage } from "@/lib/remote-media-fallbacks";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const categories = ["All", "Wildlife Safari", "Beach Holiday", "Cultural Tour", "Adventure"];
@@ -72,13 +73,19 @@ const Safaris = () => {
               <span className="text-accent font-semibold text-sm uppercase tracking-wider">Our Packages</span>
               <h1 className="text-4xl sm:text-5xl font-bold mt-3">Safari Packages</h1>
               <p className="text-primary-foreground/70 mt-4 max-w-2xl mx-auto text-lg">
-                Choose from our curated selection of safari experiences across Kenya.
+                Choose from our curated selection of safari experiences across Kenya, plus flights, transfers, and
+                lodge nights we can bundle for you.
               </p>
             </div>
           </section>
 
           <section className="section-padding bg-background">
             <div className="container-wide mx-auto">
+              <p className="mb-8 max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+                Every package below is built around real park time, trusted guides, and clear inclusions. Filter by style,
+                then open a trip for day-by-day detail. Not seeing the right mix? Ask us for a custom route or a
+                coast add-on.
+              </p>
               <div className="flex items-center gap-2 mb-8 flex-wrap">
                 <Filter className="w-5 h-5 text-muted-foreground" />
                 {categories.map((cat) => (
@@ -101,6 +108,16 @@ const Safaris = () => {
                     <SafariSkeleton />
                     <SafariSkeleton />
                   </>
+                ) : filtered.length === 0 ? (
+                  <div className="col-span-full rounded-2xl border border-dashed border-border bg-muted/30 py-16 text-center">
+                    <p className="text-muted-foreground">
+                      No packages match this filter right now. Reset the category or contact us, we publish new routes
+                      often.
+                    </p>
+                    <Button className="mt-4" variant="outline" onClick={() => setActiveCategory("All")}>
+                      Show all packages
+                    </Button>
+                  </div>
                 ) : (
                   filtered.map((safari, index) => (
                     <div
@@ -111,6 +128,7 @@ const Safaris = () => {
                       <div className="relative aspect-[16/10] overflow-hidden">
                         <OptimizedImage
                           src={safari.image}
+                          fallbackSrc={fallbackSafariImage(safari.id)}
                           alt={safari.title}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                           width={800}

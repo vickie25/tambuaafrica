@@ -6,6 +6,7 @@ import ActivitiesSection from "@/components/home/ActivitiesSection";
 import AboutPreview from "@/components/home/AboutPreview";
 import FeaturedSafaris from "@/components/home/FeaturedSafaris";
 import WhyChooseUs from "@/components/home/WhyChooseUs";
+import AdditionalServicesSection from "@/components/home/AdditionalServicesSection";
 import DestinationsSection from "@/components/home/DestinationsSection";
 import TestimonialsSection from "@/components/home/TestimonialsSection";
 import PartnersSection from "@/components/home/PartnersSection";
@@ -78,6 +79,7 @@ const Index = () => {
           <AboutPreview />
           <FeaturedSafaris />
           <WhyChooseUs />
+          <AdditionalServicesSection />
           <DestinationsSection />
           <TestimonialsSection />
           <PartnersSection />

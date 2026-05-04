@@ -283,6 +283,29 @@ export interface Database {
           updated_at?: string
         }
       }
+      site_marketing_blocks: {
+        Row: {
+          id: string
+          eyebrow: string
+          headline: string
+          body: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          eyebrow?: string
+          headline?: string
+          body?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          eyebrow?: string
+          headline?: string
+          body?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

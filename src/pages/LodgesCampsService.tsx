@@ -3,112 +3,21 @@ import { ServicePageLayout } from "@/components/services/ServicePageLayout";
 import OptimizedImage from "@/components/ui/optimized-image";
 import { fallbackLodgeImage } from "@/lib/remote-media-fallbacks";
 import { useSiteMarketingBlock } from "@/hooks/useSiteMarketingBlocks";
+import { useLodgesServiceShowcaseCards } from "@/hooks/useLodgesServiceShowcase";
 import { SITE_MARKETING_IDS } from "@/lib/site-marketing-defaults";
 
-type StayExample = {
-  id: string;
-  name: string;
-  area: string;
-  category: "Safari lodge" | "Tented camp" | "Campsite / budget camp";
-  note: string;
-};
-
-const stayExamples: StayExample[] = [
-  {
-    id: "angama",
-    name: "Angama Mara",
-    area: "Masai Mara (Rift escarpment)",
-    category: "Safari lodge",
-    note: "Stunning views and high-end design, often paired with conservancy game drives.",
-  },
-  {
-    id: "governors",
-    name: "Governors’ Camp collection",
-    area: "Masai Mara",
-    category: "Tented camp",
-    note: "Classic riverside and conservancy camps; strong guiding and traditional bush atmosphere.",
-  },
-  {
-    id: "kicheche",
-    name: "Kicheche Camps",
-    area: "Mara / Laikipia / Ol Pejeta",
-    category: "Tented camp",
-    note: "Small camps in wildlife-rich locations; good for photographers and repeat safari-goers.",
-  },
-  {
-    id: "tortilis",
-    name: "Tortilis Camp",
-    area: "Amboseli",
-    category: "Tented camp",
-    note: "Kilimanjaro views and strong elephant country, and it pairs well with Tsavo or Nairobi extensions.",
-  },
-  {
-    id: "ol-tukai",
-    name: "Ol Tukai Lodge",
-    area: "Amboseli",
-    category: "Safari lodge",
-    note: "Upper mid-range lodge inside the park with iconic mountain vistas.",
-  },
-  {
-    id: "finch",
-    name: "Finch Hattons",
-    area: "Tsavo West",
-    category: "Safari lodge",
-    note: "Lodge-style comfort in Tsavo; combines with Tsavo East and coast hops.",
-  },
-  {
-    id: "salt-lick",
-    name: "Sarova Salt Lick Game Lodge",
-    area: "Taita Hills / Tsavo",
-    category: "Safari lodge",
-    note: "Elevated waterhole views, popular with first-time safari families.",
-  },
-  {
-    id: "loisaba",
-    name: "Loisaba Tented Camp",
-    area: "Laikipia",
-    category: "Tented camp",
-    note: "Star beds and conservation landscape, great with Samburu or central Kenya routing.",
-  },
-  {
-    id: "elephant-bedroom",
-    name: "Elephant Bedroom Camp",
-    area: "Samburu",
-    category: "Tented camp",
-    note: "Riverine setting in elephant country; matches well with Laikipia or Mara air hops.",
-  },
-  {
-    id: "hells-gate",
-    name: "Hell’s Gate National Park campsites",
-    area: "Naivasha",
-    category: "Campsite / budget camp",
-    note: "Adventure camping near walking trails and cycling, often combined with Lake Naivasha lodges.",
-  },
-  {
-    id: "naivasha-camp",
-    name: "Lake Naivasha camping & tented lodges",
-    area: "Great Rift Valley",
-    category: "Campsite / budget camp",
-    note: "Lakeside camps and bandas for budget-conscious travellers between parks.",
-  },
-  {
-    id: "nakuru-lodge",
-    name: "Lake Nakuru lodges (e.g. Sarova Lion Hill, Sopa)",
-    area: "Lake Nakuru",
-    category: "Safari lodge",
-    note: "Rhino and flamingo viewing; natural bridge between Mara and Amboseli routing.",
-  },
-];
+const HERO_IMAGE_BASE = "https://images.unsplash.com/photo-1566073771259-6a8506099945";
 
 const LodgesCampsService = () => {
   const { data: hero } = useSiteMarketingBlock(SITE_MARKETING_IDS.lodgesServiceHero);
+  const { cards } = useLodgesServiceShowcaseCards();
 
   return (
     <ServicePageLayout
       title={hero.headline}
       eyebrow={hero.eyebrow}
       subtitle={hero.body}
-      heroImage="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1600&q=80"
+      heroImage={HERO_IMAGE_BASE}
       heroFallback={fallbackLodgeImage("lodges-service-hero")}
       heroAlt="Safari lodge pool overlooking the bush"
       ctaTopic="lodges"
@@ -150,29 +59,38 @@ const LodgesCampsService = () => {
       </div>
 
       <ul className="mx-auto mt-10 grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {stayExamples.map((stay) => (
-          <li
-            key={stay.id}
-            className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
-          >
-            <div className="relative aspect-[5/3]">
-              <OptimizedImage
-                src={fallbackLodgeImage(stay.id)}
-                fallbackSrc={fallbackLodgeImage(`${stay.id}-alt`)}
-                alt={stay.name}
-                className="h-full w-full object-cover"
-              />
-              <span className="absolute bottom-3 left-3 rounded-full bg-background/90 px-3 py-1 text-xs font-medium text-foreground backdrop-blur-sm">
-                {stay.category}
-              </span>
-            </div>
-            <div className="flex flex-1 flex-col p-4 sm:p-5">
-              <p className="text-xs font-semibold uppercase tracking-wide text-accent">{stay.area}</p>
-              <h3 className="mt-1 text-lg font-bold text-foreground">{stay.name}</h3>
-              <p className="mt-2 flex-1 text-sm text-muted-foreground leading-relaxed">{stay.note}</p>
-            </div>
-          </li>
-        ))}
+        {cards.map((stay) => {
+          const primary = stay.image_url?.trim() || fallbackLodgeImage(stay.id);
+          return (
+            <li
+              key={stay.id}
+              className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
+            >
+              <div className="relative aspect-[5/3]">
+                <OptimizedImage
+                  src={primary}
+                  fallbackSrc={fallbackLodgeImage(`${stay.id}-alt`)}
+                  alt={stay.name}
+                  className="h-full w-full object-cover"
+                  width={640}
+                  height={384}
+                  quality={68}
+                  fetchPriority="low"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  rootMargin="80px"
+                />
+                <span className="absolute bottom-3 left-3 rounded-full bg-background/90 px-3 py-1 text-xs font-medium text-foreground backdrop-blur-sm">
+                  {stay.category}
+                </span>
+              </div>
+              <div className="flex flex-1 flex-col p-4 sm:p-5">
+                <p className="text-xs font-semibold uppercase tracking-wide text-accent">{stay.area}</p>
+                <h3 className="mt-1 text-lg font-bold text-foreground">{stay.name}</h3>
+                <p className="mt-2 flex-1 text-sm text-muted-foreground leading-relaxed">{stay.note}</p>
+              </div>
+            </li>
+          );
+        })}
       </ul>
 
       <p className="mx-auto mt-8 max-w-3xl text-center text-xs text-muted-foreground">

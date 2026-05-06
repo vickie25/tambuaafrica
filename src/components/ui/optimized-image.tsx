@@ -14,6 +14,8 @@ interface OptimizedImageProps {
   sizes?: string;
   /** If the primary `src` fails to load (404, etc.), swap to this URL once. */
   fallbackSrc?: string;
+  /** IntersectionObserver rootMargin; smaller = fewer images load ahead of scroll (default 300px). */
+  rootMargin?: string;
 }
 
 // Ultra-fast LQIP (Low Quality Image Placeholder) - 1px data URL
@@ -32,6 +34,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   fetchPriority = "auto",
   sizes,
   fallbackSrc,
+  rootMargin = '300px',
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(priority);
@@ -54,8 +57,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
         }
       },
       {
-        // Start loading earlier so slide changes don't reveal not-yet-decoded images.
-        rootMargin: '300px',
+        rootMargin,
       }
     );
 
@@ -64,7 +66,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
     }
 
     return () => observer.disconnect();
-  }, [priority]);
+  }, [priority, rootMargin]);
 
   useEffect(() => {
     setIsLoaded(false);
@@ -76,6 +78,21 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const getOptimizedSrc = (originalSrc: string) => {
     const formatUrl = (url: string) => encodeURI(url);
 
+    if (originalSrc.includes('images.unsplash.com')) {
+      try {
+        const u = new URL(originalSrc);
+        const w = width ?? 800;
+        const h = height ?? Math.max(400, Math.round((w * 3) / 5));
+        u.searchParams.set('auto', 'format');
+        u.searchParams.set('fit', 'crop');
+        u.searchParams.set('w', String(w));
+        u.searchParams.set('h', String(h));
+        u.searchParams.set('q', String(quality));
+        return formatUrl(u.toString());
+      } catch {
+        /* fall through */
+      }
+    }
     if (originalSrc.includes('unsplash.com')) {
       const separator = originalSrc.includes('?') ? '&' : '?';
       return formatUrl(

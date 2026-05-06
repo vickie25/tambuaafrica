@@ -5,7 +5,6 @@ import type { Destination } from "@/data/destinations";
 import { useDestinations } from "@/hooks/useDestinations";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import OptimizedImage from "@/components/ui/optimized-image";
-import { useCarouselImages } from "@/hooks/useCarouselImages";
 import { fallbackDestinationImage } from "@/lib/remote-media-fallbacks";
 
 const PREFERRED_FEATURED_IDS = [
@@ -21,7 +20,6 @@ const DestinationsSection = () => {
   const { ref, isVisible } = useScrollAnimation();
 
   const { data: destinations = [], isLoading } = useDestinations();
-  const { data: sectionImages = [] } = useCarouselImages("destinations");
 
   const featured = useMemo(() => {
     const preferred = destinations.filter((d) => PREFERRED_FEATURED_IDS.includes(d.id));
@@ -49,8 +47,7 @@ const DestinationsSection = () => {
             </p>
           ) : (
             featured.map((dest, index) => {
-              const sectionImage = sectionImages.length > 0 ? sectionImages[index % sectionImages.length] : null;
-              const destinationImage = sectionImage || dest.image;
+              const destinationImage = dest.images?.[0] || dest.image;
               return (
                 <Link
                   key={dest.id}

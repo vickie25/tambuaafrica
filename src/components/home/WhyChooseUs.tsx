@@ -24,20 +24,20 @@ const WhyChooseUs = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 lg:gap-6">
           {features.map((feature, index) => (
             <div
               key={feature.title}
-              className={`bg-muted/50 border border-border rounded-2xl p-6 hover:bg-muted transition-all duration-500 hover:-translate-y-1 hover:shadow-xl group ${
+              className={`bg-muted/50 border border-border rounded-2xl p-4 sm:p-6 hover:bg-muted transition-all duration-500 hover:-translate-y-1 hover:shadow-xl group ${
                 isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
               }`}
               style={{ transitionDelay: `${index * 100}ms` }}
             >
-              <div className="w-12 h-12 rounded-xl bg-muted/20 flex items-center justify-center mb-4 group-hover:bg-accent/20 group-hover:scale-110 transition-all duration-300">
-                <feature.icon className="w-6 h-6 text-black group-hover:text-accent transition-colors" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-muted/20 flex items-center justify-center mb-3 sm:mb-4 group-hover:bg-accent/20 group-hover:scale-110 transition-all duration-300">
+                <feature.icon className="w-5 h-5 sm:w-6 sm:h-6 text-black group-hover:text-accent transition-colors" />
               </div>
-              <h3 className="font-bold text-lg mb-2 text-foreground group-hover:text-primary transition-colors">{feature.title}</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">{feature.description}</p>
+              <h3 className="font-bold text-base sm:text-lg mb-2 text-foreground group-hover:text-primary transition-colors">{feature.title}</h3>
+              <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">{feature.description}</p>
             </div>
           ))}
         </div>

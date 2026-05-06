@@ -1,4 +1,4 @@
-// destinations-lodges.ts - All 25 lodges with local images
+// destinations-lodges.ts - Curated destination lodges with local images
 
 export interface Lodge {
   id: string;
@@ -626,15 +626,109 @@ export const destinationLodges: DestinationLodges[] = [
           "Fresh seafood restaurant and oceanfront sunset bar with panoramic Indian Ocean views",
           "Dhow sunset cruises, deep-sea fishing, kayaking and kitesurfing available",
         ],
-        image: "/images/chale Hotel.jpg",
+        image:
+          "https://chaleislandresort.com/wp-content/uploads/2023/01/ocean-view-room-845x684.jpg",
         images: [
-          "/images/chale Hotel.jpg",
-          "/images/Chale Island.jpg",
-          "/images/chale-extra-1.png",
-          "/images/chale-extra-2.png",
-          "/images/chale-extra-3.png",
+          "https://chaleislandresort.com/wp-content/uploads/2023/01/ocean-view-room-845x684.jpg",
+          "https://chaleislandresort.com/wp-content/uploads/2024/11/0006-Chale-Aerials-Sept-2024-DJI_0043-DNG_DxO_DeepPRIMEXD1-845x684.jpg",
+          "https://chaleislandresort.com/wp-content/uploads/2024/03/asfeatured_islands-e1710787832917.png",
         ],
         website: "https://thesandsatchaleisland.com/",
+      },
+    ],
+  },
+
+  {
+    destinationId: "wasini",
+    destinationName: "Wasini Island",
+    lodges: [
+      {
+        id: "mpunguti-lodge",
+        name: "Mpunguti Lodge",
+        category: "mid-range",
+        description:
+          "A long-running Wasini Island lodge and restaurant with sea-facing rooms, a small conference setup, and direct access to the island's quiet coral coast.",
+        story:
+          "Mpunguti Lodge is one of the classic Wasini stays, built around simple island living: sea views, seafood, and the slower rhythm that defines the island.",
+        features: [
+          "Sea-facing rooms on Wasini Island",
+          "Island restaurant and conference hall",
+          "Good base for Kisite-Mpunguti excursions",
+          "Traditional, low-key island accommodation",
+        ],
+        image: "https://www.wasini-lodge.com/repertoire%20photo/DSC_0394.JPG",
+        images: [
+          "https://www.wasini-lodge.com/repertoire%20photo/DSC_0394.JPG",
+          "https://www.wasini-lodge.com/repertoire%20photo/DSC_0277.JPG",
+          "https://www.wasini-lodge.com/repertoire%20photo/DSC_0440.JPG",
+        ],
+        website: "https://wasini.net/mpunguti-lodge/",
+      },
+      {
+        id: "blue-monkey-beach-cottages",
+        name: "Blue Monkey Beach Cottages",
+        category: "budget",
+        description:
+          "Handmade cliff-top cottages on Wasini with private sea views, a treetop dining terrace, and a direct connection to the island's natural coastline.",
+        story:
+          "Blue Monkey Beach Cottages lean into Wasini's ecological character. The stay is modest, private, and very close to the water, which is exactly the point here.",
+        features: [
+          "Cliff-top cottages with sea views",
+          "Private sand beach and tidal pool",
+          "Treetop terrace dining",
+          "Well suited to nature-focused travelers",
+        ],
+        image: "https://www.wasini.net/wp-content/uploads/2014/12/Blue-Moneky-Beach-Cottage-Example-Exterior-225x300.jpeg",
+        images: [
+          "https://www.wasini.net/wp-content/uploads/2014/12/Blue-Moneky-Beach-Cottage-Example-Exterior-225x300.jpeg",
+          "https://www.wasini.net/wp-content/uploads/2014/12/DSC01501-300x225.jpg",
+          "https://www.wasini.net/wp-content/uploads/2014/12/Private-Blue-Monkey-Beach-300x225.jpeg",
+        ],
+        website: "https://wasini.net/blue-monkey-beach-cottages/",
+      },
+      {
+        id: "banda-porini",
+        name: "Banda Porini",
+        category: "budget",
+        description:
+          "A rustic Wasini bush cabin set back in the indigenous greenery, offering privacy, a private terrace, and easy access to the same beachfront compound as Blue Monkey.",
+        story:
+          "Banda Porini is the more secluded Wasini option. It is built for travelers who want the simplest possible island stay without losing access to the coastline and shared guest spaces.",
+        features: [
+          "Private bush cabin on Wasini",
+          "Separate bathroom and outdoor terrace",
+          "Shares beach jetty and tidal pool access",
+          "Best for quiet, low-impact stays",
+        ],
+        image: "https://wasini.net/wp-content/uploads/2019/09/Wasini-Island-Banda-Porini_Front-View-1133x1700.jpg",
+        images: [
+          "https://wasini.net/wp-content/uploads/2019/09/Wasini-Island-Banda-Porini_Front-View-1133x1700.jpg",
+          "https://wasini.net/wp-content/uploads/2019/09/Wasini-Island-Banda-Porini_Interior-1700x1133.jpg",
+          "https://www.wasini.net/wp-content/uploads/2014/12/DSC01492-300x225.jpg",
+        ],
+        website: "https://wasini.net/banda-porini/",
+      },
+      {
+        id: "banda-mlimani",
+        name: "Banda Mlimani",
+        category: "budget",
+        description:
+          "A simple hilltop Wasini band a with sea views, solar power, and a more adventurous off-grid feel than the island's other stays.",
+        story:
+          "Banda Mlimani suits travelers who want Wasini stripped back to essentials. It is very much about the setting, the breeze, and the island's natural environment.",
+        features: [
+          "Hilltop banda with sea views",
+          "Solar-powered off-grid setup",
+          "Private outdoor area and kitchen option",
+          "Ideal for independent travelers",
+        ],
+        image: "https://www.wasini.net/wp-content/uploads/2014/12/20140823_173926-300x168.jpg",
+        images: [
+          "https://www.wasini.net/wp-content/uploads/2014/12/20140823_173926-300x168.jpg",
+          "https://www.wasini.net/wp-content/uploads/2014/12/20140823_174257-300x168.jpg",
+          "https://www.wasini.net/wp-content/uploads/2014/12/20140823_174440-300x168.jpg",
+        ],
+        website: "https://wasini.net/banda-mlimani/",
       },
     ],
   },
@@ -647,26 +741,210 @@ export const destinationLodges: DestinationLodges[] = [
         id: "hemingways-watamu",
         name: "Hemingways Watamu",
         category: "luxury",
-        description: "Hemingways Watamu is Kenya's premier beachfront boutique resort,  an adults-only all-inclusive retreat perched directly on Blue Flag-awarded Watamu Beach. With just 44 suites facing the azure Indian Ocean, it combines world-class game fishing, snorkeling in the Watamu Marine National Park, and a legendary sundowner culture with the finest Swahili cuisine on the Kenyan coast.",
-        story: "Hemingways earned its name from the spirit of Ernest Hemingway's legendary East African adventures, and it lives up to that legacy daily. Each morning, sport fishing boats launch from the resort in pursuit of marlin, sailfish and wahoo in some of the world's most productive blue-water fisheries. By afternoon, sea turtles nest on the beach steps from your suite. By evening, the Indian Ocean turns every shade of gold as cold drinks appear at the clifftop bar,  and the only decision is whether to dine by the ocean or beside the pool.",
+        description:
+          "An upscale oceanfront hotel in Watamu with an elegant coastal style, a strong reputation for service, and easy access to the Marine National Park and beach.",
+        story:
+          "Hemingways Watamu is the polished choice for guests who want Watamu with a refined edge. It is well placed for marine park days, seafood-focused stays, and a quieter, higher-service coastal experience.",
         features: [
-          "Adults-only all-inclusive resort directly on award-winning Watamu Beach",
-          "44 ocean-facing suites with private balconies and Indian Ocean views",
-          "World-class deep-sea game fishing: marlin, sailfish, wahoo in blue-water fisheries",
-          "Direct access to Watamu Marine National Park,  pristine coral reefs and sea turtles",
-          "Infinity pool, beachfront bar and acclaimed Swahili-fusion restaurant",
-          "Arabuko-Sokoke Forest excursions, dhow cruises and watersports available",
+          "Oceanfront setting in Watamu",
+          "High-service luxury beach stay",
+          "Close to Watamu Marine National Park",
+          "Good for couples and relaxed premium escapes",
         ],
-        image: "/images/hemingways-watamu-market.jpg",
+        image:
+          "https://www.hemingways-collection.com/wp-content/uploads/2025/06/Main-pool-with-ocean-views-4-scaled.jpg",
         images: [
-          "/images/hemingways-watamu-market.jpg",
-          "/images/watamu-hotel.webp",
+          "https://www.hemingways-collection.com/wp-content/uploads/2025/06/Main-pool-with-ocean-views-4-scaled.jpg",
           "/images/watamu-beach.webp",
           "/images/watamu-bay.webp",
         ],
-        website: "https://www.hemingways.co.ke/",
-      }
+        website: "https://www.hemingways-collection.com/hemingways-watamu/",
+      },
+      {
+        id: "medina-palms",
+        name: "Medina Palms",
+        category: "luxury",
+        description:
+          "A stylish Watamu resort with spacious suites, ocean views, a spa, and a quieter residential feel suited to longer stays and honeymoon travel.",
+        story:
+          "Medina Palms feels more like a private coastal residence than a standard resort. The design, space, and calm atmosphere make it a strong Watamu option for guests who want to slow down and stay a little longer.",
+        features: [
+          "Spacious suites and apartments",
+          "Spa and pool facilities",
+          "Quiet, upscale Watamu setting",
+          "Well suited to longer beach holidays",
+        ],
+        image: "/images/watamu-bay.webp",
+        images: [
+          "/images/watamu-bay.webp",
+          "/images/deckchair-beach.webp",
+          "/images/beach.webp",
+        ],
+        website: "https://www.medinapalms.com/",
+      },
+      {
+        id: "turtle-bay-beach-club",
+        name: "Turtle Bay Beach Club",
+        category: "mid-range",
+        description:
+          "A long-standing all-inclusive Watamu beachfront resort set on 200 meters of beach beside the marine park, with tropical gardens, family entertainment, and watersports.",
+        story:
+          "Turtle Bay Beach Club is one of Watamu's most practical all-round stays. It gives travelers direct beach access, enough space for families, and the simple coastal setting that suits marine-focused holidays.",
+        features: [
+          "Direct beachfront access in Watamu National Marine Park",
+          "All-inclusive resort with family entertainment",
+          "Good base for snorkeling and boat trips",
+          "Reliable choice for longer coastal breaks",
+        ],
+        image: "/images/deckchair-beach.webp",
+        images: [
+          "/images/deckchair-beach.webp",
+          "/images/watamu-beach.webp",
+          "/images/beach.webp",
+        ],
+        website: "https://www.tbbckenya.com/",
+      },
+      {
+        id: "temple-point-resort",
+        name: "Temple Point Resort",
+        category: "mid-range",
+        description:
+          "A waterside Watamu resort near Mida Creek and the marine park with a relaxed, activity-friendly setting for sailing, kayaking, diving, and beach time.",
+        story:
+          "Temple Point works well for travelers who want to build Watamu around the water rather than the hotel alone. Its setting near the creek and marine park makes it useful for active coastal itineraries and nature-focused stays.",
+        features: [
+          "Near Watamu Marine National Park and Mida Creek",
+          "Good for kayaking, sailing, and marine excursions",
+          "Relaxed resort atmosphere",
+          "Strong base for active coast holidays",
+        ],
+        image:
+          "https://cdn.prod.website-files.com/667d4286644e58960632a889/66d0d96626f3b66ad5acb172_Temple%20Point%20Resort%20Watamu-80%20Large.jpeg",
+        images: [
+          "https://cdn.prod.website-files.com/667d4286644e58960632a889/66d0d96626f3b66ad5acb172_Temple%20Point%20Resort%20Watamu-80%20Large.jpeg",
+          "https://cdn.prod.website-files.com/667d4286644e58960632a889/66d0d965f246daa6f4d20ba4_Temple%20Point%20Resort%20Watamu-14%20Large.jpeg",
+          "https://cdn.prod.website-files.com/667d4286644e58960632a889/66d0d966f246daa6f4d20dcd_Temple%20Point%20Resort%20Watamu-17%20Large.jpeg",
+        ],
+        website: "https://www.templepoint.com/",
+      },
+      {
+        id: "ocean-sports-resort",
+        name: "Ocean Sports Resort",
+        category: "mid-range",
+        description:
+          "A casual Watamu beach resort with an activity-led feel that suits watersports, sunset drinks, and easy access to the Indian Ocean.",
+        story:
+          "Ocean Sports is a straightforward Watamu option for guests who want to spend more time on the water than in formal resort spaces. It suits couples, friends, and active beach travelers.",
+        features: [
+          "Watamu beach setting",
+          "Casual, activity-oriented atmosphere",
+          "Good for watersports and beach breaks",
+          "Easy fit for short or flexible stays",
+        ],
+        image: "/images/watamu-hotel.webp",
+        images: [
+          "/images/watamu-hotel.webp",
+          "/images/watamu-bay.webp",
+          "/images/deckchair-beach.webp",
+        ],
+        website: "https://www.oceansports.net/",
+      },
     ]
+  },
+  {
+    destinationId: "mombasa-south-coast",
+    destinationName: "Mombasa South Coast",
+    lodges: [
+      {
+        id: "baobab-beach-resort",
+        name: "Baobab Beach Resort & Spa",
+        category: "luxury",
+        description:
+          "A large South Coast resort on Diani's white sands, embraced by tropical gardens, multiple pools, and a strong all-inclusive beach holiday formula.",
+        story:
+          "Baobab Beach Resort is South Coast leisure in its most complete form: wide grounds, strong dining, and direct access to Diani and Galu beaches. It suits guests who want the coast to feel effortless and self-contained.",
+        features: [
+          "Set on Diani and Galu's white sands",
+          "Multiple pools and all-inclusive dining",
+          "Large tropical gardens with strong beach access",
+          "Good for families, groups, and long stays",
+        ],
+        image: "https://baobab-beach-resort.com/imgs/gallery/restaurants/11.jpg",
+        images: [
+          "https://baobab-beach-resort.com/imgs/gallery/restaurants/11.jpg",
+          "https://baobab-beach-resort.com/imgs/gallery/restaurants/22.jpg",
+          "https://baobab-beach-resort.com/imgs/gallery/restaurants/1.jpg",
+        ],
+        website: "https://baobab-beach-resort.com/",
+      },
+      {
+        id: "southern-palms-beach-resort",
+        name: "Southern Palms Beach Resort",
+        category: "mid-range",
+        description:
+          "A classic Diani Beach resort with expansive tropical grounds, two large pools, Swahili and Arabic decor, and a long beachfront stretch south of Mombasa.",
+        story:
+          "Southern Palms is a South Coast staple because it balances size with a relaxed beach feel. The property gives families and groups plenty of room while keeping the Indian Ocean at the center of the stay.",
+        features: [
+          "Direct beachfront location on Diani Beach",
+          "Two huge free-form pools and four restaurants",
+          "Swahili and Arabic decor throughout the resort",
+          "Strong fit for families and beach holidays",
+        ],
+        image:
+          "https://southernpalmskenya.com/wp-content/uploads/2021/05/SPBR-Sept-2019-Hotel-0020-IMG_9414-1-scaled.jpg",
+        images: [
+          "https://southernpalmskenya.com/wp-content/uploads/2021/05/SPBR-Sept-2019-Hotel-0020-IMG_9414-1-scaled.jpg",
+          "https://southernpalmskenya.com/wp-content/uploads/2021/05/SPBR-Sept-2019-Hotel-0132-DSC07329-scaled.jpg",
+          "https://southernpalmskenya.com/wp-content/uploads/2021/05/41-scaled.jpg",
+        ],
+        website: "https://southernpalmskenya.com/",
+      },
+      {
+        id: "leopard-beach-resort",
+        name: "Leopard Beach Resort & Spa",
+        category: "luxury",
+        description:
+          "A polished Diani Beach resort with sea-view rooms, spa facilities, pools, and a long reputation as one of the South Coast's established luxury stays.",
+        story:
+          "Leopard Beach is one of the South Coast's safest recommendations when the brief is premium beach comfort. It delivers the resort structure, spa time, and beach access that many Diani travelers want in one place.",
+        features: [
+          "Prime Diani Beach position",
+          "Spa, pools, and a broad choice of rooms and cottages",
+          "Well suited to couples and leisure stays",
+          "Easy base for South Coast excursions",
+        ],
+        image: "https://www.leopardbeachresort.com/images/gallerycenterimage/us-gallery-2_3896.jpg",
+        images: [
+          "https://www.leopardbeachresort.com/images/gallerycenterimage/us-gallery-2_3896.jpg",
+          "https://www.leopardbeachresort.com/images/gallerycenterimage/us-gallery-6_27580.jpg",
+          "https://www.leopardbeachresort.com/images/gallerycenterimage/us-gallery-3_10444.jpg",
+        ],
+        website: "https://www.leopardbeachresort.com/",
+      },
+      {
+        id: "diani-sea-resort",
+        name: "Diani Sea Resort",
+        category: "mid-range",
+        description:
+          "A family-friendly Diani Beach resort with tropical gardens, a lagoon-style pool, and an easygoing all-inclusive atmosphere.",
+        story:
+          "Diani Sea Resort is a practical South Coast base that leans into comfort, shade, and easy beach access. It is a sensible choice for travelers who want dependable holiday value rather than a flashy resort.",
+        features: [
+          "Direct access to Diani Beach",
+          "Large lagoon-style pool with swim-up bar",
+          "Family entertainment and kids' activities",
+          "Relaxed all-inclusive coastal stay",
+        ],
+        image: "https://www.dianisearesort.de/media/2018/06/IMG_2151-2.jpg",
+        images: [
+          "https://www.dianisearesort.de/media/2018/06/IMG_2151-2.jpg",
+          "https://www.dianisearesort.de/media/2018/06/MG_2391-2.jpg",
+          "https://www.dianisearesort.de/media/2018/10/DJI_0080-2-2.jpg",
+        ],
+        website: "https://www.dianisearesort.de/",
+      },
+    ],
   },
   {
     destinationId: "diani",
@@ -686,14 +964,13 @@ export const destinationLodges: DestinationLodges[] = [
           "Home to the rare Angolan Colobus monkeys",
           "World-class Afya Bora Spa and Wellness Centre",
         ],
-        image: "/images/diani.webp",
+        image: "https://baobab-beach-resort.com/imgs/gallery/restaurants/1.jpg",
         images: [
-          "/images/diani.webp",
-          "/images/Diani Beach (2).webp",
-          "/images/diani-extra-1.webp",
-          "/images/diani-extra-2.webp",
+          "https://baobab-beach-resort.com/imgs/gallery/restaurants/1.jpg",
+          "https://baobab-beach-resort.com/imgs/gallery/restaurants/11.jpg",
+          "https://baobab-beach-resort.com/imgs/gallery/restaurants/22.jpg",
         ],
-        website: "https://www.baobab-beach-resort.com/",
+        website: "https://baobab-beach-resort.com/",
       },
       {
         id: "diani-sea-resort",
@@ -708,13 +985,13 @@ export const destinationLodges: DestinationLodges[] = [
           "Themed buffet dinners featuring Swahili and international cuisine",
           "Daily entertainment: acrobats, traditional dancers, and live bands",
         ],
-        image: "/images/diani.webp",
+        image: "https://www.dianisearesort.de/media/2018/10/DJI_0080-2-2.jpg",
         images: [
-          "/images/diani.webp",
-          "/images/Diani Beach (2).webp",
-          "/images/diani-extra-1.webp",
+          "https://www.dianisearesort.de/media/2018/10/DJI_0080-2-2.jpg",
+          "https://www.dianisearesort.de/media/2018/06/IMG_2151-2.jpg",
+          "https://www.dianisearesort.de/media/2018/06/MG_2391-2.jpg",
         ],
-        website: "https://dianisearesort.de/",
+        website: "https://www.dianisearesort.de/",
       },
       {
         id: "southern-palms",
@@ -729,13 +1006,169 @@ export const destinationLodges: DestinationLodges[] = [
           "Direct beachfront location on the most scenic part of Diani",
           "Comprehensive water sports center: scuba diving, windsurfing, snorkeling",
         ],
-        image: "/images/Mombasa Hotel.jpg",
+        image:
+          "https://southernpalmskenya.com/wp-content/uploads/2021/05/SPBR-Sept-2019-Hotel-0020-IMG_9414-1-scaled.jpg",
         images: [
-          "/images/Mombasa Hotel.jpg",
-          "/images/Diani Beach (2).webp",
-          "/images/Diani Beach (2).jpg",
+          "https://southernpalmskenya.com/wp-content/uploads/2021/05/SPBR-Sept-2019-Hotel-0020-IMG_9414-1-scaled.jpg",
+          "https://southernpalmskenya.com/wp-content/uploads/2021/05/SPBR-Sept-2019-Hotel-0132-DSC07329-scaled.jpg",
+          "https://southernpalmskenya.com/wp-content/uploads/2021/05/41-scaled.jpg",
         ],
         website: "https://southernpalmskenya.com/",
+      },
+      {
+        id: "leopard-beach-resort",
+        name: "Leopard Beach Resort & Spa",
+        category: "luxury",
+        description:
+          "An established Diani Beach resort with sea-view rooms, pools, and a full-service spa, set on a raised coastal bluff with direct access to the beach.",
+        story:
+          "Leopard Beach is one of Diani's best-known classic resorts: landscaped grounds, a proper resort layout, and an easy rhythm between pool time, beach time, and excursions on the South Coast.",
+        features: [
+          "Prime Diani Beach location",
+          "Multiple pools and a full-service spa",
+          "Good mix of rooms, suites, and cottages",
+          "Strong choice for couples and leisure stays",
+        ],
+        image: "https://www.leopardbeachresort.com/images/gallerycenterimage/us-gallery-3_10444.jpg",
+        images: [
+          "https://www.leopardbeachresort.com/images/gallerycenterimage/us-gallery-3_10444.jpg",
+          "https://www.leopardbeachresort.com/images/gallerycenterimage/us-gallery-2_3896.jpg",
+          "https://www.leopardbeachresort.com/images/gallerycenterimage/us-gallery-6_27580.jpg",
+        ],
+        website: "https://www.leopardbeachresort.com/",
+      },
+      {
+        id: "swahili-beach-resort",
+        name: "Swahili Beach Resort",
+        category: "luxury",
+        description:
+          "A distinctive five-star Diani resort known for its Swahili-inspired design and its dramatic, multi-level cascading pool set in lush tropical gardens by the beach.",
+        story:
+          "Swahili Beach is a statement property. It leans into architecture, landscaping, and a big-resort feel while still keeping the coast front and center with wide pool terraces and easy access to the Indian Ocean.",
+        features: [
+          "Signature multi-level cascading pool",
+          "Swahili-inspired architecture and interiors",
+          "Beachfront access on Diani Beach",
+          "Good fit for couples and luxury beach stays",
+        ],
+        image: "https://swahilibeach.com/wp-content/uploads/2025/02/DJI_0147.jpg",
+        images: [
+          "https://swahilibeach.com/wp-content/uploads/2025/02/DJI_0147.jpg",
+          "https://swahilibeach.com/wp-content/uploads/2025/05/pool-2.png",
+          "https://swahilibeach.com/wp-content/uploads/2025/02/DSC_4801.jpg",
+        ],
+        website: "https://swahilibeach.com/",
+      },
+      {
+        id: "pinewood-beach-resort",
+        name: "Pinewood Beach Resort & Spa",
+        category: "luxury",
+        description:
+          "A boutique-style resort on the Diani/Galu strip with a strong reputation for calm service, wellness, and romantic beach stays, supported by on-site dining and spa facilities.",
+        story:
+          "Pinewood works best for travelers who want Diani without the mega-resort scale: more personal, quieter, and easy to pair with a few excursions while keeping the beach the main attraction.",
+        features: [
+          "Boutique resort atmosphere on the South Coast",
+          "Beach access on the Diani/Galu strip",
+          "On-site dining and spa facilities",
+          "Good fit for couples and relaxed luxury breaks",
+        ],
+        image: "https://mail.pinewood-beach.com/images/gallery/exterior-gallery1_693860.jpg",
+        images: [
+          "https://mail.pinewood-beach.com/images/gallery/exterior-gallery1_693860.jpg",
+          "https://mail.pinewood-beach.com/images/gallery/activities-gallery9_337927.jpg",
+          "https://mail.pinewood-beach.com/images/gallery/dining-gallery8_222079.jpg",
+        ],
+        website: "https://pinewood-beach.com/",
+      },
+      {
+        id: "diani-reef-beach-resort",
+        name: "Diani Reef Beach Resort & Spa",
+        category: "luxury",
+        description:
+          "A large beachfront resort in Diani with broad facilities for beach holidays, events, and longer stays, combining multiple room categories with resort-style pools and dining.",
+        story:
+          "Diani Reef is built for classic beach-holiday convenience: big grounds, plenty of on-site options, and a coastline setting that works well for travelers who want everything in one place.",
+        features: [
+          "Beachfront resort in Diani",
+          "Multiple accommodation categories",
+          "Resort-style pools and on-site dining",
+          "Popular choice for events and longer stays",
+        ],
+        image: "https://dianireef.com/wp-content/uploads/2023/03/Aerial-view-of-Diani-Reef-768x512.jpg",
+        images: [
+          "https://dianireef.com/wp-content/uploads/2023/03/Aerial-view-of-Diani-Reef-768x512.jpg",
+          "https://dianireef.com/wp-content/uploads/2023/03/Main-swimming-pool-768x512.jpg",
+          "https://dianireef.com/wp-content/uploads/2023/03/Diani-Beach-768x512.jpg",
+        ],
+        website: "https://dianireef.com/",
+      },
+      {
+        id: "neptune-paradise-beach-resort",
+        name: "Neptune Paradise Beach Resort & Spa",
+        category: "mid-range",
+        description:
+          "An all-inclusive Diani beachfront resort set in a tropical garden with makuti-roof cottages and a relaxed, family-friendly rhythm.",
+        story:
+          "Neptune Paradise is about easy coastal value: a classic Diani beach setting, lots of outdoor space, and the kind of simple resort structure that makes planning straightforward for families and groups.",
+        features: [
+          "All-inclusive beach resort on Diani",
+          "Makuti-roof cottage-style rooms",
+          "Tropical garden setting",
+          "Good fit for families and groups",
+        ],
+        image:
+          "https://www.neptunehotels.com/wp-content/uploads/2023/09/Neptune-Paradise-Beach-Resort-and-Spa-Pool-View-Diani-888x848.jpg.webp",
+        images: [
+          "https://www.neptunehotels.com/wp-content/uploads/2023/09/Neptune-Paradise-Beach-Resort-and-Spa-Pool-View-Diani-888x848.jpg.webp",
+          "https://www.neptunehotels.com/wp-content/uploads/2025/06/Neptune-Paradise-Renovated-Room-1-1200x900.jpg.webp",
+          "https://www.neptunehotels.com/wp-content/uploads/2022/08/RECEPTION_5884-ph-by-Rosalia-Filippetti-1200x900.jpg.webp",
+        ],
+        website: "https://www.neptunehotels.com/neptune-paradise-beach-resort-spa/",
+      },
+      {
+        id: "neptune-village-beach-resort",
+        name: "Neptune Village Beach Resort & Spa",
+        category: "mid-range",
+        description:
+          "A wide-frontage, all-inclusive style beach resort on Diani with makuti-roof cottages, big gardens, and an energetic facilities mix for longer stays.",
+        story:
+          "Neptune Village is a dependable South Coast base when you want lots of space, beach access, and an easy resort routine where everything is on hand.",
+        features: [
+          "All-inclusive beach resort on Diani",
+          "Large tropical gardens and wide beachfront",
+          "Makuti-roof cottage-style rooms",
+          "Good fit for longer stays and groups",
+        ],
+        image: "https://www.neptunehotels.com/wp-content/uploads/2024/01/Neptune-Village-Reception-1200x900.jpg.webp",
+        images: [
+          "https://www.neptunehotels.com/wp-content/uploads/2024/01/Neptune-Village-Reception-1200x900.jpg.webp",
+          "https://www.neptunehotels.com/wp-content/uploads/2022/08/Village-Evening-View-of-Pool-Barsd-1200x900.jpg.webp",
+          "https://www.neptunehotels.com/wp-content/uploads/2023/10/Neptune-Village-Beach-Resort-Spa-Superior-Garden-Room-800x500.jpg.webp",
+        ],
+        website: "https://www.neptunehotels.com/neptune-village-beach-resort-spa/",
+      },
+      {
+        id: "neptune-palm-beach-boutique",
+        name: "Neptune Palm Beach Boutique Resort & Spa",
+        category: "mid-range",
+        description:
+          "A boutique Diani beachfront resort with Swahili-inspired architecture, makuti-roof cottages, and a quieter atmosphere than the larger all-inclusive compounds nearby.",
+        story:
+          "Neptune Palm is a clean middle ground: a full resort setup with beachfront comfort, but with a smaller, more boutique feel that suits couples and relaxed beach travelers.",
+        features: [
+          "Boutique beachfront resort on Diani",
+          "Swahili-inspired architecture and gardens",
+          "Makuti-roof cottage-style rooms",
+          "Good fit for calmer beach stays",
+        ],
+        image: "https://www.neptunehotels.com/wp-content/uploads/2024/01/Neptune-Palm-Reception-1200x900.jpg.webp",
+        images: [
+          "https://www.neptunehotels.com/wp-content/uploads/2024/01/Neptune-Palm-Reception-1200x900.jpg.webp",
+          "https://www.neptunehotels.com/wp-content/uploads/2022/08/DSC_0156-1200x900.jpg.webp",
+          "https://www.neptunehotels.com/wp-content/uploads/2022/08/DSC_0148-1200x900.jpg.webp",
+        ],
+        website: "https://www.neptunehotels.com/neptune-palm-beach-boutique-resort-spa/",
       },
     ],
   },
@@ -786,6 +1219,78 @@ export const destinationLodges: DestinationLodges[] = [
     ],
   },
   {
+    destinationId: "mombasa",
+    destinationName: "Mombasa",
+    lodges: [
+      {
+        id: "hotel-englishpoint",
+        name: "Hotel EnglishPoint & Spa",
+        category: "luxury",
+        description:
+          "A modern waterfront hotel and spa at English Point Marina, set across the creek from Old Mombasa and Fort Jesus with infinity-pool views, boardwalk dining, and a strong business-leisure mix.",
+        story:
+          "Hotel EnglishPoint is the city's polished coastal base: contemporary, architectural, and close to Mombasa's historic core. It suits guests who want marina views, spa time, and easy access to Fort Jesus, the Old Port, and the city centre without losing the feel of an oceanfront escape.",
+        features: [
+          "Waterfront setting at English Point Marina",
+          "Infinity pool, spa, gym, and boardwalk restaurants",
+          "Close to Fort Jesus, Old Town, and the Old Port",
+          "Ideal for both leisure stays and corporate travel",
+        ],
+        image: "/images/Mombasa Hotel.webp",
+        images: [
+          "/images/Mombasa Hotel.webp",
+          "/images/Mombasa Hotel 1.webp",
+          "/images/Mombasa hotel (2).webp",
+        ],
+        website: "https://englishpoint.co.ke/",
+      },
+      {
+        id: "cityblue-creekside",
+        name: "CityBlue Creekside Hotel & Suites",
+        category: "mid-range",
+        description:
+          "A 100-room creekside hotel overlooking Tudor Creek, combining Moorish-inspired architecture, a pool garden, fitness facilities, and flexible event space for business and leisure guests.",
+        story:
+          "CityBlue Creekside sits where Mombasa feels most layered: water, history, and city movement all in one place. The setting on Tudor Creek makes it a useful base for travelers who want the old-city atmosphere, conference convenience, and relaxed resort features in a single stop.",
+        features: [
+          "Overlooks Tudor Creek in historic Mombasa",
+          "Moorish-inspired design with decorative arches and tiles",
+          "Pool garden, restaurant, and fitness centre",
+          "Well suited for events and short city stays",
+        ],
+        image: "/images/Mombasa Hotel 1.webp",
+        images: [
+          "/images/Mombasa Hotel 1.webp",
+          "/images/Mombasa Hotel.webp",
+          "/images/Mombasa hotel (2).webp",
+        ],
+        website: "https://www.citybluehotels.com/cityblue-creekside-hotel-suites-mombasa",
+      },
+      {
+        id: "prideinn-hotel-nyali",
+        name: "PrideInn Hotel Nyali",
+        category: "mid-range",
+        description:
+          "A convenient Nyali hotel behind City Mall with easy access to beaches, nightlife, and the wider Mombasa business district, plus a pool, restaurant, and practical city-coast comfort.",
+        story:
+          "PrideInn Hotel Nyali is a sensible base for guests who want to stay close to the action without paying beachfront resort rates. It works well for quick Mombasa stopovers, family trips, and travelers combining city errands with the coast.",
+        features: [
+          "Central Nyali location behind City Mall",
+          "Short distance to beaches and Mombasa nightlife",
+          "Pool, restaurant, and bar on site",
+          "Useful for business, transit, and short leisure stays",
+        ],
+        image: "/images/Mombasa hotel (2).webp",
+        images: [
+          "/images/Mombasa hotel (2).webp",
+          "/images/Mombasa Hotel.webp",
+          "/images/Mombasa Hotel 1.webp",
+        ],
+        website: "https://www.prideinnhotels.com/hotels-in-mombasa/prideinn-nyali/",
+      },
+    ],
+  },
+  {
     destinationId: "mombasa-north-coast",
     destinationName: "Mombasa North Coast",
     lodges: [
@@ -793,23 +1298,136 @@ export const destinationLodges: DestinationLodges[] = [
         id: "serena-beach-resort",
         name: "Serena Beach Resort & Spa",
         category: "luxury",
-        description: "Fringed by white beaches and shaded by coconut palms, Serena Beach Resort & Spa brings the history and culture of the Swahili Coast to life. Designed to resemble a 13th-century Swahili town, this tranquil oasis offers ultimate coastal relaxation on Shanzu Beach.",
-        story: "Walking into Serena Beach Resort is like stepping back in time to an ancient Swahili settlement. Winding lanes, carved balconies, and coral pillars lead you to a stunning palm-fringed beachfront. Families and couples alike spend their days enjoying world-class water sports, swimming in the free-form pool, or unwinding at the Maisha Mind Body & Spirit Spa, all while experiencing the warm, vibrant hospitality of the Kenyan coast.",
+        description:
+          "A five-star Shanzu Beach resort inspired by a 13th-century Swahili village, with palm-fringed beachfront, landscaped gardens, a free-form pool, and the Maisha Spa.",
+        story:
+          "Serena Beach Resort & Spa is one of the North Coast's most distinctive stays, pairing Swahili-inspired architecture with calm beachfront living. It suits travelers who want a classic coast-resort feel with polished service, generous gardens, and easy access to Mombasa's northern beaches.",
         features: [
-          "Located directly on the pristine, white sands of Shanzu Beach",
-          "Unique architecture inspired by a 13th-century Swahili town",
-          "Maisha Mind Body & Spirit Spa offering indulgent coastal treatments",
-          "Extensive water sports including windsurfing, sailing, and scuba diving",
-          "Multiple dining options featuring fresh, local Indian Ocean seafood",
-          "Butterfly pavilion and sea turtle conservation programs on site",
+          "Directly on the white sands of Shanzu Beach",
+          "Architecture styled after a traditional Swahili village",
+          "Maisha Mind Body & Spirit Spa and free-form pool",
+          "Family-friendly beachfront resort with watersports",
         ],
-        image: "/images/mombasa-north-1.webp",
+        image:
+          "https://image-tc.galaxy.tf/wijpeg-cyj5svnn0rrxr29cimdmqvrgz/accommodation-deluxe-queen-garden-view-1-web_square.jpg?crop=333%2C0%2C1334%2C1334&width=1000",
         images: [
-          "/images/mombasa-north-1.webp",
-          "/images/mombasa-north-2.webp",
-          "/images/mombasa-north-3.webp",
+          "https://image-tc.galaxy.tf/wijpeg-cyj5svnn0rrxr29cimdmqvrgz/accommodation-deluxe-queen-garden-view-1-web_square.jpg?crop=333%2C0%2C1334%2C1334&width=1000",
+          "https://image-tc.galaxy.tf/wijpeg-eu5em5nrzhwf3emhbgih4c9vx/superior-sea-view-room1_square.jpg?crop=239%2C0%2C1442%2C1442&width=1000",
+          "https://image-tc.galaxy.tf/wijpeg-2psxqki3eywp1mg58o1gpabr9/accommodation-family-room-web_square.jpg?crop=249%2C0%2C1502%2C1502&width=1000",
         ],
         website: "https://www.serenahotels.com/serena-beach-resort-spa",
+      },
+      {
+        id: "sarova-whitesands",
+        name: "Sarova Whitesands Beach Resort & Spa",
+        category: "luxury",
+        description:
+          "A large beachfront resort on Bamburi Beach with five swimming pools, ocean-view rooms, Tulia Spa, and strong dining options, located about 30 minutes from Mombasa city centre.",
+        story:
+          "Sarova Whitesands is one of the North Coast's strongest all-round resort choices. The scale works in its favor: wide grounds, multiple pools, strong food, and direct beach access give it the feel of a complete holiday compound rather than just a room by the sea.",
+        features: [
+          "Located on Mombasa's North Coast on Bamburi Beach",
+          "Five swimming pools including a quieter pool and pool bar",
+          "Tulia Spa, kids club, and multiple dining venues",
+          "Good fit for families, couples, and conference travel",
+        ],
+        image: "https://www.sarovahotels.com/whitesands-mombasa/assets/images/room-gallery10.jpg",
+        images: [
+          "https://www.sarovahotels.com/whitesands-mombasa/assets/images/room-gallery10.jpg",
+          "https://www.sarovahotels.com/whitesands-mombasa/assets/images/room-gallery11.jpg",
+          "https://www.sarovahotels.com/whitesands-mombasa/assets/images/room-gallery2.jpg",
+        ],
+        website: "https://www.sarovahotels.com/whitesands-mombasa/",
+      },
+      {
+        id: "prideinn-paradise",
+        name: "PrideInn Paradise Beach Resort & Spa",
+        category: "luxury",
+        description:
+          "A beachfront Shanzu property with ocean-view rooms, direct beach access, expansive pool facilities, a spa, and an on-site aqua park that makes it especially strong for families.",
+        story:
+          "PrideInn Paradise balances resort comfort with the kind of features families actually use. It has the beachfront setting, but the pool, spa, and aqua park make it more active than a standard coast hotel and easier to recommend for mixed-age groups.",
+        features: [
+          "Shanzu Beach location on the North Coast",
+          "Ocean-view rooms and direct beach access",
+          "Aqua park, spa, gym, and multiple dining venues",
+          "Strong choice for family holidays and events",
+        ],
+        image:
+          "https://www.prideinnhotels.com/wp-content/uploads/elementor/thumbs/Paradise_Room-Header-qy96o3qkztmgnjqqd8i8ykl713pb9upe63zh0j69vs.webp",
+        images: [
+          "https://www.prideinnhotels.com/wp-content/uploads/elementor/thumbs/Paradise_Room-Header-qy96o3qkztmgnjqqd8i8ykl713pb9upe63zh0j69vs.webp",
+          "https://www.prideinnhotels.com/wp-content/uploads/elementor/thumbs/Accommodation_Paradise-10-qw2vgaz4f7034u8r6uis9o9bmfv10nar0cg2o62qvc.webp",
+          "/images/real images frm Tambua/hotel.jpeg",
+        ],
+        website: "https://www.prideinnhotels.com/hotels-in-mombasa/prideinn-paradise/",
+      },
+      {
+        id: "prideinn-flamingo",
+        name: "PrideInn Flamingo Beach Resort & Spa",
+        category: "mid-range",
+        description:
+          "A Shanzu Beach resort with pool and sea-view accommodation, a spa, kids facilities, and standout dining spaces including a cave restaurant and cliffside bar.",
+        story:
+          "PrideInn Flamingo brings more of a playful, holiday-energy feel to the North Coast. The cave restaurant and cliffside bar give it a memorable identity, while the family facilities and beachfront setting keep it practical for actual stays.",
+        features: [
+          "Shanzu Beach / Serena Road location",
+          "Pool, spa, gym, and kids club",
+          "Cave restaurant and cliffside bar for dining",
+          "Good fit for couples, families, and short beach breaks",
+        ],
+        image:
+          "https://www.prideinnhotels.com/wp-content/uploads/elementor/thumbs/PrideInn-Flamingo_Leisure1-r0dkt6l4z8434dca8q5h6zgmeg9pty08rr6svrcu4o.webp",
+        images: [
+          "https://www.prideinnhotels.com/wp-content/uploads/elementor/thumbs/PrideInn-Flamingo_Leisure1-r0dkt6l4z8434dca8q5h6zgmeg9pty08rr6svrcu4o.webp",
+          "https://www.prideinnhotels.com/wp-content/uploads/elementor/thumbs/PrideInn-Flamingo_Swimming-Pool-qzzybjfuqs4qdu1wh42m7tvcl0jlr8dz2jbze0ipoo.webp",
+          "/images/Mombasa hotel (2).webp",
+        ],
+        website: "https://www.prideinnhotels.com/hotels-in-mombasa/prideinn-flamingo/",
+      },
+      {
+        id: "severin-sea-lodge",
+        name: "Severin Sea Lodge",
+        category: "mid-range",
+        description:
+          "A traditional-style beach lodge on Bamburi Beach with 188 rooms and suites, tropical gardens, spa and wellness facilities, and direct access to the Indian Ocean.",
+        story:
+          "Severin Sea Lodge is a dependable Bamburi Beach option for guests who want a calmer, more established resort atmosphere. The African-style design, direct beach frontage, and broad mix of rooms make it an easy fit for longer stays.",
+        features: [
+          "Located directly on Bamburi Beach",
+          "188 rooms and suites in African-style wooden furnishings",
+          "Spa, gym, pools, and watersport access",
+          "Well suited to relaxed beach holidays",
+        ],
+        image: "/images/real images frm Tambua/hotel.jpeg",
+        images: [
+          "/images/real images frm Tambua/hotel.jpeg",
+          "/images/Mombasa hotel (2).webp",
+          "/images/popular activities/Mombasa hotel (2).webp",
+        ],
+        website: "https://www.severinsealodge.com/",
+      },
+      {
+        id: "voyager-beach-resort",
+        name: "Voyager Beach Resort",
+        category: "mid-range",
+        description:
+          "A ship-themed Nyali resort with all-inclusive style dining, three pools, four bars, and a strong family-entertainment program close to the beach.",
+        story:
+          "Voyager has a clear identity that makes it easy to place: lively, family-oriented, and geared toward guests who want more animation and activity than a quiet beach hotel. It works well for Mombasa stays that should feel fun and self-contained.",
+        features: [
+          "Nyali location off Links Road",
+          "All-inclusive feel with three pools and four bars",
+          "Family entertainment, watersports, and themed shows",
+          "Good base for beach holidays near Mombasa city",
+        ],
+        image: "/images/popular activities/Mombasa hotel (2).webp",
+        images: [
+          "/images/popular activities/Mombasa hotel (2).webp",
+          "/images/real images frm Tambua/hotel.jpeg",
+          "/images/Mombasa hotel (2).webp",
+        ],
+        website: "https://www.heritage-eastafrica.com/voyagerbeachresort/",
       },
     ],
   },

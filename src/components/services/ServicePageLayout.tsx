@@ -48,6 +48,10 @@ export function ServicePageLayout({
               alt={heroAlt}
               className="h-full w-full object-cover"
               priority
+              width={1280}
+              height={720}
+              quality={72}
+              sizes="100vw"
             />
           </div>
           <div className="container-wide relative z-10 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">

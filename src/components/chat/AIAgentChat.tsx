@@ -7,6 +7,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSafaris } from "@/hooks/useSafaris";
 import { useDestinations } from "@/hooks/useDestinations";
 import { useBlogs } from "@/hooks/useBlogs";
+import { useDestinationLodges } from "@/hooks/useDestinationLodges";
+import { useLodgesServiceShowcaseCards } from "@/hooks/useLodgesServiceShowcase";
 import OptimizedImage from "@/components/ui/optimized-image";
 import { hasSupabaseEnv, supabase } from "@/integrations/supabase/client";
 import {
@@ -55,6 +57,8 @@ export const AIAgentChat = () => {
   const { data: safaris = [] } = useSafaris();
   const { data: destinations = [] } = useDestinations();
   const { data: blogs = [] } = useBlogs();
+  const { data: lodgeGroups = [] } = useDestinationLodges();
+  const { cards: serviceLodgeCards = [] } = useLodgesServiceShowcaseCards();
   const location = useLocation();
 
   const pageLabel = useMemo(() => pageLabelFromPath(location.pathname), [location.pathname]);
@@ -70,6 +74,23 @@ export const AIAgentChat = () => {
       destNames,
     };
   }, [safaris, destinations, blogs]);
+
+  const lodgeCatalogContext = useMemo(() => {
+    const totalLodges = lodgeGroups.reduce((sum, group) => sum + group.lodges.length, 0);
+    const parts: string[] = [];
+    parts.push(`Live lodge and camp catalogue: ${lodgeGroups.length} destination groups, ${totalLodges} lodges/camps total.`);
+    lodgeGroups.slice(0, 16).forEach((group) => {
+      const names = group.lodges.slice(0, 5).map((lodge) => lodge.name).join(", ");
+      parts.push(`- ${group.destinationName} (${group.lodges.length}): ${names}${group.lodges.length > 5 ? ", and more" : ""}`);
+    });
+    if (serviceLodgeCards.length > 0) {
+      parts.push("Lodges service showcase:");
+      serviceLodgeCards.slice(0, 10).forEach((card) => {
+        parts.push(`- ${card.name} | ${card.area} | ${card.category}`);
+      });
+    }
+    return parts.join("\n");
+  }, [lodgeGroups, serviceLodgeCards]);
 
   const catalogContext = useMemo(() => {
     const parts: string[] = [];
@@ -90,12 +111,15 @@ export const AIAgentChat = () => {
       parts.push("Blog titles:");
       blogs.slice(0, 10).forEach((b) => parts.push(`- ${b.title}`));
     }
+    if (lodgeCatalogContext) {
+      parts.push(lodgeCatalogContext);
+    }
     parts.push(`Services summary: ${TAMBUA_SERVICES.ticketing} ${TAMBUA_SERVICES.transfers} ${TAMBUA_SERVICES.lodges}`);
     parts.push(
       `Site paths: home ${SITE_ROUTES.home}; safaris ${SITE_ROUTES.safaris}; destinations ${SITE_ROUTES.destinations}; services hub ${SITE_ROUTES.services}; ticketing ${SITE_ROUTES.servicesTicketing}; transfers ${SITE_ROUTES.servicesTransfers}; lodges ${SITE_ROUTES.servicesLodges}; contact ${SITE_ROUTES.contact}; travel-info ${SITE_ROUTES.travelInfo}; blog ${SITE_ROUTES.blog}; booking ${SITE_ROUTES.booking}.`,
     );
     return parts.join("\n");
-  }, [safaris, destinations, blogs]);
+  }, [safaris, destinations, blogs, lodgeCatalogContext]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

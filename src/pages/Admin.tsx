@@ -70,6 +70,9 @@ const AdminLodges = lazy(() =>
 const AdminSiteCopy = lazy(() =>
   import("@/components/admin/AdminSiteCopy").then((m) => ({ default: m.AdminSiteCopy })),
 );
+const AdminLodgesShowcase = lazy(() =>
+  import("@/components/admin/AdminLodgesShowcase").then((m) => ({ default: m.AdminLodgesShowcase })),
+);
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800",
@@ -82,6 +85,11 @@ const adminTabs = [
   { id: "bookings", label: "Bookings", hint: "Look up reservations and change status." },
   { id: "carousel", label: "Homepage images", hint: "Hero, activities, and gallery slides." },
   { id: "site_copy", label: "Home & services text", hint: "Home services strip and lodges page hero." },
+  {
+    id: "lodge_gallery",
+    label: "Lodge page gallery",
+    hint: "Image grid on Lodge & camp booking (/services/lodges-camps). Empty = built-in cards.",
+  },
   { id: "safaris", label: "Safaris", hint: "Packages and prices on the site." },
   { id: "destinations", label: "Destinations", hint: "Park and region pages." },
   { id: "lodges", label: "Lodges & camps", hint: "Per-destination lodge list in Supabase." },
@@ -375,6 +383,11 @@ const Admin = () => {
               {activeTab === "site_copy" && (
                 <ErrorBoundary>
                   <AdminSiteCopy />
+                </ErrorBoundary>
+              )}
+              {activeTab === "lodge_gallery" && (
+                <ErrorBoundary>
+                  <AdminLodgesShowcase />
                 </ErrorBoundary>
               )}
               {activeTab === "safaris" && (

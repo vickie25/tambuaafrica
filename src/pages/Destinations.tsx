@@ -634,12 +634,13 @@ const Destinations = () => {
                       onClick={() => setSelected(dest)}
                       aria-label={`Open details for ${dest.name}`}
                     >
-                      <ImageSlider
-                        images={dest.images || [dest.image]}
-                        name={dest.name}
-                        destinationId={dest.id}
+                      <OptimizedImage
+                        src={dest.images?.[0] || dest.image}
+                        fallbackSrc={fallbackDestinationImage(dest.id)}
+                        alt={dest.name}
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 md:group-hover:scale-110"
                         priority={index < 6}
-                        shouldReduceMotion={!!shouldReduceMotion}
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                       <div className="absolute bottom-0 left-0 right-0 p-6">

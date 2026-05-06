@@ -30,7 +30,7 @@ export const destinations: Destination[] = [
       "/images/mombasa-north-1.webp",
       "/images/mombasa-north-2.webp",
     ],
-    safariCount: 1,
+    safariCount: 3,
   },
   {
     id: "tsavo",
@@ -179,7 +179,7 @@ export const destinations: Destination[] = [
       "/images/diani-extra-1.webp",
       "/images/diani-extra-2.webp",
     ],
-    safariCount: 2,
+    safariCount: 10,
   },
   {
     id: "chale-island",
@@ -195,13 +195,12 @@ export const destinations: Destination[] = [
       "World-class marine biodiversity: A pristine house reef supports sea turtles, dolphins, over 200 coral fish species, and vibrant coral gardens",
       "Swahili-Arabic heritage architecture: Hand-carved timber, painted tiles, and ocean-facing verandas echo centuries of coastal craftsmanship",
     ],
-    image: "/images/Chale Island.webp",
+    image:
+      "https://chaleislandresort.com/wp-content/uploads/2024/11/0006-Chale-Aerials-Sept-2024-DJI_0043-DNG_DxO_DeepPRIMEXD1-845x684.jpg",
     images: [
-      "/images/Chale Island.webp",
-      "/images/chale Hotel.webp",
-      "/images/chale-extra-1.webp",
-      "/images/chale-extra-2.webp",
-      "/images/chale-extra-3.webp",
+      "https://chaleislandresort.com/wp-content/uploads/2024/11/0006-Chale-Aerials-Sept-2024-DJI_0043-DNG_DxO_DeepPRIMEXD1-845x684.jpg",
+      "https://chaleislandresort.com/wp-content/uploads/2023/01/ocean-view-room-845x684.jpg",
+      "https://chaleislandresort.com/wp-content/uploads/2024/11/0004-Chale-Tower-Suite-Sept-2024-_A7R33811-845x684.jpg",
     ],
     safariCount: 1,
   },
@@ -225,7 +224,7 @@ export const destinations: Destination[] = [
       "/images/watamu-hotel.webp",
       "/images/watamu-bay.webp",
     ],
-    safariCount: 1,
+    safariCount: 5,
   },
   {
     id: "wasini",
@@ -241,12 +240,13 @@ export const destinations: Destination[] = [
       "Vehicle-free serenity: Wasini has zero cars and zero paved roads, offering a completely undisturbed island experience.",
       "Swahili culture & cuisine: Known for its ancient ruins, Baobab trees, and phenomenal fresh crab and coconut rice dishes.",
     ],
-    image: "/images/wasini-island-1.webp",
+    image: "https://www.wasini.net/wp-content/uploads/2014/12/Private-Blue-Monkey-Beach-300x225.jpeg",
     images: [
-      "/images/wasini-island-1.webp",
-      "/images/wasini-island-2.webp",
+      "https://www.wasini.net/wp-content/uploads/2014/12/Private-Blue-Monkey-Beach-300x225.jpeg",
+      "https://www.wasini.net/wp-content/uploads/2014/12/DSC01501-300x225.jpg",
+      "https://www.wasini.net/wp-content/uploads/2014/12/DSC01492-300x225.jpg",
     ],
-    safariCount: 1,
+    safariCount: 4,
   },
   {
     id: "mombasa-north-coast",
@@ -268,7 +268,7 @@ export const destinations: Destination[] = [
       "/images/mombasa-north-2.webp",
       "/images/mombasa-north-3.webp",
     ],
-    safariCount: 1,
+    safariCount: 6,
   },
   {
     id: "mombasa-south-coast",
@@ -289,6 +289,6 @@ export const destinations: Destination[] = [
       "/images/diani.webp",
       "/images/Diani Beach (2).webp",
     ],
-    safariCount: 1,
+    safariCount: 4,
   },
 ];

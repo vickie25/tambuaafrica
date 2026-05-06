@@ -306,6 +306,41 @@ export interface Database {
           updated_at?: string
         }
       }
+      lodges_service_cards: {
+        Row: {
+          id: string
+          sort_order: number
+          name: string
+          area: string
+          category: string
+          note: string
+          image_url: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          sort_order?: number
+          name: string
+          area: string
+          category: string
+          note: string
+          image_url: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          sort_order?: number
+          name?: string
+          area?: string
+          category?: string
+          note?: string
+          image_url?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

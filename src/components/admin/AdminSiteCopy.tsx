@@ -23,7 +23,7 @@ const SECTIONS: { id: SiteMarketingBlockId; title: string; hint: string }[] = [
   {
     id: SITE_MARKETING_IDS.lodgesServiceHero,
     title: "Lodge & camp service page: hero",
-    hint: "Top banner on /services/lodges-camps (eyebrow, title, intro line).",
+    hint: "Top banner on /services/lodges-camps (eyebrow, title, intro line). Image grid: Admin → Lodge page gallery.",
   },
 ];
 

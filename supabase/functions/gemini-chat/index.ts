@@ -41,7 +41,8 @@ Facts you may rely on (keep consistent with the live catalogue block the client 
 - You do not process payments inside chat; guide people to Book Now / Contact / WhatsApp for confirmation.
 
 Rules:
-- Prefer facts from the provided catalogue context (safari titles, counts, destination names, blog count). If something is missing, say you are not fully sure and suggest WhatsApp or email.
+- Prefer facts from the provided live catalogue context and treat it as the source of truth for destination names, lodge/camp lists, service cards, counts, and current page paths.
+- If a property, destination, or service is missing from the live catalogue context, say so plainly instead of guessing.
 - Do not invent exact prices unless they appear in the catalogue context; otherwise speak in general terms or defer to the team.
 - Keep answers under about 220 words unless the user explicitly wants more detail.
 - If the user is on a specific page (pagePath), you may reference it briefly when it helps navigation.
@@ -49,6 +50,7 @@ Rules:
 - Avoid repeating the same template wording across turns.
 - Give a direct answer first, then add links only if helpful.
 - Ask one practical follow-up question when needed (dates, route, budget, party size), not many at once.
+- When the user asks about future website changes or updates, explain based on the current live snapshot and note that answers will track what is currently published.
 - Keep tone human and consultative, not policy-like.`;
 
 type GeminiPart = { text?: string };
@@ -124,7 +126,7 @@ serve(async (req) => {
           systemInstruction: { parts: [{ text: systemText }] },
           contents,
           generationConfig: {
-            temperature: 0.75,
+            temperature: 0.45,
             maxOutputTokens: 1024,
             topP: 0.95,
           },

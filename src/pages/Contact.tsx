@@ -11,8 +11,23 @@ import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import OptimizedImage from "@/components/ui/optimized-image";
 import { submitInquiry } from "@/lib/inquiry";
 import { toast } from "sonner";
+import { TEAM_CONTACT_EMAILS } from "@/lib/admin-email";
 
 const emptyForm = { name: "", email: "", phone: "", subject: "", message: "" };
+
+const ContactEmailList = () => (
+  <div className="space-y-0.5">
+    {TEAM_CONTACT_EMAILS.map((email) => (
+      <a
+        key={email}
+        href={`mailto:${email}`}
+        className="block text-muted-foreground text-sm hover:text-accent transition-colors"
+      >
+        {email}
+      </a>
+    ))}
+  </div>
+);
 
 const Contact = () => {
   const { ref, isVisible } = useScrollAnimation();
@@ -172,7 +187,7 @@ const Contact = () => {
                         <Mail className="w-4 h-4 text-accent mt-0.5 shrink-0" />
                         <div>
                           <div className="font-medium text-foreground text-sm">Email</div>
-                          <div className="text-muted-foreground text-sm">info@tambuaafrica.com</div>
+                          <ContactEmailList />
                         </div>
                       </div>
                     </div>
@@ -209,7 +224,7 @@ const Contact = () => {
                         <Mail className="w-4 h-4 text-accent mt-0.5 shrink-0" />
                         <div>
                           <div className="font-medium text-foreground text-sm">Email</div>
-                          <div className="text-muted-foreground text-sm">info@tambuaafrica.com</div>
+                          <ContactEmailList />
                         </div>
                       </div>
                     </div>

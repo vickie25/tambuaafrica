@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://www.tambuaafrica.com/sitemap.xml
+Sitemap: https://www.tambua-africa.com/sitemap.xml

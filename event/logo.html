@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#111;display:flex;justify-content:center;align-items:flex-start;padding:40px;font-family:Inter,-apple-system,sans-serif;}
+.poster{width:680px;min-height:1020px;background:linear-gradient(160deg,#0f172a 0%,#0a1628 60%,#0c1e3d 100%);position:relative;overflow:hidden;}
+.poster::before{content:'';position:absolute;top:-80px;left:-80px;width:400px;height:400px;background:radial-gradient(circle,rgba(59,130,246,0.15),transparent 70%);border-radius:50%;}
+.poster::after{content:'';position:absolute;bottom:100px;right:-80px;width:380px;height:380px;background:radial-gradient(circle,rgba(139,92,246,0.12),transparent 70%);border-radius:50%;}
+.top-bar{height:4px;background:linear-gradient(90deg,#3b82f6,#06b6d4,#8b5cf6);width:100%;}
+.logo-area{position:absolute;top:28px;left:32px;display:flex;align-items:center;gap:14px;}
+.logo-img{width:72px;height:72px;border-radius:50%;background:#fff;object-fit:contain;padding:4px;}
+.logo-text{display:flex;flex-direction:column;}
+.logo-text .cres{font-size:20px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;}
+.logo-text .dyn{font-size:9px;font-weight:700;color:#f5a623;letter-spacing:3px;margin-top:1px;}
+.badge{position:absolute;top:44px;right:32px;border:0.75px solid #3b82f6;border-radius:12px;padding:5px 16px;}
+.badge span{font-size:9px;font-weight:500;color:#60a5fa;letter-spacing:3px;}
+.content{padding:140px 40px 40px;}
+.pre-label{font-size:11px;font-weight:500;color:#60a5fa;letter-spacing:6px;margin-bottom:20px;}
+.headline-ai{font-size:130px;font-weight:900;color:#ffffff;line-height:1;margin-bottom:4px;}
+.accent-bar{width:320px;height:4px;background:linear-gradient(90deg,#3b82f6,#06b6d4,#8b5cf6);border-radius:2px;margin-bottom:20px;}
+.headline-in{font-size:44px;font-weight:300;color:#e2e8f0;margin-bottom:8px;}
+.headline-biz{font-size:60px;font-weight:800;color:#ffffff;margin-bottom:20px;}
+.dots{display:flex;gap:8px;align-items:center;margin-bottom:24px;}
+.dot{width:8px;height:8px;border-radius:50%;}
+.tagline{font-size:14px;color:#94a3b8;line-height:1.7;margin-bottom:32px;}
+.rule{height:0.5px;background:rgba(255,255,255,0.08);margin-bottom:28px;}
+.detail-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:28px;}
+.dcard{background:#0f2040;border-radius:12px;padding:18px 14px;text-align:center;}
+.dcard.blue{border:0.75px solid #3b82f6;}
+.dcard.cyan{border:0.75px solid #06b6d4;}
+.dcard.purple{border:0.75px solid #8b5cf6;}
+.dcard-label{font-size:8px;font-weight:600;letter-spacing:2px;margin-bottom:8px;}
+.dcard.blue .dcard-label{color:#60a5fa;}
+.dcard.cyan .dcard-label{color:#22d3ee;}
+.dcard.purple .dcard-label{color:#a78bfa;}
+.dcard-val{font-size:16px;font-weight:700;color:#ffffff;margin-bottom:3px;}
+.dcard-sub{font-size:10px;color:#475569;}
+.ticket-label{font-size:9px;font-weight:600;color:#60a5fa;letter-spacing:4px;margin-bottom:16px;}
+.tickets{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:28px;}
+.tcard{background:#0a1628;border:0.75px solid #1e293b;border-radius:12px;padding:20px 14px;text-align:center;}
+.tcard.featured{background:#0d1f3c;border:1.5px solid #3b82f6;position:relative;transform:translateY(-8px);}
+.tcard.vip{border-color:#f59e0b;}
+.tcard-type{font-size:10px;color:#64748b;margin-bottom:8px;}
+.tcard.vip .tcard-type{color:#f59e0b;}
+.popular-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#3b82f6;color:#fff;font-size:8px;font-weight:700;padding:3px 12px;border-radius:8px;letter-spacing:1px;white-space:nowrap;}
+.tcard-price{font-size:30px;font-weight:900;color:#ffffff;line-height:1;}
+.tcard.featured .tcard-price{color:#ffffff;}
+.tcard.vip .tcard-price{color:#fbbf24;}
+.tcard-curr{font-size:11px;color:#475569;margin-top:4px;}
+.tcard.featured .tcard-curr{color:#60a5fa;}
+.perks{font-size:11px;color:#64748b;margin-bottom:28px;text-align:center;line-height:1.8;}
+.bottom-bar{height:0.5px;background:rgba(255,255,255,0.08);margin-bottom:20px;}
+.footer{display:flex;justify-content:space-between;align-items:center;padding:0 0 0 0;}
+.footer span{font-size:11px;color:#334155;}
+.footer .mid{color:#3b82f6;}
+.bottom-accent{height:4px;background:linear-gradient(90deg,#3b82f6,#06b6d4,#8b5cf6);width:100%;margin-top:24px;}
+</style>
+</head>
+<body>
+<div class="poster">
+  <div class="top-bar"></div>
+
+  <div class="logo-area">
+    <img class="logo-img" src="LOGO.jpg" alt="Cres Dynamics"/>
+    <div class="logo-text">
+      <span class="cres">CRES</span>
+      <span class="dyn">DYNAMICS</span>
+    </div>
+  </div>
+
+  <div class="badge"><span>NAIROBI · 2026</span></div>
+
+  <div class="content">
+    <div class="pre-label">THE FUTURE OF</div>
+    <div class="headline-ai">AI</div>
+    <div class="accent-bar"></div>
+    <div class="headline-in">in</div>
+    <div class="headline-biz">Business.</div>
+
+    <div class="dots">
+      <div class="dot" style="background:#3b82f6;opacity:0.6;"></div>
+      <div class="dot" style="background:#06b6d4;opacity:0.6;"></div>
+      <div class="dot" style="background:#8b5cf6;opacity:0.6;width:14px;height:14px;"></div>
+      <div class="dot" style="background:#06b6d4;opacity:0.6;"></div>
+      <div class="dot" style="background:#3b82f6;opacity:0.6;"></div>
+    </div>
+
+    <div class="tagline">
+      One afternoon. 300 seats. Business owners and developers<br/>
+      learning what AI means for them — and what to do about it right now.
+    </div>
+
+    <div class="rule"></div>
+
+    <div class="detail-cards">
+      <div class="dcard blue">
+        <div class="dcard-label">DATE</div>
+        <div class="dcard-val">20 June 2026</div>
+        <div class="dcard-sub">Friday</div>
+      </div>
+      <div class="dcard cyan">
+        <div class="dcard-label">TIME</div>
+        <div class="dcard-val">2PM – 7PM</div>
+        <div class="dcard-sub">EAT</div>
+      </div>
+      <div class="dcard purple">
+        <div class="dcard-label">VENUE</div>
+        <div class="dcard-val">Sarit Expo Centre</div>
+        <div class="dcard-sub">Westlands, Nairobi</div>
+      </div>
+    </div>
+
+    <div class="rule"></div>
+
+    <div class="ticket-label">TICKET PRICING</div>
+    <div class="tickets">
+      <div class="tcard">
+        <div class="tcard-type">General</div>
+        <div class="tcard-price">1,500</div>
+        <div class="tcard-curr">KES · Full programme</div>
+      </div>
+      <div class="tcard featured">
+        <div class="popular-badge">POPULAR</div>
+        <div class="tcard-type" style="color:#94a3b8;">Standard</div>
+        <div class="tcard-price">2,500</div>
+        <div class="tcard-curr">KES · Full programme</div>
+      </div>
+      <div class="tcard vip">
+        <div class="tcard-type">VIP Access</div>
+        <div class="tcard-price">3,500</div>
+        <div class="tcard-curr">KES · Front seats + perks</div>
+      </div>
+    </div>
+
+    <div class="perks">
+      AI tools · Live demos · Real networking · Action plan<br/>
+      Colour lanyards · Certificates · Speaker access
+    </div>
+
+    <div class="bottom-bar"></div>
+
+    <div class="footer">
+      <span>cresdynamics.com</span>
+      <span class="mid">info@cresdynamics.com</span>
+      <span>+254 708 805 496</span>
+    </div>
+
+    <div class="bottom-accent"></div>
+  </div>
+</div>
+</body>
+</html>

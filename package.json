@@ -5,11 +5,18 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "snapshot": "node scripts/generate-site-snapshot.cjs",
+    "prebuild": "node scripts/generate-site-snapshot.cjs",
     "build": "vite build",
+    "postbuild": "node scripts/prerender-static.mjs",
+    "prerender": "node scripts/prerender-static.mjs",
+    "build:fast": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
+    "test:signup": "node scripts/test-signup.cjs",
+    "test:e2e": "playwright test",
     "test:watch": "vitest",
     "diagnose:supabase": "node scripts/diagnose-supabase.cjs",
     "setup-storage": "node scripts/setup-storage.js",
@@ -100,6 +107,7 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
     "vite": "^5.4.19",
+    "vite-plugin-compression": "^0.5.1",
     "vitest": "^3.2.4"
   }
 }

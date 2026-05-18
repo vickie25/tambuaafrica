@@ -1,13 +1,13 @@
 const { createClient } = require("@supabase/supabase-js");
 require("dotenv").config();
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "info@tambuaafrica.com";
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "info@tambua-africa.com";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const ADMIN_NAME = process.env.ADMIN_NAME || "Tambua Africa Admin";
 
 if (!ADMIN_PASSWORD) {
   console.error("Missing ADMIN_PASSWORD in .env. Set it locally, then run: node update-admin.js (or update-admin.cjs)");
-  console.error("Example: ADMIN_EMAIL=info@tambuaafrica.com ADMIN_PASSWORD=… (do not commit .env)");
+  console.error("Example: ADMIN_EMAIL=info@tambua-africa.com ADMIN_PASSWORD=… (do not commit .env)");
   process.exit(1);
 }
 

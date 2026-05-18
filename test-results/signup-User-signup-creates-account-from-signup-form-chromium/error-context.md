@@ -1,0 +1,172 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T":
+    - list:
+      - listitem [ref=e3]:
+        - img [ref=e5]
+        - generic [ref=e8]: email rate limit exceeded
+  - generic [ref=e9]:
+    - navigation [ref=e10]:
+      - generic [ref=e12]:
+        - link "Tambua Africa Tambua Africa Tours & Safaris" [ref=e13] [cursor=pointer]:
+          - /url: /
+          - img "Tambua Africa" [ref=e15]
+          - generic [ref=e16]: Tambua Africa Tours & Safaris
+        - generic [ref=e17]:
+          - link "Home" [ref=e19] [cursor=pointer]:
+            - /url: /
+          - button "Safaris" [ref=e21] [cursor=pointer]:
+            - text: Safaris
+            - img [ref=e22]
+          - link "Destination" [ref=e25] [cursor=pointer]:
+            - /url: /destinations
+          - button "Services" [ref=e27] [cursor=pointer]:
+            - text: Services
+            - img [ref=e28]
+          - button "Travel Info" [ref=e31] [cursor=pointer]:
+            - text: Travel Info
+            - img [ref=e32]
+          - link "Blog" [ref=e35] [cursor=pointer]:
+            - /url: /blog
+          - link "Contact Us" [ref=e37] [cursor=pointer]:
+            - /url: /contact
+        - link [ref=e39] [cursor=pointer]:
+          - /url: /login
+          - img
+    - generic [ref=e42]:
+      - generic [ref=e43]:
+        - heading "Create Account" [level=1] [ref=e44]
+        - paragraph [ref=e45]: Join Tambua Africa for your next adventure
+      - generic [ref=e46]:
+        - generic [ref=e47]:
+          - text: Full Name
+          - textbox "John Doe" [ref=e48]: UI Signup Test
+        - generic [ref=e49]:
+          - text: Email
+          - textbox "you@example.com" [ref=e50]: tambua.ui.1779087535505@mailinator.com
+        - generic [ref=e51]:
+          - text: Password
+          - generic [ref=e52]:
+            - textbox "Min. 6 characters" [ref=e53]: UiTest#1779087535505
+            - button [ref=e54] [cursor=pointer]:
+              - img [ref=e55]
+        - button "Create Account" [ref=e58] [cursor=pointer]:
+          - img
+          - text: Create Account
+      - paragraph [ref=e59]:
+        - text: Already have an account?
+        - link "Sign in" [ref=e60] [cursor=pointer]:
+          - /url: /login
+    - contentinfo [ref=e61]:
+      - generic [ref=e64]:
+        - generic [ref=e65]:
+          - heading "Stay Updated" [level=3] [ref=e66]
+          - paragraph [ref=e67]: Get the latest safari deals and travel tips
+        - generic [ref=e68]:
+          - textbox "Enter your email" [ref=e69]
+          - button "Subscribe" [ref=e70] [cursor=pointer]:
+            - img
+            - text: Subscribe
+      - generic [ref=e72]:
+        - generic [ref=e73]:
+          - heading "Tambua Africa Tours & Safaris Ltd." [level=3] [ref=e74]
+          - paragraph [ref=e75]: Plainsview Road, F21-5, Hazina Estate
+          - generic [ref=e76]:
+            - generic [ref=e77]:
+              - img [ref=e78]
+              - link "info@tambua-africa.com" [ref=e81] [cursor=pointer]:
+                - /url: mailto:info@tambua-africa.com
+            - generic [ref=e82]:
+              - img [ref=e83]
+              - link "isaac@tambua-africa.com" [ref=e86] [cursor=pointer]:
+                - /url: mailto:isaac@tambua-africa.com
+            - generic [ref=e87]:
+              - img [ref=e88]
+              - link "jorim@tambua-africa.com" [ref=e91] [cursor=pointer]:
+                - /url: mailto:jorim@tambua-africa.com
+            - generic [ref=e92]:
+              - link [ref=e93] [cursor=pointer]:
+                - /url: https://facebook.com/tambuaafrica
+                - img [ref=e94]
+              - link [ref=e96] [cursor=pointer]:
+                - /url: https://twitter.com/tambuaafrica
+                - img [ref=e97]
+              - link [ref=e99] [cursor=pointer]:
+                - /url: https://youtube.com/tambuaafrica
+                - img [ref=e100]
+        - generic [ref=e103]:
+          - heading "Legal" [level=4] [ref=e104]
+          - list [ref=e105]:
+            - listitem [ref=e106]:
+              - link "Privacy Policy" [ref=e107] [cursor=pointer]:
+                - /url: /privacy
+            - listitem [ref=e108]:
+              - link "Terms of Service" [ref=e109] [cursor=pointer]:
+                - /url: /terms
+        - generic [ref=e110]:
+          - heading "Safari Itineraries" [level=4] [ref=e111]
+          - list [ref=e112]:
+            - listitem [ref=e113]:
+              - link "2-Days Mombasa to Amboseli Air Safari" [ref=e114] [cursor=pointer]:
+                - /url: /safaris
+            - listitem [ref=e115]:
+              - link "1 Day Snorkeling Wasini Island" [ref=e116] [cursor=pointer]:
+                - /url: /safaris
+            - listitem [ref=e117]:
+              - link "1 Day Shimba Hills" [ref=e118] [cursor=pointer]:
+                - /url: /safaris
+            - listitem [ref=e119]:
+              - link "2 Days Masai Mara From Nairobi" [ref=e120] [cursor=pointer]:
+                - /url: /safaris
+            - listitem [ref=e121]:
+              - link "4 Days Masai Mara - Lake Nakuru-Amboseli Safari" [ref=e122] [cursor=pointer]:
+                - /url: /safaris
+            - listitem [ref=e123]:
+              - link "3 Days Masai Mara Safari" [ref=e124] [cursor=pointer]:
+                - /url: /safaris
+        - generic [ref=e125]:
+          - heading "Contact" [level=4] [ref=e126]
+          - list [ref=e127]:
+            - listitem [ref=e128]:
+              - heading "Drop a Line" [level=5] [ref=e129]
+              - generic [ref=e130]:
+                - generic [ref=e131]:
+                  - img [ref=e132]
+                  - link "info@tambua-africa.com" [ref=e135] [cursor=pointer]:
+                    - /url: mailto:info@tambua-africa.com
+                - generic [ref=e136]:
+                  - img [ref=e137]
+                  - link "isaac@tambua-africa.com" [ref=e140] [cursor=pointer]:
+                    - /url: mailto:isaac@tambua-africa.com
+                - generic [ref=e141]:
+                  - img [ref=e142]
+                  - link "jorim@tambua-africa.com" [ref=e145] [cursor=pointer]:
+                    - /url: mailto:jorim@tambua-africa.com
+                - generic [ref=e146]:
+                  - img [ref=e147]
+                  - generic [ref=e149]: "Kenya: +254 726 207 900 / +254 792 329 682 / +254 704 548 78"
+                - generic [ref=e150]:
+                  - img [ref=e151]
+                  - generic [ref=e153]: "UK: +44 793 997 0489"
+                - generic [ref=e154]:
+                  - img [ref=e155]
+                  - generic [ref=e157]: "WA: +254 792 329 682"
+            - listitem [ref=e158]:
+              - heading "Visit office" [level=5] [ref=e159]
+              - generic [ref=e160]:
+                - img [ref=e161]
+                - generic [ref=e164]: Plainsview Road, F21-5, Hazina Estate
+      - generic [ref=e166]:
+        - paragraph [ref=e167]: © 2026 Tambua Africa Tours & Safaris. All rights reserved.
+        - link "Built by Cres Dynamics Ltd." [ref=e168] [cursor=pointer]:
+          - /url: https://cresdynamics.com
+  - link "Chat on WhatsApp" [ref=e170] [cursor=pointer]:
+    - /url: https://wa.me/254792329682?text=Hello%20Tambua%20Africa!%20I'm%20interested%20in%20a%20safari.
+    - img [ref=e171]
+  - button "Message Ashley" [ref=e173] [cursor=pointer]:
+    - img [ref=e174]
+```

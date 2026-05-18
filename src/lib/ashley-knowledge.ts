@@ -3,12 +3,16 @@
  * counts are merged at runtime in the chat component so answers stay current.
  */
 
+import { TEAM_CONTACT_EMAILS } from "@/lib/admin-email";
+
 export const ASHLEY_DISPLAY_NAME = "Ashley";
 export const ASHLEY_TITLE = "Guest services · Tambua Africa";
 
 export const WHATSAPP_E164 = "+254792329682";
 export const WHATSAPP_DISPLAY = "+254 792 329 682";
-export const CONTACT_EMAIL = "info@tambuaafrica.com";
+export const CONTACT_EMAIL = TEAM_CONTACT_EMAILS[0];
+export const CONTACT_EMAILS = TEAM_CONTACT_EMAILS;
+export const CONTACT_EMAILS_DISPLAY = TEAM_CONTACT_EMAILS.join(", ");
 
 export const SITE_ROUTES = {
   home: "/",

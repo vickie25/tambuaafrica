@@ -1,4 +1,4 @@
--- Promote info@tambuaafrica.com to admin in public.profiles and refresh is_admin().
+-- Promote info@tambua-africa.com to admin in public.profiles and refresh is_admin().
 -- Run in: Supabase Dashboard → SQL → New query.
 --
 -- Prerequisite: the user must already exist under Authentication → Users
@@ -16,7 +16,7 @@ select
   coalesce(u.created_at, now()),
   now()
 from auth.users u
-where lower(trim(coalesce(u.email, ''))) = 'info@tambuaafrica.com'
+where lower(trim(coalesce(u.email, ''))) = 'info@tambua-africa.com'
 on conflict (id) do update set
   role = 'admin',
   full_name = coalesce(
@@ -43,7 +43,11 @@ as $$
     select 1
     from auth.users u
     where u.id = _user_id
-      and lower(trim(coalesce(u.email, ''))) = 'info@tambuaafrica.com'
+      and lower(trim(coalesce(u.email, ''))) in (
+        'info@tambua-africa.com',
+        'isaac@tambua-africa.com',
+        'jorim@tambua-africa.com'
+      )
   );
 $$;
 

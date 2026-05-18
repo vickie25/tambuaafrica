@@ -15,7 +15,7 @@ if (!supabaseUrl || !supabaseServiceKey) {
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-const targetEmail = 'info@tambuaafrica.com';
+const targetEmail = 'info@tambua-africa.com';
 
 async function promoteToAdmin() {
   console.log(`Searching for user: ${targetEmail}...`);

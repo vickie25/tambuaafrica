@@ -4,6 +4,7 @@ import {
   DEFAULT_LODGES_SERVICE_SHOWCASE,
   type LodgesServiceShowcaseCard,
 } from "@/lib/lodges-service-showcase-defaults";
+import { usePublicQueryMode } from "@/lib/use-public-query";
 
 type Row = {
   id: string;
@@ -27,16 +28,20 @@ function mapRow(r: Row): LodgesServiceShowcaseCard {
   };
 }
 
-/** Ordered cards for the lodges service page. Uses DB when at least one row exists; otherwise curated defaults. */
 export function useLodgesServiceShowcaseCards(): {
   cards: LodgesServiceShowcaseCard[];
   fromDatabase: boolean;
   isLoading: boolean;
   isError: boolean;
 } {
+  const { useStatic, snapshot, queryOptions } = usePublicQueryMode();
+
   const q = useQuery({
     queryKey: ["lodges-service-cards"],
     queryFn: async (): Promise<Row[] | null> => {
+      if (useStatic && snapshot?.lodges_service_cards.length) {
+        return snapshot.lodges_service_cards as Row[];
+      }
       if (!hasSupabaseEnv) return null;
       const { data, error } = await supabase
         .from("lodges_service_cards")
@@ -49,7 +54,11 @@ export function useLodgesServiceShowcaseCards(): {
       }
       return (data ?? []) as Row[];
     },
-    staleTime: 1000 * 60 * 2,
+    initialData:
+      useStatic && snapshot?.lodges_service_cards.length
+        ? (snapshot.lodges_service_cards as Row[])
+        : undefined,
+    ...queryOptions,
   });
 
   const rows = q.data;

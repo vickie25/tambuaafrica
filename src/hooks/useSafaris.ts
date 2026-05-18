@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Safari, safaris as localSafaris } from "@/data/safaris";
 import { fallbackSafariImage } from "@/lib/remote-media-fallbacks";
+import { usePublicQueryMode } from "@/lib/use-public-query";
 
 const BROKEN_SAFARI_IMAGE_MAP: Record<string, string> = {
   "/images/dawn-w-FmUx8z_Tz4A-unsplash.webp": "/images/destiations/Lake Nakuru/lake elementaita.webp",
@@ -12,70 +13,68 @@ const normalizeSafariImage = (image: string | null | undefined) => {
   return BROKEN_SAFARI_IMAGE_MAP[image] ?? image;
 };
 
+export function mapSafariRows(data: Record<string, unknown>[]): Safari[] {
+  if (!data.length) return localSafaris;
+  return data.map((item) => {
+    const normalized = normalizeSafariImage(item.image as string | null) ?? (item.image as string);
+    const image =
+      (typeof normalized === "string" && normalized.trim()) || fallbackSafariImage(String(item.id));
+    return {
+      ...item,
+      image,
+      stripePriceId: (item.stripe_price_id as string) ?? "",
+    } as Safari;
+  });
+}
+
+async function fetchSafarisFromDb(): Promise<Safari[]> {
+  const { data, error } = await supabase.from("safaris").select("*");
+  if (error) throw error;
+  if (!data?.length) return localSafaris;
+  return mapSafariRows(data as Record<string, unknown>[]);
+}
+
 export const useSafaris = () => {
-  const query = useQuery({
+  const { useStatic, snapshot, queryOptions } = usePublicQueryMode();
+
+  return useQuery({
     queryKey: ["safaris"],
     queryFn: async () => {
-      try {
-        const { data, error } = await supabase.from("safaris").select("*");
-        if (error) throw error;
-
-        if (!data || data.length === 0) {
-          return localSafaris;
-        }
-
-        return data.map((item) => {
-          const normalized = normalizeSafariImage(item.image) ?? item.image;
-          const image =
-            (typeof normalized === "string" && normalized.trim()) || fallbackSafariImage(String(item.id));
-          return {
-            ...item,
-            image,
-            stripePriceId: item.stripe_price_id ?? "",
-          };
-        }) as Safari[];
-      } catch (err) {
-        console.warn("Supabase fetch failed. Falling back to local Safari data.");
-        return localSafaris;
+      if (useStatic && snapshot?.safaris.length) {
+        return mapSafariRows(snapshot.safaris);
       }
+      return fetchSafarisFromDb();
     },
-    staleTime: 1000 * 60 * 5, // 5 mins - reduced from 30 mins for faster updates
-    gcTime: 1000 * 60 * 30,   // 30 mins - reduced from 1 hour
-    refetchOnWindowFocus: true, // Enable to show updates when switching tabs
+    initialData: useStatic && snapshot?.safaris.length ? mapSafariRows(snapshot.safaris) : undefined,
+    ...queryOptions,
   });
-
-  return query;
 };
 
 export const useSafari = (id?: string) => {
+  const { useStatic, queryOptions } = usePublicQueryMode();
+  const listQuery = useSafaris();
+
   return useQuery({
     queryKey: ["safari", id],
     queryFn: async () => {
       if (!id) return null;
+      if (listQuery.data) {
+        const hit = listQuery.data.find((s) => s.id === id);
+        if (hit) return hit;
+      }
       try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data, error } = await supabase.from("safaris").select("*").eq("id", id).maybeSingle();
         if (error) throw error;
-
         if (data) {
-          const normalized = normalizeSafariImage(data.image) ?? data.image;
-          const image =
-            (typeof normalized === "string" && normalized.trim()) || fallbackSafariImage(String(data.id));
-          return {
-            ...data,
-            image,
-            stripePriceId: data.stripe_price_id ?? "",
-          } as Safari;
+          return mapSafariRows([data as Record<string, unknown>])[0] ?? null;
         }
-
-        // Fallback
         return localSafaris.find((s) => s.id === id) || null;
-      } catch (err) {
-        console.warn(`Supabase fetch failed for safari ${id}. Falling back to local data.`);
+      } catch {
         return localSafaris.find((s) => s.id === id) || null;
       }
     },
-    enabled: !!id,
-    staleTime: 1000 * 60 * 5,
+    enabled: !!id && (!useStatic || !listQuery.data?.length),
+    initialData: id && listQuery.data ? listQuery.data.find((s) => s.id === id) ?? undefined : undefined,
+    ...queryOptions,
   });
 };

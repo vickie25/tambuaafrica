@@ -53,7 +53,11 @@ const Privacy = () => {
                 <h2 className="text-xl font-semibold text-primary">5. Your Rights</h2>
                 <p>
                   You may request access, correction, or deletion of your personal data by contacting us at
-                  <span className="font-medium"> info@tambuaafrica.com</span>.
+                  <span className="font-medium">
+                    {" "}
+                    info@tambua-africa.com, isaac@tambua-africa.com, or jorim@tambua-africa.com
+                  </span>
+                  .
                 </p>
               </section>
 

@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { TEAM_CONTACT_EMAILS } from "@/lib/admin-email";
 
 const Footer = () => {
   return (
@@ -37,12 +38,17 @@ const Footer = () => {
               Plainsview Road, F21-5, Hazina Estate
             </p>
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Mail className="w-4 h-4" />
-                <a href="mailto:info@tambuaafrica.com" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors text-sm">
-                  info@tambuaafrica.com
-                </a>
-              </div>
+              {TEAM_CONTACT_EMAILS.map((email) => (
+                <div key={email} className="flex items-center gap-2">
+                  <Mail className="w-4 h-4 shrink-0" />
+                  <a
+                    href={`mailto:${email}`}
+                    className="text-primary-foreground/70 hover:text-primary-foreground transition-colors text-sm"
+                  >
+                    {email}
+                  </a>
+                </div>
+              ))}
               <div className="flex gap-3">
                 <a href="https://facebook.com/tambuaafrica" className="w-8 h-8 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-white hover:text-primary transition-colors">
                   <Facebook className="w-4 h-4" />
@@ -110,12 +116,14 @@ const Footer = () => {
               <li className="space-y-2">
                 <h5 className="font-medium text-white">Drop a Line</h5>
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2 text-sm text-primary-foreground/70">
-                    <Mail className="w-4 h-4" />
-                    <a href="mailto:info@tambuaafrica.com" className="hover:text-white transition-colors">
-                      info@tambuaafrica.com
-                    </a>
-                  </div>
+                  {TEAM_CONTACT_EMAILS.map((email) => (
+                    <div key={email} className="flex items-center gap-2 text-sm text-primary-foreground/70">
+                      <Mail className="w-4 h-4 shrink-0" />
+                      <a href={`mailto:${email}`} className="hover:text-white transition-colors">
+                        {email}
+                      </a>
+                    </div>
+                  ))}
                   <div className="flex items-start gap-2 text-sm text-primary-foreground/70">
                     <Phone className="w-4 h-4 mt-1" />
                     <span>Kenya: +254 726 207 900 / +254 792 329 682 / +254 704 548 78</span>
@@ -128,15 +136,6 @@ const Footer = () => {
                     <Phone className="w-4 h-4 text-accent" />
                     <span>WA: +254 792 329 682</span>
                   </div>
-                </div>
-              </li>
-              <li className="space-y-2">
-                <h5 className="font-medium text-white">Email Address</h5>
-                <div className="flex items-center gap-2 text-sm text-primary-foreground/70">
-                  <Mail className="w-4 h-4" />
-                  <a href="mailto:info@tambuaafrica.com" className="hover:text-white transition-colors">
-                    info@tambuaafrica.com
-                  </a>
                 </div>
               </li>
               <li className="space-y-2">

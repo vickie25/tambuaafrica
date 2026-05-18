@@ -1,7 +1,9 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { hasSupabaseEnv, supabase } from "@/integrations/supabase/client";
 import { isAdminMailbox } from "@/lib/admin-email";
+import { isLiveDataPath } from "@/lib/site-snapshot";
 import type { User, Session } from "@supabase/supabase-js";
 
 interface AuthContextType {
@@ -26,10 +28,12 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const { pathname } = useLocation();
+  const needsAuthImmediately = isLiveDataPath(pathname);
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(needsAuthImmediately);
 
   const fetchRole = async (userId: string) => {
     try {
@@ -62,8 +66,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const initializeAuth = async () => {
       try {
         if (!hasSupabaseEnv) {
-          console.error("CRITICAL: Missing Supabase Environment Variables!");
           return;
+        }
+
+        if (!needsAuthImmediately) {
+          setLoading(false);
         }
 
         const fetchSession = async () => {
@@ -138,7 +145,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [needsAuthImmediately]);
 
   const signUp = async (email: string, password: string, fullName: string) => {
     if (!hasSupabaseEnv) {

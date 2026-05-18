@@ -15,6 +15,7 @@ import {
   ASHLEY_DISPLAY_NAME,
   ASHLEY_TITLE,
   CONTACT_EMAIL,
+  CONTACT_EMAILS_DISPLAY,
   SITE_ROUTES,
   TAMBUA_SERVICES,
   WHATSAPP_DISPLAY,
@@ -280,7 +281,7 @@ export const AIAgentChat = () => {
     }
 
     if (hasAny(q, ["contact", "whatsapp", "phone", "email", "support", "reach you", "talk to"])) {
-      return `Best ways to reach us: WhatsApp ${WHATSAPP_DISPLAY}, email ${CONTACT_EMAIL}, or the form on the Contact page (${SITE_ROUTES.contact}). Tell us dates, party size, and whether you need flights or lodges too, and we reply quickly.${pathHint()}`;
+      return `Best ways to reach us: WhatsApp ${WHATSAPP_DISPLAY}, email ${CONTACT_EMAILS_DISPLAY}, or the form on the Contact page (${SITE_ROUTES.contact}). Tell us dates, party size, and whether you need flights or lodges too, and we reply quickly.${pathHint()}`;
     }
 
     if (hasAny(q, ["destination", "where should i", "where to go", "place to visit", "park", "country"])) {

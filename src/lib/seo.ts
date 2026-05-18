@@ -1,5 +1,5 @@
 /** Canonical public site origin (must match production redirects and canonical links). */
-export const SITE_ORIGIN = "https://www.tambuaafrica.com";
+export const SITE_ORIGIN = "https://www.tambua-africa.com";
 
 export const SITE_NAME = "Tambua Africa Tours & Safaris";
 

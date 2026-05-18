@@ -120,7 +120,7 @@ serve(async (req) => {
 
       const companyEmail = Deno.env.get("COMPANY_NOTIFICATION_EMAIL")
         || Deno.env.get("COMPANY_EMAIL")
-        || "info@tambuaafrica.com";
+        || "info@tambua-africa.com";
       try {
         if (booking) {
           await sendBookingConfirmationEmail({

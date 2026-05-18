@@ -153,7 +153,7 @@ function generatePDF(data: ReceiptData): Uint8Array {
   contentLines.push("1 1 1 rg");
   contentLines.push("BT /F1 24 Tf 50 730 Td (TAMBUA AFRICA) Tj ET");
   contentLines.push("BT /F2 11 Tf 50 710 Td (Safari Tours & Travel) Tj ET");
-  contentLines.push("BT /F2 9 Tf 50 690 Td (Plainsview Road, Nairobi, Kenya | info@tambuaafrica.com) Tj ET");
+  contentLines.push("BT /F2 9 Tf 50 690 Td (Plainsview Road, Nairobi, Kenya | info@tambua-africa.com | isaac@tambua-africa.com | jorim@tambua-africa.com) Tj ET");
 
   // Receipt title
   contentLines.push("BT /F1 18 Tf 400 730 Td (RECEIPT) Tj ET");
@@ -241,7 +241,7 @@ function generatePDF(data: ReceiptData): Uint8Array {
   // Footer
   contentLines.push("0.420 0.451 0.502 rg");
   contentLines.push("BT /F2 9 Tf 50 355 Td (Thank you for choosing Tambua Africa for your safari adventure!) Tj ET");
-  contentLines.push("BT /F2 8 Tf 50 340 Td (For questions, contact us at info@tambuaafrica.com | +254 700 000 000) Tj ET");
+  contentLines.push("BT /F2 8 Tf 50 340 Td (For questions: info@tambua-africa.com, isaac@tambua-africa.com, jorim@tambua-africa.com | +254 700 000 000) Tj ET");
   contentLines.push("BT /F2 8 Tf 50 325 Td (This is a computer-generated receipt and does not require a signature.) Tj ET");
 
   const contentStream = contentLines.join("\n");

@@ -50,7 +50,7 @@ with check (
     select 1 from public.profiles p
     where p.id = auth.uid() and lower(coalesce(p.role, '')) = 'admin'
   )
-  or lower(coalesce(auth.jwt() ->> 'email', '')) in ('info@tambuaafrica.com')
+  or lower(coalesce(auth.jwt() ->> 'email', '')) in ('info@tambua-africa.com', 'isaac@tambua-africa.com', 'jorim@tambua-africa.com')
 );
 
 drop policy if exists "admin_update_lodges_service_cards" on public.lodges_service_cards;
@@ -63,14 +63,14 @@ using (
     select 1 from public.profiles p
     where p.id = auth.uid() and lower(coalesce(p.role, '')) = 'admin'
   )
-  or lower(coalesce(auth.jwt() ->> 'email', '')) in ('info@tambuaafrica.com')
+  or lower(coalesce(auth.jwt() ->> 'email', '')) in ('info@tambua-africa.com', 'isaac@tambua-africa.com', 'jorim@tambua-africa.com')
 )
 with check (
   exists (
     select 1 from public.profiles p
     where p.id = auth.uid() and lower(coalesce(p.role, '')) = 'admin'
   )
-  or lower(coalesce(auth.jwt() ->> 'email', '')) in ('info@tambuaafrica.com')
+  or lower(coalesce(auth.jwt() ->> 'email', '')) in ('info@tambua-africa.com', 'isaac@tambua-africa.com', 'jorim@tambua-africa.com')
 );
 
 drop policy if exists "admin_delete_lodges_service_cards" on public.lodges_service_cards;
@@ -83,5 +83,5 @@ using (
     select 1 from public.profiles p
     where p.id = auth.uid() and lower(coalesce(p.role, '')) = 'admin'
   )
-  or lower(coalesce(auth.jwt() ->> 'email', '')) in ('info@tambuaafrica.com')
+  or lower(coalesce(auth.jwt() ->> 'email', '')) in ('info@tambua-africa.com', 'isaac@tambua-africa.com', 'jorim@tambua-africa.com')
 );

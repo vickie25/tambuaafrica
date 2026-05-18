@@ -1,7 +1,7 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { testimonials as localTestimonials } from "@/data/testimonials";
+import { usePublicQueryMode } from "@/lib/use-public-query";
 
 export interface Review {
   id: string;
@@ -18,12 +18,32 @@ export interface Review {
   updated_at: string;
 }
 
-export const useReviews = () => {
-  const queryClient = useQueryClient();
+function mapLocalTestimonials(): Review[] {
+  return localTestimonials.map((t, index) => ({
+    id: t.id,
+    author_name: t.name,
+    author_title: t.title,
+    author_avatar: t.avatar,
+    quote: t.quote,
+    rating: t.rating,
+    source: "manual",
+    source_url: null,
+    is_active: true,
+    display_order: index + 1,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  }));
+}
 
-  const query = useQuery({
+export const useReviews = () => {
+  const { useStatic, snapshot, queryOptions } = usePublicQueryMode();
+
+  return useQuery({
     queryKey: ["reviews"],
     queryFn: async () => {
+      if (useStatic && snapshot?.reviews.length) {
+        return snapshot.reviews as Review[];
+      }
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data, error } = await (supabase as any)
@@ -33,74 +53,14 @@ export const useReviews = () => {
           .order("display_order", { ascending: true });
 
         if (error) throw error;
-
-        if (!data || data.length === 0) {
-          // Fall back to local testimonials
-          return localTestimonials.map((t, index) => ({
-            id: t.id,
-            author_name: t.name,
-            author_title: t.title,
-            author_avatar: t.avatar,
-            quote: t.quote,
-            rating: t.rating,
-            source: "manual",
-            source_url: null,
-            is_active: true,
-            display_order: index + 1,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          })) as Review[];
-        }
-
+        if (!data?.length) return mapLocalTestimonials();
         return data as Review[];
       } catch (err) {
         console.warn("Supabase reviews fetch failed. Falling back to local testimonials.");
-        return localTestimonials.map((t, index) => ({
-          id: t.id,
-          author_name: t.name,
-          author_title: t.title,
-          author_avatar: t.avatar,
-          quote: t.quote,
-          rating: t.rating,
-          source: "manual",
-          source_url: null,
-          is_active: true,
-          display_order: index + 1,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })) as Review[];
+        return mapLocalTestimonials();
       }
     },
-    staleTime: 1000 * 60 * 5, // 5 mins
-    gcTime: 1000 * 60 * 30,   // 30 mins
-    refetchOnWindowFocus: true,
+    initialData: useStatic && snapshot?.reviews.length ? (snapshot.reviews as Review[]) : undefined,
+    ...queryOptions,
   });
-
-  // Real-time subscription for reviews - disabled due to subscription conflicts
-  // TODO: Re-enable once Supabase realtime is properly configured
-  /*
-  useEffect(() => {
-    const channel = supabase
-      .channel('reviews-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'reviews'
-        },
-        (payload) => {
-          console.log('Reviews real-time update:', payload);
-          queryClient.invalidateQueries({ queryKey: ["reviews"] });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient]);
-  */
-
-  return query;
 };

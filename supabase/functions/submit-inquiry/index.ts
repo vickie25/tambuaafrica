@@ -275,7 +275,14 @@ const appendInquiryToSheet = async (payload: InquiryPayload, submissionId: strin
 const sendInquiryEmail = async (payload: InquiryPayload) => {
   const resendApiKey = getOptionalEnv("RESEND_API_KEY");
   // Always deliver inquiry notifications to the company mailbox.
-  const companyEmail = Deno.env.get("COMPANY_NOTIFICATION_EMAIL") || "info@tambuaafrica.com";
+  const defaultRecipients = [
+    "info@tambua-africa.com",
+    "isaac@tambua-africa.com",
+    "jorim@tambua-africa.com",
+  ];
+  const companyEmail =
+    Deno.env.get("COMPANY_NOTIFICATION_EMAIL")?.split(",").map((e) => e.trim()).filter(Boolean)
+    || defaultRecipients;
   const fromEmail = getOptionalEnv("RESEND_FROM_EMAIL") || "onboarding@resend.dev";
 
   if (!resendApiKey) {

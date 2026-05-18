@@ -12,7 +12,7 @@ import CookieConsent from "@/components/layout/CookieConsent";
 import ErrorBoundary from "@/components/layout/ErrorBoundary";
 import BackToTop from "@/components/layout/BackToTop";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import { AIAgentChat } from "@/components/chat/AIAgentChat";
+import LazyAIAgentChat from "@/components/chat/LazyAIAgentChat";
 import { lazy, Suspense, useEffect } from "react";
 import { usePerformanceOptimization } from "@/hooks/usePerformanceOptimization";
 
@@ -45,6 +45,7 @@ const TransfersService = lazy(() => import("./pages/TransfersService").then(m =>
 const LodgesCampsService = lazy(() => import("./pages/LodgesCampsService").then(m => ({ default: m.default })));
 
 import SuspenseFallback from "@/components/layout/SuspenseFallback";
+import { hydrateStaticQueryCache } from "@/lib/hydrate-static-cache";
 import {
   SEO_BY_ROUTE,
   SITE_NAME,
@@ -57,14 +58,16 @@ import {
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5,      // 5 minutes
-      gcTime: 1000 * 60 * 30,         // 30 minutes
-      retry: 1,                        // Single retry on failure
-      refetchOnWindowFocus: true,      // Refetch when window regains focus
-      refetchOnReconnect: true,        // Refetch when reconnected
+      staleTime: 1000 * 60 * 30,
+      gcTime: 1000 * 60 * 60,
+      retry: 1,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
     },
   },
 });
+
+hydrateStaticQueryCache(queryClient);
 
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -153,7 +156,7 @@ const App = () => (
           <AuthProvider>
             <AnimatedRoutes />
             <FloatingButtons />
-            <AIAgentChat />
+            <LazyAIAgentChat />
             <CookieConsent />
             <BackToTop />
           </AuthProvider>

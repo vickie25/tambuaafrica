@@ -9,7 +9,7 @@ select
   u.id,
   coalesce(u.raw_user_meta_data ->> 'full_name', split_part(coalesce(u.email, ''), '@', 1), 'User'),
   case
-    when lower(coalesce(u.email, '')) in ('info@tambuaafrica.com')
+    when lower(coalesce(u.email, '')) in ('info@tambua-africa.com', 'isaac@tambua-africa.com', 'jorim@tambua-africa.com')
       then 'admin'
     else 'user'
   end,

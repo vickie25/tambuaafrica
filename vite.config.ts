@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import { VitePWA } from "vite-plugin-pwa";
+import viteCompression from "vite-plugin-compression";
 import path from "path";
 
 // https://vitejs.dev/config/
@@ -13,82 +14,58 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    // Optimize chunk splitting for faster initial load
+    target: "es2020",
     rollupOptions: {
       output: {
         manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'query-vendor': ['@tanstack/react-query'],
-          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-tooltip', '@radix-ui/react-select'],
-          'animation': ['framer-motion'],
-          'icons': ['lucide-react'],
+          "react-vendor": ["react", "react-dom", "react-router-dom"],
+          "query-vendor": ["@tanstack/react-query"],
+          "ui-vendor": [
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-tooltip",
+            "@radix-ui/react-select",
+          ],
+          animation: ["framer-motion"],
+          icons: ["lucide-react"],
+          supabase: ["@supabase/supabase-js"],
         },
       },
     },
-    // Aggressive minification
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-      },
-    },
-    // Generate source maps only in development
-    sourcemap: mode === 'development',
-    // Optimize CSS
+    minify: "esbuild",
+    cssMinify: true,
+    sourcemap: mode === "development",
     cssCodeSplit: true,
-    // Preload critical chunks
     reportCompressedSize: false,
+    chunkSizeWarningLimit: 900,
   },
   plugins: [
     react(),
+    viteCompression({ algorithm: "brotliCompress", ext: ".br", deleteOriginFile: false }),
+    viteCompression({ algorithm: "gzip", ext: ".gz", deleteOriginFile: false }),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: "autoUpdate",
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,svg}'],
+        globPatterns: ["**/*.{js,css,html,ico,svg,woff2}"],
         maximumFileSizeToCacheInBytes: 12 * 1024 * 1024,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/.*\.(png|jpg|jpeg|svg|gif|webp|avif|mp4)$/,
-            handler: 'CacheFirst',
+            handler: "CacheFirst",
             options: {
-              cacheName: 'images-cache',
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
-              },
+              cacheName: "images-cache",
+              expiration: { maxEntries: 120, maxAgeSeconds: 60 * 60 * 24 * 30 },
             },
           },
           {
-            urlPattern: /\/api\//,
-            handler: 'NetworkFirst',
+            urlPattern: /\/data\/site-snapshot\.json/,
+            handler: "CacheFirst",
             options: {
-              cacheName: 'api-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60, // 1 hour
-              },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/.*\.supabase\.co/,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'supabase-cache',
-              expiration: {
-                maxEntries: 20,
-                maxAgeSeconds: 60 * 30, // 30 minutes
-              },
+              cacheName: "site-snapshot",
+              expiration: { maxEntries: 2, maxAgeSeconds: 60 * 60 * 24 * 7 },
             },
           },
         ],
-        // Exclude dynamic routes from precaching
-        navigateFallbackDenylist: [
-          /^\/admin/,
-          /^\/dashboard/,
-          /^\/booking/,
-          /^\/api/,
-        ],
+        navigateFallbackDenylist: [/^\/admin/, /^\/dashboard/, /^\/booking/, /^\/api/],
       },
     }),
   ],
@@ -98,6 +75,6 @@ export default defineConfig(({ mode }) => ({
     },
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', 'framer-motion'],
+    include: ["react", "react-dom", "react-router-dom"],
   },
 }));

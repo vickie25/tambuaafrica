@@ -58,7 +58,7 @@ AS $$
   OR EXISTS (
     SELECT 1 FROM auth.users u
     WHERE u.id = _user_id
-      AND lower(coalesce(u.email, '')) IN ('info@tambuaafrica.com')
+      AND lower(coalesce(u.email, '')) IN ('info@tambua-africa.com', 'isaac@tambua-africa.com', 'jorim@tambua-africa.com')
   );
 $$;
 
@@ -74,7 +74,7 @@ BEGIN
     NEW.id,
     COALESCE(NULLIF(NEW.raw_user_meta_data ->> 'full_name', ''), split_part(COALESCE(NEW.email, ''), '@', 1), ''),
     COALESCE(NULLIF(NEW.raw_user_meta_data ->> 'phone', ''), ''),
-    CASE WHEN lower(COALESCE(NEW.email, '')) IN ('info@tambuaafrica.com') THEN 'admin' ELSE 'user' END
+    CASE WHEN lower(COALESCE(NEW.email, '')) IN ('info@tambua-africa.com', 'isaac@tambua-africa.com', 'jorim@tambua-africa.com') THEN 'admin' ELSE 'user' END
   )
   ON CONFLICT (id) DO UPDATE
   SET
@@ -97,7 +97,7 @@ SELECT
   u.id,
   COALESCE(NULLIF(u.raw_user_meta_data ->> 'full_name', ''), split_part(COALESCE(u.email, ''), '@', 1), ''),
   COALESCE(NULLIF(u.raw_user_meta_data ->> 'phone', ''), ''),
-  CASE WHEN lower(COALESCE(u.email, '')) IN ('info@tambuaafrica.com') THEN 'admin' ELSE 'user' END,
+  CASE WHEN lower(COALESCE(u.email, '')) IN ('info@tambua-africa.com', 'isaac@tambua-africa.com', 'jorim@tambua-africa.com') THEN 'admin' ELSE 'user' END,
   COALESCE(u.created_at, now()),
   now()
 FROM auth.users u

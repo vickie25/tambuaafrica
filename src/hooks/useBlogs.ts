@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/types/supabase";
 import { BlogPost, posts as localPosts } from "@/data/blogPosts";
+import { usePublicQueryMode } from "@/lib/use-public-query";
 
 type BlogRow = Database["public"]["Tables"]["blogs"]["Row"];
 
@@ -34,7 +35,7 @@ const formatBlogDate = (value?: string | null) => {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 };
 
-const mapRemoteBlogToUi = (item: BlogRow & { tags?: string[]; author?: string }): BlogPost => {
+export const mapRemoteBlogToUi = (item: BlogRow & { tags?: string[]; author?: string }): BlogPost => {
   const parsed = extractMetaFromContent(item.content || "");
   const content = parsed.body;
   const excerpt =
@@ -67,55 +68,72 @@ const mapRemoteBlogToUi = (item: BlogRow & { tags?: string[]; author?: string })
   };
 };
 
+function mapBlogRows(data: Record<string, unknown>[], includeDrafts: boolean): BlogPost[] {
+  if (!data.length) {
+    return includeDrafts ? localPosts : localPosts.filter((post) => (post.status || "published") === "published");
+  }
+  const mapped = data.map((item) => mapRemoteBlogToUi(item as BlogRow & { tags?: string[] }));
+  return includeDrafts ? mapped : mapped.filter((post) => (post.status || "published") === "published");
+}
+
+async function fetchBlogsFromDb(includeDrafts: boolean): Promise<BlogPost[]> {
+  const { data, error } = await supabase.from("blogs").select("*").order("created_at", { ascending: false });
+  if (error) throw error;
+  return mapBlogRows((data ?? []) as Record<string, unknown>[], includeDrafts);
+}
+
 export const useBlogs = ({ includeDrafts = false }: { includeDrafts?: boolean } = {}) => {
-  const query = useQuery({
-    queryKey: ["blogs", includeDrafts ? "all" : "published"],
+  const { useStatic, snapshot, queryOptions } = usePublicQueryMode();
+  const key = includeDrafts ? "all" : "published";
+
+  return useQuery({
+    queryKey: ["blogs", key],
     queryFn: async () => {
+      if (useStatic && snapshot?.blogs.length) {
+        return mapBlogRows(snapshot.blogs, includeDrafts);
+      }
       try {
-        const { data, error } = await supabase.from("blogs").select("*").order("created_at", { ascending: false });
-        if (error) throw error;
-
-        if (!data || data.length === 0) {
-          return includeDrafts ? localPosts : localPosts.filter((post) => (post.status || "published") === "published");
-        }
-
-        const mapped = data.map((item) => mapRemoteBlogToUi(item as BlogRow & { tags?: string[] }));
-        return includeDrafts ? mapped : mapped.filter((post) => (post.status || "published") === "published");
+        return await fetchBlogsFromDb(includeDrafts);
       } catch (err) {
         console.warn("Supabase fetch failed. Falling back to local blog posts.", err);
-        return includeDrafts ? localPosts : localPosts.filter((post) => (post.status || "published") === "published");
+        return mapBlogRows([], includeDrafts);
       }
     },
-    staleTime: 1000 * 60 * 5, // 5 mins - reduced from 30 mins for faster updates
-    gcTime: 1000 * 60 * 30,   // 30 mins - reduced from 1 hour
-    refetchOnWindowFocus: true, // Enable to show updates when switching tabs
+    initialData:
+      useStatic && snapshot?.blogs.length ? mapBlogRows(snapshot.blogs, includeDrafts) : undefined,
+    ...queryOptions,
   });
-
-  return query;
 };
 
 export const useBlog = (id?: string, { includeDrafts = false }: { includeDrafts?: boolean } = {}) => {
+  const { useStatic, queryOptions } = usePublicQueryMode();
+  const listQuery = useBlogs({ includeDrafts });
+  const key = includeDrafts ? "all" : "published";
+
   return useQuery({
-    queryKey: ["blog", id, includeDrafts ? "all" : "published"],
+    queryKey: ["blog", id, key],
     queryFn: async () => {
       if (!id) return null;
+      if (listQuery.data) {
+        const hit = listQuery.data.find((post) => post.id === id);
+        if (hit) return hit;
+      }
       try {
         const { data, error } = await supabase.from("blogs").select("*").eq("id", id).maybeSingle();
         if (error) throw error;
-
         if (data) {
           const mapped = mapRemoteBlogToUi(data as BlogRow & { tags?: string[] });
           if (!includeDrafts && (mapped.status || "published") !== "published") return null;
           return mapped;
         }
-
-        return null;
+        return localPosts.find((post) => post.id === id) || null;
       } catch (err) {
         console.warn(`Supabase fetch failed for blog post ${id}. Falling back to local post.`, err);
         return localPosts.find((post) => post.id === id) || null;
       }
     },
-    enabled: !!id,
-    staleTime: 1000 * 60 * 5,
+    enabled: !!id && (!useStatic || !listQuery.data?.length),
+    initialData: id && listQuery.data ? listQuery.data.find((post) => post.id === id) : undefined,
+    ...queryOptions,
   });
 };

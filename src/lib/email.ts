@@ -1,5 +1,5 @@
 // Email service integration using Resend API
-import { COMPANY_INBOX_EMAIL } from "@/lib/admin-email";
+import { COMPANY_INBOX_EMAIL, TEAM_CONTACT_EMAILS } from "@/lib/admin-email";
 
 interface EmailOptions {
   to: string | string[];
@@ -34,12 +34,14 @@ class EmailService {
 
       const recipients = Array.isArray(options.to) ? options.to : [options.to];
       
-      if (!recipients.includes(this.companyNotificationEmail)) {
-        recipients.push(this.companyNotificationEmail);
+      for (const inbox of TEAM_CONTACT_EMAILS) {
+        if (!recipients.includes(inbox)) {
+          recipients.push(inbox);
+        }
       }
 
       const emailData = {
-        from: options.from || 'Tambua Africa <no-reply@tambuaafrica.com>',
+        from: options.from || 'Tambua Africa <no-reply@tambua-africa.com>',
         to: recipients,
         subject: options.subject,
         html: options.html || this.generateHtmlFromText(options.text || ''),

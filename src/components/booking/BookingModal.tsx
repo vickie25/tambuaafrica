@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { submitInquiry } from "@/lib/inquiry";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { buildWhatsAppUrl } from "@/lib/whatsapp";
 
 interface BookingModalProps {
   open: boolean;
@@ -80,7 +81,7 @@ const BookingModal = ({ open, onOpenChange, preselectedSafari }: BookingModalPro
 
     const openWhatsAppBooking = () => {
       const whatsappText = `Hello Tambua Next Wave! I would like to book a safari.\n\nSafari: ${selectedSafari.title}\nName: ${form.name}\nEmail: ${form.email}\nPhone: ${form.phone}\nDate: ${format(date, "yyyy-MM-dd")}\nGuests: ${form.guests}\n\nNotes: ${form.notes || "None"}`;
-      const whatsappUrl = `https://wa.me/254792329682?text=${encodeURIComponent(whatsappText)}`;
+      const whatsappUrl = buildWhatsAppUrl(whatsappText);
       window.open(whatsappUrl, '_blank');
       onOpenChange(false);
       setForm(emptyForm);

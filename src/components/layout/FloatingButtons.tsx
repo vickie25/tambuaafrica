@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { buildWhatsAppUrl } from "@/lib/whatsapp";
 
 const FloatingButtons = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -56,7 +56,7 @@ const FloatingButtons = () => {
         </AnimatePresence>
 
         <motion.a
-          href="https://wa.me/254792329682?text=Hello%20Tambua%20Africa!%20I'm%20interested%20in%20a%20safari."
+          href={buildWhatsAppUrl()}
           target="_blank"
           rel="noopener noreferrer"
           className="w-16 h-16 rounded-full bg-[#25D366] text-white shadow-xl flex items-center justify-center hover:bg-[#20BD5A] transition-colors"

@@ -12,6 +12,7 @@ import OptimizedImage from "@/components/ui/optimized-image";
 import { submitInquiry } from "@/lib/inquiry";
 import { toast } from "sonner";
 import { TEAM_CONTACT_EMAILS } from "@/lib/admin-email";
+import { WHATSAPP_DISPLAY } from "@/lib/whatsapp";
 
 const emptyForm = { name: "", email: "", phone: "", subject: "", message: "" };
 
@@ -217,7 +218,7 @@ const Contact = () => {
                         <MessageCircle className="w-4 h-4 text-accent mt-0.5 shrink-0" />
                         <div>
                           <div className="font-medium text-foreground text-sm">WhatsApp</div>
-                          <div className="text-muted-foreground text-sm">+254 792 329 682</div>
+                          <div className="text-muted-foreground text-sm">{WHATSAPP_DISPLAY}</div>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">

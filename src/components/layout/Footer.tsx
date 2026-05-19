@@ -3,6 +3,7 @@ import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube, Send } from
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TEAM_CONTACT_EMAILS } from "@/lib/admin-email";
+import { WHATSAPP_DISPLAY } from "@/lib/whatsapp";
 
 const Footer = () => {
   return (
@@ -134,7 +135,7 @@ const Footer = () => {
                   </div>
                   <div className="flex items-center gap-2 text-sm text-primary-foreground/70">
                     <Phone className="w-4 h-4 text-accent" />
-                    <span>WA: +254 792 329 682</span>
+                    <span>WA: {WHATSAPP_DISPLAY}</span>
                   </div>
                 </div>
               </li>

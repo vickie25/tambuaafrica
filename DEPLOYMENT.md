@@ -26,12 +26,22 @@ Do **not** add `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, or `SEND_EMAIL_HOO
 ## 3. Custom domain
 
 1. Vercel → **Domains** → add `tambuaafrica.com` and `www.tambuaafrica.com`
-2. DNS at your registrar → point to Vercel (A/CNAME as shown)
+2. DNS at your registrar → point **both** apex and `www` to Vercel (A/CNAME as shown in Vercel)
 3. `vercel.json` redirects `www` → apex automatically
+
+If `https://tambuaafrica.com` returns **404** but a `*.vercel.app` preview URL works, the apex domain is not linked to this project yet — finish DNS in Vercel → Domains.
 
 ## 4. Supabase (required for auth & data)
 
-- **URL Configuration:** Site URL `https://tambuaafrica.com`, redirect URLs `https://tambuaafrica.com/auth/confirm`, `https://tambuaafrica.com/**`
+In **Supabase Dashboard → Authentication → URL Configuration**:
+
+| Setting | Value |
+|---------|--------|
+| **Site URL** | `https://tambuaafrica.com` (not `tambua-africa.com`) |
+| **Redirect URLs** | `https://tambuaafrica.com/auth/confirm`, `https://tambuaafrica.com/**` |
+
+If signup shows `redirect_to=...tambua-africa.com` or returns **500**, the Site URL is still wrong or the **Send Email** hook failed — see `supabase/AUTH_EMAIL_SETUP.md` and re-run `npm run setup:auth-email`.
+
 - **Send Email hook:** see `supabase/AUTH_EMAIL_SETUP.md`
 - Run `npm run setup:auth-email` after changing Resend/hook secrets
 

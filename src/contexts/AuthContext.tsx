@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { hasSupabaseEnv, supabase } from "@/integrations/supabase/client";
 import { isAdminMailbox } from "@/lib/admin-email";
-import { getEmailConfirmRedirectUrl } from "@/lib/auth-redirect";
+import { getAuthSiteOrigin, getEmailConfirmRedirectUrl } from "@/lib/auth-redirect";
 import { formatAuthError } from "@/lib/auth-errors";
 import { isLiveDataPath } from "@/lib/site-snapshot";
 import type { User, Session } from "@supabase/supabase-js";
@@ -196,7 +196,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       );
     }
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: `${getAuthSiteOrigin()}/reset-password`,
     });
     if (error) throw error;
   };

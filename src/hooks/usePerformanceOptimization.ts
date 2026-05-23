@@ -6,36 +6,11 @@ import { useEffect } from 'react';
  */
 export const usePerformanceOptimization = () => {
   useEffect(() => {
-    // Prefetch critical resources
-    const prefetchResources = () => {
-      const links = [
-        { href: '/safaris', as: 'fetch' },
-        { href: '/destinations', as: 'fetch' },
-        { href: '/blog', as: 'fetch' },
-      ];
-
-      links.forEach(({ href }) => {
-        const link = document.createElement('link');
-        link.rel = 'prefetch';
-        link.href = href;
-        document.head.appendChild(link);
-      });
-    };
-
     // Optimize Web Fonts loading
     if ('fonts' in document) {
       document.fonts.ready.then(() => {
         document.documentElement.classList.add('fonts-loaded');
       });
-    }
-
-    // Enable requestIdleCallback for non-critical tasks
-    if ('requestIdleCallback' in window) {
-      requestIdleCallback(() => {
-        prefetchResources();
-      });
-    } else {
-      setTimeout(prefetchResources, 2000);
     }
 
     // Disable network information tracking if available

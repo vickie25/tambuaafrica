@@ -53,10 +53,12 @@ const HeroSection = () => {
           >
             <OptimizedImage
               src={image}
-              alt="Hero Background"
+              alt="Maasai Mara wildebeest migration Kenya safari landscape"
               className="w-full h-full object-cover"
               priority
               quality={85}
+              width={1920}
+              height={1080}
             />
           </motion.div>
         ))}
@@ -73,8 +75,7 @@ const HeroSection = () => {
             transition={{ delay: 0.5, duration: 0.8 }}
             className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight"
           >
-            Explore <span className="font-display italic text-yellow-500">Africa</span> Through the
-            Heart of the East
+            Kenya Safaris &amp; African Tours | Tambua Africa Tours and Safaris
           </motion.h1>
 
           <motion.p 
@@ -83,7 +84,7 @@ const HeroSection = () => {
             transition={{ delay: 0.7, duration: 0.8 }}
             className="text-lg sm:text-xl text-white/80 max-w-2xl leading-relaxed"
           >
-            Discover tailor-made adventures across Kenya, Tanzania, Uganda, Rwanda, and the Indian Ocean coast, from migration safaris to gorilla treks and beach escapes.
+            As a Nairobi tour operator, we craft tailor-made Kenya safaris, affordable Maasai Mara packages, wildlife tours, beach holidays, and cultural experiences across East Africa.
           </motion.p>
 
           <motion.div 

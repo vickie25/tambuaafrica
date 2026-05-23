@@ -33,6 +33,7 @@ const Login = lazy(() => import("./pages/Login").then(m => ({ default: m.default
 const Signup = lazy(() => import("./pages/Signup").then(m => ({ default: m.default })));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword").then(m => ({ default: m.default })));
 const ResetPassword = lazy(() => import("./pages/ResetPassword").then(m => ({ default: m.default })));
+const AuthConfirm = lazy(() => import("./pages/AuthConfirm").then(m => ({ default: m.default })));
 const Dashboard = lazy(() => import("./pages/Dashboard").then(m => ({ default: m.default })));
 const Admin = lazy(() => import("./pages/Admin").then(m => ({ default: m.default })));
 const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess").then(m => ({ default: m.default })));
@@ -48,12 +49,16 @@ import SuspenseFallback from "@/components/layout/SuspenseFallback";
 import { hydrateStaticQueryCache } from "@/lib/hydrate-static-cache";
 import {
   SEO_BY_ROUTE,
-  SITE_NAME,
   SITE_ORIGIN,
   absoluteUrl,
-  DEFAULT_OG_IMAGE_PATH,
   truncateMetaDescription,
+  GLOBAL_OG,
+  GLOBAL_TWITTER,
+  TRAVEL_AGENCY_JSON_LD,
+  buildBreadcrumbJsonLd,
+  DEFAULT_OG_IMAGE_PATH,
 } from "@/lib/seo";
+import GoogleAnalytics from "@/components/seo/GoogleAnalytics";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -78,12 +83,15 @@ const AnimatedRoutes = () => {
   const isSafariDetail = location.pathname.startsWith("/safaris/") && location.pathname !== "/safaris";
   const routeSeo = SEO_BY_ROUTE[location.pathname];
   const shouldRenderRouteSeo = !isBlogDetail && !isSafariDetail && !!routeSeo;
-  const canonicalUrl = `${SITE_ORIGIN}${location.pathname}`;
+  const canonicalUrl = `${SITE_ORIGIN}${location.pathname === "/" ? "/" : location.pathname.replace(/\/$/, "")}`;
   const metaDescription = routeSeo ? truncateMetaDescription(routeSeo.description) : "";
-  const ogImageUrl = routeSeo ? absoluteUrl(routeSeo.ogImage ?? DEFAULT_OG_IMAGE_PATH) : DEFAULT_OG_IMAGE_PATH;
+  const ogImageUrl = absoluteUrl(routeSeo?.ogImage ?? DEFAULT_OG_IMAGE_PATH);
+  const breadcrumbLd = buildBreadcrumbJsonLd(location.pathname);
+  const isHome = location.pathname === "/";
 
   return (
     <ErrorBoundary>
+      <GoogleAnalytics />
       <Suspense fallback={<SuspenseFallback />}>
         {shouldRenderRouteSeo && routeSeo && (
           <Helmet>
@@ -92,18 +100,25 @@ const AnimatedRoutes = () => {
             {routeSeo.robots ? <meta name="robots" content={routeSeo.robots} /> : <meta name="robots" content="index, follow" />}
             <link rel="canonical" href={canonicalUrl} />
 
-            <meta property="og:site_name" content={SITE_NAME} />
-            <meta property="og:type" content="website" />
+            <meta property="og:type" content={GLOBAL_OG.type} />
+            <meta property="og:title" content={GLOBAL_OG.title} />
+            <meta property="og:description" content={GLOBAL_OG.description} />
             <meta property="og:url" content={canonicalUrl} />
-            <meta property="og:title" content={routeSeo.title} />
-            <meta property="og:description" content={metaDescription} />
             <meta property="og:image" content={ogImageUrl} />
-            <meta property="og:locale" content="en_US" />
+            <meta property="og:locale" content={GLOBAL_OG.locale} />
 
-            <meta name="twitter:card" content="summary_large_image" />
-            <meta name="twitter:title" content={routeSeo.title} />
-            <meta name="twitter:description" content={metaDescription} />
+            <meta name="twitter:card" content={GLOBAL_TWITTER.card} />
+            <meta name="twitter:site" content={GLOBAL_TWITTER.site} />
+            <meta name="twitter:title" content={GLOBAL_TWITTER.title} />
+            <meta name="twitter:description" content={GLOBAL_TWITTER.description} />
             <meta name="twitter:image" content={ogImageUrl} />
+
+            {isHome && (
+              <script type="application/ld+json">{JSON.stringify(TRAVEL_AGENCY_JSON_LD)}</script>
+            )}
+            {breadcrumbLd && (
+              <script type="application/ld+json">{JSON.stringify(breadcrumbLd)}</script>
+            )}
           </Helmet>
         )}
         <AnimatePresence mode="wait">
@@ -128,6 +143,7 @@ const AnimatedRoutes = () => {
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/auth/confirm" element={<AuthConfirm />} />
             <Route path="/booking" element={<ProtectedRoute><Booking /></ProtectedRoute>} />
             
             {/* Security: Protected Routes */}

@@ -1,12 +1,33 @@
 /** Canonical public site origin (must match production redirects and canonical links). */
-export const SITE_ORIGIN = "https://www.tambua-africa.com";
+export const SITE_ORIGIN = "https://tambuaafrica.com";
 
 export const SITE_NAME = "Tambua Africa Tours & Safaris";
 
 /** Default share image (under `public/`). */
-export const DEFAULT_OG_IMAGE_PATH = "/images/beautiful-shot-three-cute-giraffes-field-with-trees-blue-sky.webp";
+export const DEFAULT_OG_IMAGE_PATH = "/images/og-safari-image.jpg";
 
 export const DEFAULT_OG_IMAGE_URL = `${SITE_ORIGIN}${DEFAULT_OG_IMAGE_PATH}`;
+
+export const LOGO_URL = `${SITE_ORIGIN}/images/logo.png`;
+
+/** Shared Open Graph / Twitter defaults (same on every public page). */
+export const GLOBAL_OG = {
+  type: "website",
+  title: "Tambua Africa Tours & Safaris | Kenya Safaris",
+  description:
+    "Tailor-made Kenya safaris, wildlife tours & beach holidays. 16+ years of experience. Book your African adventure with Tambua Africa.",
+  locale: "en_KE",
+  image: DEFAULT_OG_IMAGE_URL,
+} as const;
+
+export const GLOBAL_TWITTER = {
+  card: "summary_large_image",
+  site: "@TambuaAfrica",
+  title: "Tambua Africa Tours & Safaris",
+  description:
+    "Tailor-made Kenya safaris & African tours. Expert guides, competitive prices. Book today!",
+  image: DEFAULT_OG_IMAGE_URL,
+} as const;
 
 export type RouteSeoEntry = {
   title: string;
@@ -36,49 +57,49 @@ export function absoluteUrl(href: string): string {
 
 export const SEO_BY_ROUTE: Record<string, RouteSeoEntry> = {
   "/": {
-    title: `${SITE_NAME} | Kenya & East Africa Safaris`,
+    title: "Tambua Africa Tours & Safaris | Kenya Safari & Travel Experts | Nairobi",
     description:
-      "Kenya and East Africa safaris from Nairobi: Masai Mara, Amboseli, custom itineraries, flights, transfers, and lodge booking with trusted local guides.",
+      "Tambua Africa offers tailor-made Kenya safaris, wildlife tours, beach holidays, and cultural experiences. 16+ years of expertise. Book your African adventure today. Call +254 726 207 900.",
   },
   "/about": {
     title: `About Us | ${SITE_NAME}`,
     description:
-      "Meet Tambua Africa, a Nairobi-based tour operator planning Kenya safaris, regional circuits, and full trip support for international travelers.",
+      "Meet Tambua Africa, a Nairobi tour operator planning tailor-made Kenya safaris, Maasai Mara wildlife tours, beach holidays, and cultural experiences across East Africa.",
   },
   "/safaris": {
-    title: `Kenya Safari Packages | ${SITE_NAME}`,
+    title: "Kenya Safari Packages & African Tours | Tambua Africa Tours",
     description:
-      "Compare Masai Mara, Amboseli, Nakuru, coast, and regional safari packages. Flexible durations, clear inclusions, and help booking your dates.",
+      "Explore Kenya's Maasai Mara, Amboseli, Tsavo & more. Tambua Africa offers custom safari packages, beach holidays, and group tours at competitive prices. Get a free quote today.",
   },
   "/destinations": {
     title: `Safari Destinations in Kenya & East Africa | ${SITE_NAME}`,
     description:
-      "Explore parks, lakes, beaches, and cross-border routes across Kenya, Tanzania, Uganda, and Rwanda with lodge ideas and sample circuits.",
+      "Explore Maasai Mara, Amboseli, Lake Nakuru, Diani Beach, and cross-border routes. Kenya safari destinations with lodge ideas from a Nairobi tour operator.",
   },
   "/travel-info": {
-    title: `Travel Info for Kenya & East Africa | ${SITE_NAME}`,
+    title: `Travel Info for Kenya Safaris | ${SITE_NAME}`,
     description:
-      "Practical guidance on visas, health, packing, seasons, money, and park etiquette before your Kenya or East Africa safari.",
+      "Kenya safari packing lists, best seasons for Maasai Mara migration, visas, health tips, and park etiquette from Tambua Africa's Nairobi team.",
   },
   "/gallery": {
-    title: `Safari Gallery | ${SITE_NAME}`,
+    title: `Kenya Safari Gallery | Wildlife Photos | ${SITE_NAME}`,
     description:
-      "Wildlife, landscapes, and lodge moments from Tambua Africa safaris across Kenya and the wider East Africa region.",
+      "Maasai Mara wildlife, Amboseli elephants, and Kenya safari moments from Tambua Africa tours across Kenya and East Africa.",
   },
   "/blog": {
-    title: `Safari & Travel Blog | ${SITE_NAME}`,
+    title: `Kenya Safari Blog & Travel Tips | ${SITE_NAME}`,
     description:
-      "Visa updates, park news, packing tips, and safari planning ideas from the Tambua Africa team based in Nairobi.",
+      "Best time to visit Maasai Mara, Kenya safari packing lists, wildlife tours, and Nairobi day trips — expert articles from Tambua Africa.",
   },
   "/contact": {
-    title: `Contact & Trip Enquiry | ${SITE_NAME}`,
+    title: "Contact Tambua Africa | Book a Kenya Safari | Nairobi, Kenya",
     description:
-      "WhatsApp, email, or contact form: speak with Tambua Africa about dates, budget, parks, and a custom Kenya or East Africa itinerary.",
+      "Contact Tambua Africa Tours & Safaris in Nairobi, Kenya. Call +254 726 207 900 or email info@tambuaafrica.com to start planning your dream safari.",
   },
   "/services": {
     title: `Safari Services: Ticketing, Transfers & Lodges | ${SITE_NAME}`,
     description:
-      "Flights, coach tickets, private transfers, and lodge or camp bookings layered around your safari dates, coordinated from Nairobi.",
+      "Flights, coach tickets, private transfers, and lodge or camp bookings layered around your Kenya safari dates, coordinated from Nairobi.",
   },
   "/services/ticketing": {
     title: `Air & Coach Ticketing for Safaris | ${SITE_NAME}`,
@@ -123,6 +144,11 @@ export const SEO_BY_ROUTE: Record<string, RouteSeoEntry> = {
     description: "Choose a new password for your Tambua Africa account.",
     robots: "noindex, follow",
   },
+  "/auth/confirm": {
+    title: `Confirm Email | ${SITE_NAME}`,
+    description: "Confirm your Tambua Africa account email.",
+    robots: "noindex, follow",
+  },
   "/booking": {
     title: `Complete Booking | ${SITE_NAME}`,
     description: "Finish payment and details for your confirmed Tambua Africa safari or tour booking.",
@@ -134,3 +160,69 @@ export const SEO_BY_ROUTE: Record<string, RouteSeoEntry> = {
     robots: "noindex, follow",
   },
 };
+
+/** Human-readable segment for BreadcrumbList JSON-LD on inner pages. */
+export const BREADCRUMB_LABELS: Record<string, string> = {
+  "/about": "About",
+  "/safaris": "Safari Packages",
+  "/destinations": "Destinations",
+  "/travel-info": "Travel Info",
+  "/gallery": "Gallery",
+  "/blog": "Blog",
+  "/contact": "Contact",
+  "/services": "Services",
+  "/services/ticketing": "Ticketing",
+  "/services/transfers": "Transfers",
+  "/services/lodges-camps": "Lodges & Camps",
+  "/terms": "Terms",
+  "/privacy": "Privacy",
+};
+
+export const TRAVEL_AGENCY_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "TravelAgency",
+  name: SITE_NAME,
+  url: SITE_ORIGIN,
+  logo: LOGO_URL,
+  description:
+    "Nairobi-based tour operator specializing in tailor-made Kenya safaris, wildlife tours, beach holidays and cultural experiences across Africa.",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "Standard Street, Floor 4, Suite 16",
+    addressLocality: "Nairobi",
+    addressCountry: "KE",
+  },
+  telephone: "+254726207900",
+  email: "info@tambuaafrica.com",
+  sameAs: [
+    "https://www.facebook.com/Tambuasafaris/",
+    "https://twitter.com/TambuaAfrica",
+  ],
+  openingHours: "Mo-Fr 08:00-17:00",
+  priceRange: "$$$",
+  areaServed: "Kenya, Africa",
+};
+
+export function buildBreadcrumbJsonLd(pathname: string): Record<string, unknown> | null {
+  const label = BREADCRUMB_LABELS[pathname];
+  if (!label) return null;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: SITE_ORIGIN,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: label,
+        item: `${SITE_ORIGIN}${pathname}`,
+      },
+    ],
+  };
+}

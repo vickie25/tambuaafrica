@@ -13,6 +13,7 @@ import { submitInquiry } from "@/lib/inquiry";
 import { toast } from "sonner";
 import { TEAM_CONTACT_EMAILS } from "@/lib/admin-email";
 import { WHATSAPP_DISPLAY } from "@/lib/whatsapp";
+import { trackConversion } from "@/components/seo/GoogleAnalytics";
 
 const emptyForm = { name: "", email: "", phone: "", subject: "", message: "" };
 
@@ -101,6 +102,7 @@ const Contact = () => {
       } else {
         toast.success("Message sent successfully. Our team will reply by email.");
       }
+      trackConversion("generate_lead", { method: "contact_form" });
       setFormData(emptyForm);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "We could not send your message right now.");
@@ -118,14 +120,16 @@ const Contact = () => {
           <div className="absolute inset-0 z-0 opacity-20">
             <OptimizedImage 
               src="/images/amboseli-real.webp" 
-              alt="Contact Us Background" 
+              alt="Contact Tambua Africa Nairobi Kenya safari operator" 
               className="w-full h-full object-cover"
-              priority 
+              priority
+              width={1920}
+              height={800}
             />
           </div>
           <div className="container-wide relative z-10 mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <span className="text-accent font-semibold text-sm uppercase tracking-wider">Get In Touch</span>
-            <h1 className="text-4xl sm:text-5xl font-bold mt-3">Contact Us</h1>
+            <h1 className="text-4xl sm:text-5xl font-bold mt-3">Contact Tambua Africa Tours &amp; Safaris</h1>
             <p className="text-primary-foreground/70 mt-4 max-w-2xl mx-auto text-lg">
               Planning Kenya, Uganda, Tanzania, Rwanda, or a wider East Africa journey? We&apos;d love to help, including
               air & road ticketing, private transfers, and lodge or camp bookings alongside your safari.
@@ -204,7 +208,7 @@ const Contact = () => {
                         <MapPin className="w-4 h-4 text-accent mt-0.5 shrink-0" />
                         <div>
                           <div className="font-medium text-foreground text-sm">Physical Location</div>
-                          <div className="text-muted-foreground text-sm">Plainsview Road, Off Mombasa Road, Nairobi, Kenya</div>
+                          <div className="text-muted-foreground text-sm">Standard Street, Floor 4, Suite 16, Nairobi, Kenya</div>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
@@ -253,6 +257,17 @@ const Contact = () => {
                     <li>• 24/7 trip support before and during travel</li>
                     <li>• Transparent pricing with trusted local expertise</li>
                   </ul>
+                </div>
+
+                <div className="rounded-2xl overflow-hidden border border-border aspect-[16/10] min-h-[240px]">
+                  <iframe
+                    title="Tambua Africa Tours office location in Nairobi, Kenya"
+                    src="https://maps.google.com/maps?q=Standard+Street%2C+Nairobi%2C+Kenya&z=15&output=embed"
+                    className="w-full h-full min-h-[240px] border-0"
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    allowFullScreen
+                  />
                 </div>
               </div>
 

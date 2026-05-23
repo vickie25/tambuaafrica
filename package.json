@@ -19,6 +19,8 @@
     "test:e2e": "playwright test",
     "test:watch": "vitest",
     "diagnose:supabase": "node scripts/diagnose-supabase.cjs",
+    "setup:auth-email": "node scripts/setup-auth-email-hook.cjs",
+    "confirm-user": "node scripts/confirm-user.cjs",
     "setup-storage": "node scripts/setup-storage.js",
     "setup-db": "npx supabase db reset --project-ref rtgurahirgyjnwdoepso --yes",
     "type-check": "tsc --noEmit"

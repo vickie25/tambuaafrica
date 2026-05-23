@@ -18,7 +18,7 @@ const WhyChooseUs = () => {
       <div className="container-wide mx-auto">
         <div className="text-center mb-12">
           <span className="text-accent font-semibold text-sm uppercase tracking-wider">Why Choose Us</span>
-          <h2 className="text-3xl sm:text-4xl font-bold mt-2 text-foreground">The Tambua Africa Difference</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold mt-2 text-foreground">Why Choose Us</h2>
           <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
             We go above and beyond to ensure your African adventure exceeds every expectation.
           </p>

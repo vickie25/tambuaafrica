@@ -64,17 +64,19 @@ const Safaris = () => {
             <div className="absolute inset-0 z-0 opacity-20">
               <OptimizedImage 
                 src="/images/amboseli-real.webp" 
-                alt="Safaris Background" 
+                alt="Amboseli elephants Kenya safari package wildlife tour" 
                 className="w-full h-full object-cover"
-                priority 
+                priority
+                width={1920}
+                height={800}
               />
             </div>
             <div className="container-wide relative z-10 mx-auto px-4 sm:px-6 lg:px-8 text-center">
               <span className="text-accent font-semibold text-sm uppercase tracking-wider">Our Packages</span>
-              <h1 className="text-4xl sm:text-5xl font-bold mt-3">Safari Packages</h1>
-              <p className="text-primary-foreground/70 mt-4 max-w-2xl mx-auto text-lg">
-                Choose from our curated selection of safari experiences across Kenya, plus flights, transfers, and
-                lodge nights we can bundle for you.
+              <h1 className="text-4xl sm:text-5xl font-bold mt-3">Kenya Safari Packages &amp; Wildlife Tours</h1>
+              <p className="text-primary-foreground/70 mt-4 max-w-2xl mx-auto text-lg text-base">
+                Compare Maasai Mara safari, Amboseli, Tsavo, and affordable Kenya safari packages. Africa safari tours with
+                flights, transfers, and lodge nights bundled by our Nairobi tour operator.
               </p>
             </div>
           </section>

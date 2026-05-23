@@ -9,6 +9,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageTransition from "@/components/layout/PageTransition";
 import { ADMIN_LOGIN_EMAIL } from "@/lib/admin-email";
+import { formatAuthError } from "@/lib/auth-errors";
 
 const Login = () => {
   const { signIn } = useAuth();
@@ -45,7 +46,7 @@ const Login = () => {
       navigate(redirectTarget, { replace: true });
     } catch (err) {
       console.error("Login failed:", err);
-      toast.error((err as Error).message || "Login failed");
+      toast.error(formatAuthError(err));
     } finally {
       setLoading(false);
     }

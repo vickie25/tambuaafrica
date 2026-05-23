@@ -109,4 +109,70 @@ export const posts: BlogPost[] = [
       <p>Join our specialized photographic safaris, where our driver-guides are trained to position the vehicle for the perfect lighting angle.</p>
     `
   },
+  {
+    id: "7",
+    title: "Best Time to Visit Maasai Mara for the Wildebeest Migration",
+    excerpt: "Plan your Maasai Mara wildebeest migration tour with month-by-month guidance on river crossings, crowds, and Kenya safari 7 days package pricing.",
+    image: "https://images.unsplash.com/photo-1516426122078-c23e76319801?w=800&q=80",
+    date: "May 18, 2026",
+    category: "Safari Planning",
+    readTime: "6 min read",
+    content: `
+      <p>The Maasai Mara is Kenya's most famous wildlife reserve, and timing your visit around the Great Migration can define your entire safari. Here's when our Nairobi team recommends booking.</p>
+      <h3>Peak migration months</h3>
+      <p>Late July through September offers the best odds for dramatic Mara River crossings, though herds can arrive earlier after strong rains in the Serengeti. October often still holds large concentrations before herds move south.</p>
+      <h3>Shoulder season value</h3>
+      <p>June and early November bring fewer vehicles and competitive rates on Kenya tour packages while wildlife viewing remains excellent outside the river-crossing frenzy.</p>
+      <p>Contact Tambua Africa for a tailor-made Maasai Mara safari matched to your budget and travel dates.</p>
+    `
+  },
+  {
+    id: "8",
+    title: "Kenya Safari Packing List: What to Bring (and What to Leave Home)",
+    excerpt: "A practical Kenya safari packing list for bush flights, lodge evenings, and coastal extensions — from neutral clothing to binoculars and power adapters.",
+    image: "https://images.unsplash.com/photo-1549366021-9f761d450615?w=800&q=80",
+    date: "May 12, 2026",
+    category: "Travel Tips",
+    readTime: "5 min read",
+    content: `
+      <p>Packing light for a Kenya safari keeps road and light-air transfers simple. Focus on layers, sun protection, and neutral tones that blend with the bush.</p>
+      <h3>Essentials</h3>
+      <p>Soft duffel bags (not hard suitcases on many charter flights), wide-brim hat, high-SPF sunscreen, insect repellent, refillable water bottle, and quality binoculars dramatically improve game drives.</p>
+      <h3>Clothing</h3>
+      <p>Long-sleeved shirts and trousers in khaki, olive, or brown protect from sun and insects. Evenings can be cool — pack a fleece. If you add a beach holiday, bring swimwear and sandals separately.</p>
+    `
+  },
+  {
+    id: "9",
+    title: "Top 10 Animals to See on a Kenya Safari",
+    excerpt: "From the Big Five to flamingos, wild dogs, and the Maasai Mara migration — the must-see wildlife on affordable Kenya safari packages.",
+    image: "https://images.unsplash.com/photo-1535941339077-2dd1c7963098?w=800&q=80",
+    date: "May 5, 2026",
+    category: "Wildlife",
+    readTime: "7 min read",
+    content: `
+      <p>Kenya packs extraordinary biodiversity into compact circuits. These ten species top most guests' wish lists — and we know which parks deliver the best sightings.</p>
+      <h3>Big Five & migration herds</h3>
+      <p>Lion, leopard, elephant, buffalo, and rhino anchor classic itineraries. Add wildebeest and zebra in their millions during the migration for Africa's greatest wildlife spectacle.</p>
+      <h3>Beyond the checklist</h3>
+      <p>Lake Nakuru flamingos, Samburu specials like Grevy's zebra, and cheetah on the open Mara plains reward travelers who venture beyond a single park.</p>
+    `
+  },
+  {
+    id: "10",
+    title: "Nairobi Day Trips Guide: Parks & Experiences Near the City",
+    excerpt: "Short on time? Nairobi National Park, Giraffe Centre, Karen Blixen Museum, and more — the best day trips from Kenya's capital with a local tour operator.",
+    image: "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=800&q=80",
+    date: "Apr 28, 2026",
+    category: "Nairobi",
+    readTime: "6 min read",
+    content: `
+      <p>Nairobi is the gateway to East Africa — and several world-class experiences sit within an hour of the city centre, perfect before or after a longer safari.</p>
+      <h3>Nairobi National Park</h3>
+      <p>The only capital-city park where rhino, lion, and giraffe roam against a skyline backdrop. Half-day game drives fit tight layovers.</p>
+      <h3>Culture & conservation</h3>
+      <p>Pair the Giraffe Centre, David Sheldrick elephant orphanage (by appointment), and Karen Blixen Museum for a full Nairobi cultural day trip.</p>
+      <p>Ask Tambua Africa to bundle Nairobi day trips into your Kenya safari itinerary.</p>
+    `
+  },
 ];

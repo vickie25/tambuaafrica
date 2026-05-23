@@ -9,15 +9,18 @@ const activities = [
   {
     icon: Binoculars,
     title: "Game Drive",
+    section: "Wildlife Safaris",
     description: "Track the Big Five with expert guides on sunrise and sunset drives across iconic savannah parks.",
     images: [
       "/images/popular activities/game drives.webp",
       "/images/popular activities/game drives1.webp",
     ],
+    imageAlt: "Kenya wildlife game drive safari in Maasai Mara",
   },
   {
     icon: Palmtree,
     title: "Beach Holidays",
+    section: "Beach Holidays",
     description: "Unwind on white-sand beaches, enjoy ocean views, and experience laid-back coastal island life.",
     images: [
       "/images/popular activities/beach.webp",
@@ -25,47 +28,65 @@ const activities = [
       "/images/popular activities/Chale Island.webp",
       "/images/popular activities/chale Hotel.webp",
     ],
+    imageAlt: "Diani Beach Kenya holiday package coastal safari",
   },
   {
     icon: Wind,
     title: "Zipline Canopy",
+    section: "Wildlife Safaris",
     description: "Glide above forest canopies for adrenaline-filled aerial views and unforgettable nature thrills.",
     images: [
       "/images/popular activities/Zipline 2.webp",
       "/images/popular activities/Zipline.webp",
       "/images/popular activities/zipline (2).webp",
     ],
+    imageAlt: "Forest zipline adventure tour Kenya",
   },
   {
     icon: Mountain,
     title: "Hiking Adventures",
+    section: "Wildlife Safaris",
     description: "Take guided trails through hills and mountains, from scenic day hikes to challenging summit routes.",
     images: [
       "/images/popular activities/Hiking.webp",
       "/images/popular activities/Hike.webp",
       "/images/popular activities/Hiking (2).webp",
     ],
+    imageAlt: "Kenya hiking adventure wildlife tours",
   },
   {
     icon: Compass,
     title: "Cultural Tours",
+    section: "Cultural Tours",
     description: "Meet local communities, explore living traditions, and discover authentic East African heritage.",
     images: [
       "/images/popular activities/culture tours.webp",
       "/images/popular activities/culture tours (2).webp",
     ],
+    imageAlt: "Cultural tours Kenya Maasai community experience",
   },
   {
     icon: Activity,
     title: "Bungee & Jumping",
+    section: "Wildlife Safaris",
     description: "Push your limits with high-energy jumps and bungee experiences designed for pure adventure.",
     images: [
       "/images/popular activities/Bangee and Jumping.webp",
       "/images/popular activities/Jumping (2).webp",
       "/images/popular activities/Jumping.webp",
     ],
+    imageAlt: "Adventure bungee jumping experience Kenya",
   },
 ];
+
+const DISPLAY_ORDER = [
+  "Game Drive",
+  "Beach Holidays",
+  "Cultural Tours",
+  "Bungee & Jumping",
+  "Zipline Canopy",
+  "Hiking Adventures",
+] as const;
 
 type ActivityItem = (typeof activities)[number];
 type ActivityIconKey = "compass" | "palmtree" | "binoculars" | "mountain" | "activity" | "wind";
@@ -144,6 +165,8 @@ const ActivityCard = ({
               src={image}
               alt={`${activity.title} image ${i + 1}`}
               className="w-full h-full aspect-[4/5] object-cover transition-transform duration-700 md:group-hover:scale-110"
+              width={600}
+              height={750}
             />
           </motion.div>
         ))}
@@ -153,8 +176,9 @@ const ActivityCard = ({
           {activity.images.map((_, dotIndex) => (
             <button
               key={`${activity.title}-${dotIndex}`}
+              type="button"
               aria-label={`Go to activity image ${dotIndex + 1}`}
-              className={`h-2 rounded-full transition-all ${
+              className={`h-2 min-w-[8px] min-h-[8px] rounded-full transition-all ${
                 dotIndex === currentImage ? "w-4 bg-white" : "w-2 bg-white/50"
               }`}
               onClick={() => setCurrentImage(dotIndex)}
@@ -212,19 +236,23 @@ const ActivitiesSection = () => {
     };
   });
 
+  const orderedActivities = DISPLAY_ORDER.map((title) =>
+    displayActivities.find((a) => a.title === title)
+  ).filter((a): a is ActivityItem => Boolean(a));
+
   return (
     <section className="section-padding bg-background" ref={ref}>
       <div className="container-wide mx-auto">
         <div className="text-center mb-12">
           <span className="text-accent font-semibold text-sm uppercase tracking-wider">What We Offer</span>
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground mt-2">Popular Activities</h2>
-          <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
-            Choose from our most popular adventure categories and create memories that last a lifetime.
+          <p className="text-muted-foreground mt-3 max-w-2xl mx-auto text-base">
+            Wildlife safaris, Kenya beach holiday packages, and cultural tours Kenya travelers love — all planned by our Nairobi team.
           </p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 lg:gap-8">
-          {displayActivities.map((activity, index) => (
+          {orderedActivities.map((activity, index) => (
             <ActivityCard
               key={activity.title}
               activity={activity}

@@ -1,8 +1,28 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "npm run prebuild && vite build",
   "outputDirectory": "dist",
   "framework": "vite",
   "regions": ["fra1"],
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "www.tambuaafrica.com" }],
+      "destination": "https://tambuaafrica.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "www.tambua-africa.com" }],
+      "destination": "https://tambuaafrica.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "tambua-africa.com" }],
+      "destination": "https://tambuaafrica.com/:path*",
+      "permanent": true
+    },
+  ],
   "rewrites": [
     {
       "source": "/api/(.*)",
@@ -37,7 +57,16 @@
       ]
     },
     {
-      "source": "/static/(.*)",
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)\\.(js|css|woff2)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -50,7 +79,7 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=31536000, stale-while-revalidate=86400"
+          "value": "public, max-age=31536000, immutable"
         }
       ]
     },
@@ -59,7 +88,7 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=31536000, stale-while-revalidate=86400"
+          "value": "public, max-age=31536000, immutable"
         }
       ]
     }

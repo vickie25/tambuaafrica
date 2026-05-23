@@ -21,9 +21,11 @@ const AboutPreview = () => {
             <div className="relative rounded-2xl overflow-hidden aspect-[4/3]">
               <img
                 src="/images/real images frm Tambua/Team.jpeg"
-                alt="East Africa safari landscape"
+                alt="Tambua Africa safari guides team Nairobi Kenya tour operator"
                 className="w-full h-full object-cover"
                 loading="lazy"
+                width={800}
+                height={600}
               />
             </div>
             <div className="absolute -bottom-6 -right-4 sm:right-6 bg-card rounded-xl shadow-xl p-5 border border-border">
@@ -40,8 +42,8 @@ const AboutPreview = () => {
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground leading-tight">
               Curating East Africa Journeys with Local Expertise Since 2008
             </h2>
-            <p className="text-muted-foreground leading-relaxed">
-              Tambua Africa Tours & Safaris is a Nairobi-based operator creating bespoke journeys across Kenya and the wider East Africa region. We combine on-the-ground logistics, trusted local partnerships, and destination expertise to shape trips that feel seamless and deeply personal.
+            <p className="text-muted-foreground leading-relaxed text-base">
+              Tambua Africa Tours &amp; Safaris is among the best safari companies in Nairobi, Kenya — offering tailor-made safaris, affordable Kenya safari packages, Maasai Mara migration tours, and Kenya beach holiday packages. As your Nairobi tour operator, we plan Africa safari tours with trusted guides and transparent pricing.
             </p>
             <ul className="space-y-3">
               {["Licensed regional safari specialists", "Expert local guides across East Africa", "Sustainable and community-conscious travel", "Flexible itineraries for different budgets and travel styles"].map(

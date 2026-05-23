@@ -8,6 +8,7 @@ import { Loader2, UserPlus, Eye, EyeOff } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageTransition from "@/components/layout/PageTransition";
+import { formatAuthError } from "@/lib/auth-errors";
 
 const Signup = () => {
   const { signUp } = useAuth();
@@ -26,9 +27,11 @@ const Signup = () => {
     setLoading(true);
     try {
       await signUp(email, password, fullName);
-      toast.success("Account created! Please check your email to verify your account before signing in.");
+      toast.success(
+        "Account created! Check your inbox for a confirmation email from Tambua Africa — the link will sign you in and open your dashboard."
+      );
     } catch (err) {
-      toast.error((err as Error).message || "Signup failed");
+      toast.error(formatAuthError(err));
     } finally {
       setLoading(false);
     }

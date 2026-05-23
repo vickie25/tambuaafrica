@@ -57,6 +57,11 @@ function writeHtmlForRoute(route, html) {
 }
 
 async function main() {
+  if (process.env.VERCEL === "1") {
+    console.log("Skipping prerender on Vercel (SPA + meta tags; run npm run prerender locally if needed).");
+    process.exit(0);
+  }
+
   if (!fs.existsSync(distDir)) {
     console.error("dist/ missing — run vite build first.");
     process.exit(1);

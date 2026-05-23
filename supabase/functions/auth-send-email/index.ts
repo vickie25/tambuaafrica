@@ -127,6 +127,10 @@ const getFromAddress = () =>
 const isResendDomainError = (message: string) =>
   /domain|not verified|verify your domain|from address|only send/i.test(message);
 
+/** Resend test mode: delivery to arbitrary inboxes fails — do not block Supabase signup. */
+const isResendDeliveryRestriction = (message: string) =>
+  /only send|testing emails|not allowed|recipient|sandbox|verify your domain/i.test(message);
+
 const buildVerifyUrl = (payload: HookPayload) => {
   const supabaseUrl = (
     Deno.env.get("SUPABASE_URL") ||
@@ -156,7 +160,7 @@ const subjectFor = (action: EmailActionType) => {
     case "recovery":
       return "Reset your Tambua Africa password";
     case "email_change":
-      return "Confirm your new email — Tambua Africa";
+      return "Confirm your new email, Tambua Africa";
     default:
       return "Confirm your Tambua Africa account";
   }
@@ -250,10 +254,20 @@ Deno.serve(async (req) => {
     const { error } = await sendWithResend(payload);
 
     if (error) {
-      console.error("Resend error:", JSON.stringify(error));
+      const msg = error.message || JSON.stringify(error);
+      console.error("Resend error:", msg);
+
+      if (isResendDeliveryRestriction(msg) || isResendDomainError(msg)) {
+        console.warn(
+          "Allowing auth to continue without email (verify tambuaafrica.com on Resend for production delivery):",
+          msg,
+        );
+        return ok();
+      }
+
       return fail(
         500,
-        `Resend failed: ${error.message}. Set AUTH_FROM_EMAIL to Tambua Africa Tours & Safaris <onboarding@resend.dev> or disable the Send Email hook if confirm email is off.`,
+        `Resend failed: ${msg}. Use AUTH_FROM_EMAIL with onboarding@resend.dev until your domain is verified.`,
       );
     }
   } catch (err) {

@@ -31,5 +31,15 @@ export function formatAuthError(error: unknown): string {
     return "Email service configuration issue. Try again shortly or contact support.";
   }
 
+  if (
+    /hook|resend|send email|unexpected failure|error sending confirmation|500/i.test(message)
+  ) {
+    return "We could not send the confirmation email right now. Your account may still be created: try signing in, or use Continue with Google. If sign in fails, contact info@tambuaafrica.com.";
+  }
+
+  if (/user already registered|already been registered/i.test(message)) {
+    return "This email already has an account. Sign in instead, or use Forgot password.";
+  }
+
   return message;
 }

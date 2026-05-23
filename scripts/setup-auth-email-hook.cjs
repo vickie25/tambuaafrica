@@ -17,7 +17,27 @@ const { spawnSync } = require("node:child_process");
 const fs = require("node:fs");
 const path = require("node:path");
 
-require("dotenv").config({ path: path.join(__dirname, "..", ".env") });
+const ENV_PATH = path.join(__dirname, "..", ".env");
+require("dotenv").config({ path: ENV_PATH });
+
+/** dotenv can miss values when .env has unquoted spaces or & in AUTH_FROM_EMAIL */
+function readEnvFromFile(name) {
+  const fromProcess = process.env[name]?.trim();
+  if (fromProcess) return fromProcess;
+  if (!fs.existsSync(ENV_PATH)) return null;
+  const text = fs.readFileSync(ENV_PATH, "utf8");
+  const prefix = `${name}=`;
+  const line = text.split(/\r?\n/).find((l) => l.startsWith(prefix) && !l.startsWith("#"));
+  if (!line) return null;
+  let value = line.slice(prefix.length).trim();
+  if (
+    (value.startsWith('"') && value.endsWith('"')) ||
+    (value.startsWith("'") && value.endsWith("'"))
+  ) {
+    value = value.slice(1, -1).trim();
+  }
+  return value || null;
+}
 
 const PROJECT_REF = "tulnrphqshxiybdreqec";
 const HOOK_URL = `https://${PROJECT_REF}.supabase.co/functions/v1/auth-send-email`;
@@ -41,8 +61,8 @@ function requireEnv(name) {
 console.log("\n=== Tambua Africa — Resend Send Email Hook (Option A) ===\n");
 
 if (!deployOnly) {
-  const resendKey = requireEnv("RESEND_API_KEY");
-  const hookSecret = process.env.SEND_EMAIL_HOOK_SECRET?.trim();
+  const resendKey = readEnvFromFile("RESEND_API_KEY");
+  const hookSecret = readEnvFromFile("SEND_EMAIL_HOOK_SECRET");
 
   if (!resendKey) {
     console.error("\nMissing RESEND_API_KEY in .env");
@@ -61,14 +81,14 @@ into .env, then re-run this script so edge secrets stay in sync.
   if (hookSecret) secrets.push(`SEND_EMAIL_HOOK_SECRET=${hookSecret}`);
 
   const from =
-    process.env.AUTH_FROM_EMAIL?.trim() ||
+    readEnvFromFile("AUTH_FROM_EMAIL") ||
     "Tambua Africa Tours & Safaris <onboarding@resend.dev>";
-  const replyTo = process.env.AUTH_REPLY_TO?.trim() || "info@tambuaafrica.com";
+  const replyTo = readEnvFromFile("AUTH_REPLY_TO") || "info@tambuaafrica.com";
   const siteUrl =
-    process.env.AUTH_SITE_URL?.trim() ||
-    process.env.VITE_SITE_URL?.trim() ||
+    readEnvFromFile("AUTH_SITE_URL") ||
+    readEnvFromFile("VITE_SITE_URL") ||
     "https://tambua-africa.com";
-  const skipHook = (process.env.AUTH_SKIP_EMAIL_HOOK || "false").trim().toLowerCase();
+  const skipHook = (readEnvFromFile("AUTH_SKIP_EMAIL_HOOK") || "false").toLowerCase();
 
   secrets.push(`AUTH_FROM_EMAIL=${from}`);
   secrets.push(`AUTH_REPLY_TO=${replyTo}`);

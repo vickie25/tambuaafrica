@@ -8,6 +8,7 @@ import { Loader2, Mail } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageTransition from "@/components/layout/PageTransition";
+import { formatAuthError } from "@/lib/auth-errors";
 
 const ForgotPassword = () => {
   const { resetPassword } = useAuth();
@@ -21,9 +22,11 @@ const ForgotPassword = () => {
     try {
       await resetPassword(email);
       setSent(true);
-      toast.success("Password reset link sent to your email");
+      toast.success(
+        "If that email is registered, Tambua Africa Tours & Safaris sent a reset link — check inbox and spam."
+      );
     } catch (err) {
-      toast.error((err as Error).message || "Could not send reset email");
+      toast.error(formatAuthError(err));
     } finally {
       setLoading(false);
     }
@@ -43,7 +46,10 @@ const ForgotPassword = () => {
             {sent ? (
               <div className="text-center space-y-4">
                 <Mail className="w-12 h-12 text-accent mx-auto" />
-                <p className="text-foreground">Check your email for the reset link</p>
+                <p className="text-foreground text-sm leading-relaxed">
+                  Check your inbox for an email from <strong>Tambua Africa Tours &amp; Safaris</strong>.
+                  If you do not see it within a few minutes, check spam or promotions.
+                </p>
                 <Link to="/login" className="text-accent hover:underline text-sm">Back to sign in</Link>
               </div>
             ) : (

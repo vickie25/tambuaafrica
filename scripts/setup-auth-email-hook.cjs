@@ -68,7 +68,7 @@ into .env, then re-run this script so edge secrets stay in sync.
     process.env.AUTH_SITE_URL?.trim() ||
     process.env.VITE_SITE_URL?.trim() ||
     "https://tambua-africa.com";
-  const skipHook = (process.env.AUTH_SKIP_EMAIL_HOOK || "true").trim().toLowerCase();
+  const skipHook = (process.env.AUTH_SKIP_EMAIL_HOOK || "false").trim().toLowerCase();
 
   secrets.push(`AUTH_FROM_EMAIL=${from}`);
   secrets.push(`AUTH_REPLY_TO=${replyTo}`);
@@ -104,11 +104,13 @@ Auth URL allow list (Authentication → URL Configuration):
   - http://localhost:8080/auth/confirm
   - https://tambuaafrica.com/auth/confirm
 
-If "Confirm email" is OFF (instant signup / dashboard redirect):
-  - AUTH_SKIP_EMAIL_HOOK=true is set by default (hook returns 200, no Resend call)
-  - OR disable Send Email hook in Supabase Dashboard
+Supabase Dashboard (required for security):
+  1. Authentication → Providers → Email → turn ON "Confirm email"
+  2. Authentication → Email Templates → leave enabled; the hook sends mail (not Supabase SMTP)
+  3. Rate limits: Authentication → Rate Limits — raise email limits on Pro if many signups
 
-If you turn confirm email back ON:
-  - Set AUTH_SKIP_EMAIL_HOOK=false in .env and re-run this script
-  - Use onboarding@resend.dev until your domain is verified in Resend
+AUTH_SKIP_EMAIL_HOOK=false by default (emails sent via Resend / Tambua Africa branding).
+Set AUTH_SKIP_EMAIL_HOOK=true only for local testing without email.
+
+Resend: verify tambuaafrica.com domain to send from info@tambuaafrica.com; until then use onboarding@resend.dev
 `);

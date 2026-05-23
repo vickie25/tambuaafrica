@@ -9,6 +9,9 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageTransition from "@/components/layout/PageTransition";
 import { supabase } from "@/integrations/supabase/client";
+import { validatePassword, PASSWORD_HINT } from "@/lib/password-policy";
+import PasswordRequirements from "@/components/auth/PasswordRequirements";
+import { formatAuthError } from "@/lib/auth-errors";
 
 const ResetPassword = () => {
   const { updatePassword } = useAuth();
@@ -31,15 +34,22 @@ const ResetPassword = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.length < 6) { toast.error("Password must be at least 6 characters"); return; }
-    if (password !== confirmPassword) { toast.error("Passwords don't match"); return; }
+    const passwordCheck = validatePassword(password);
+    if (!passwordCheck.valid) {
+      toast.error(passwordCheck.message);
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast.error("Passwords don't match");
+      return;
+    }
     setLoading(true);
     try {
       await updatePassword(password);
       toast.success("Password updated successfully!");
       navigate("/login");
     } catch (err) {
-      toast.error((err as Error).message || "Could not update password");
+      toast.error(formatAuthError(err));
     } finally {
       setLoading(false);
     }
@@ -61,11 +71,26 @@ const ResetPassword = () => {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-foreground">New Password</label>
-                  <Input type="password" placeholder="Min. 6 characters" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                  <Input
+                    type="password"
+                    placeholder={PASSWORD_HINT}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    autoComplete="new-password"
+                  />
+                  <PasswordRequirements password={password} className="mt-2" />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-foreground">Confirm Password</label>
-                  <Input type="password" placeholder="Re-enter password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+                  <Input
+                    type="password"
+                    placeholder="Re-enter password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    autoComplete="new-password"
+                  />
                 </div>
                 <Button type="submit" disabled={loading} className="w-full bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl py-5">
                   {loading ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Lock className="w-5 h-5 mr-2" />}

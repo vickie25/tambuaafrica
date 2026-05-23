@@ -1,97 +1,74 @@
-# Option A: Resend Send Email Hook
+# Resend Send Email Hook (Tambua Africa branded mail)
 
-Confirmation emails are sent by **Tambua Africa** via Resend. After the user clicks the link, they land on `/auth/confirm` and are redirected to **`/dashboard`**.
+All auth emails (signup confirm, password reset) are sent by **Tambua Africa Tours & Safaris** via **Resend**, not Supabase’s default mail. Supabase only triggers the hook.
 
-## Quick setup (about 10 minutes)
+## Security settings (Supabase Dashboard)
 
-### 1. Save `.env` in the project root
+1. **Authentication → Providers → Email**
+   - **Confirm email:** ON (required for signup security)
+   - **Secure email change:** ON (recommended)
+
+2. **Authentication → Hooks → Send Email**
+   - Enabled, type **HTTPS**
+   - URL: `https://tulnrphqshxiybdreqec.supabase.co/functions/v1/auth-send-email`
+   - Secret: same as `SEND_EMAIL_HOOK_SECRET` in `.env`
+
+3. **Authentication → URL Configuration**
+
+| Field | Value |
+|-------|--------|
+| Site URL | `https://tambuaafrica.com` or `https://tambua-africa.com` |
+| Redirect URLs | `https://tambuaafrica.com/**`, `https://tambua-africa.com/**` |
+| | `https://tambuaafrica.com/auth/confirm`, `https://tambuaafrica.com/reset-password` |
+
+4. **Authentication → Rate Limits** (many users signing up at once)
+   - On **Pro**, raise **email sent** limits per hour
+   - Free tier is very low (~2 auth emails/hour) — upgrade or use Resend with hook (each user still counts toward Supabase hook calls)
+
+5. **Do not** disable the Email provider while the hook is enabled — the hook replaces sending; both stay enabled.
+
+## `.env` (project root)
 
 ```env
-RESEND_API_KEY=re_your_key_from_resend.com
-SEND_EMAIL_HOOK_SECRET=v1,whsec_from_supabase_dashboard
+RESEND_API_KEY=re_xxxx
+SEND_EMAIL_HOOK_SECRET=v1,whsec_xxxx
 
-# Until your domain is verified in Resend:
 AUTH_FROM_EMAIL=Tambua Africa Tours & Safaris <onboarding@resend.dev>
-
-# After domain verification:
-# AUTH_FROM_EMAIL=Tambua Africa Tours & Safaris <info@tambuaafrica.com>
+# After Resend domain verify: Tambua Africa Tours & Safaris <info@tambuaafrica.com>
 
 AUTH_REPLY_TO=info@tambuaafrica.com
-VITE_SITE_URL=http://localhost:8080
+AUTH_SKIP_EMAIL_HOOK=false
+VITE_SITE_URL=https://tambua-africa.com
 ```
 
-**Save the file** (Ctrl+S). An empty `.env` on disk will break deploy and local login.
+**Important:** `AUTH_SKIP_EMAIL_HOOK=false` so confirmation and password-reset emails are actually sent. If this was `true`, forgot-password would show success but **no email** would be delivered.
 
-### 2. Generate the hook secret (before deploy)
-
-1. [Supabase Dashboard](https://supabase.com/dashboard/project/tulnrphqshxiybdreqec/auth/hooks) → **Authentication** → **Hooks**
-2. **Send Email** → Enable → Type **HTTPS**
-3. Click **Generate secret** → copy into `.env` as `SEND_EMAIL_HOOK_SECRET`
-
-### 3. Deploy function + secrets
+## Deploy
 
 ```bash
 npm run setup:auth-email
 ```
 
-This runs `supabase secrets set` and deploys `auth-send-email`.
+## User flows
 
-### 4. Point the hook at your function
+| Action | Email | Link lands on |
+|--------|--------|----------------|
+| Sign up | Confirm account (Tambua Africa) | `/auth/confirm` → `/dashboard` |
+| Forgot password | Reset password (Tambua Africa) | `/reset-password` |
 
-In the same **Send Email** hook panel:
-
-| Field | Value |
-|-------|--------|
-| **URL** | `https://tulnrphqshxiybdreqec.supabase.co/functions/v1/auth-send-email` |
-| **Secret** | Same value as `SEND_EMAIL_HOOK_SECRET` in `.env` |
-
-Save / enable the hook.
-
-### 5. Auth redirect URLs (live site → dashboard)
-
-**Authentication** → **URL Configuration**:
-
-| Field | Value |
-|-------|--------|
-| **Site URL** | `https://tambuaafrica.com` |
-| **Redirect URLs** (add each line) | `https://tambuaafrica.com/**` |
-| | `https://tambuaafrica.com/auth/confirm` |
-| | `https://tambuaafrica.com/dashboard` |
-| Optional (local dev only) | `http://localhost:8080/auth/confirm` |
-
-Flow: email link → `https://tambuaafrica.com/auth/confirm` → auto redirect → `https://tambuaafrica.com/dashboard`.
-
-Set edge secret so the hook always uses the live domain:
-
-```bash
-npx supabase secrets set AUTH_SITE_URL=https://tambuaafrica.com --project-ref tulnrphqshxiybdreqec
-```
-
-On **Vercel** (production deploy), set: `VITE_SITE_URL=https://tambuaafrica.com`
-
-### 6. Test
-
-1. Restart `npm run dev` if running locally.
-2. Sign up at `/signup`.
-3. Open the email (sender: Tambua Africa / your `AUTH_FROM_EMAIL`).
-4. Click **Continue to Tambua Africa** → `/auth/confirm` → `/dashboard`.
-
-## Hook URL
-
-```
-https://tulnrphqshxiybdreqec.supabase.co/functions/v1/auth-send-email
-```
+Password rules in the app: 8+ chars, upper, lower, number, symbol.
 
 ## Troubleshooting
 
 | Problem | Fix |
 |---------|-----|
-| **Hook 500** / `Unexpected status code returned from hook: 500` | Run `npm run setup:auth-email`. If **Confirm email is OFF**, set `AUTH_SKIP_EMAIL_HOOK=true` in `.env` (default in setup script) so the hook returns 200 without calling Resend. Or **disable** the Send Email hook in the dashboard. If confirmation is ON, use `AUTH_FROM_EMAIL=... <onboarding@resend.dev>` until Resend domain is verified. Check **Edge Functions → auth-send-email → Logs**. |
-| No email | Resend dashboard → Logs; function logs in Supabase → Edge Functions → auth-send-email |
-| Hook 401 | `SEND_EMAIL_HOOK_SECRET` must match dashboard exactly (include `v1,whsec_` prefix) |
-| Resend domain error | Use `onboarding@resend.dev` until domain is verified (function auto-retries with test sender) |
-| Redirect error | Add `/auth/confirm` to redirect allow list |
-| Still Supabase default mail | Hook must be **enabled**; email provider can stay enabled (hook takes over sending) |
+| Forgot password “sent” but **no email** | Set `AUTH_SKIP_EMAIL_HOOK=false`, run `npm run setup:auth-email`. Check Resend → Logs and Supabase → Edge Functions → auth-send-email → Logs. |
+| Email in spam | Normal until domain is verified in Resend; use branded sender after verify |
+| Resend only delivers to your address | **Sandbox:** verify domain at resend.com/domains, or add recipient in Resend for testing |
+| Hook 500 | `RESEND_API_KEY` on edge; use `onboarding@resend.dev` as `AUTH_FROM_EMAIL` |
+| Hook 401 | `SEND_EMAIL_HOOK_SECRET` matches dashboard exactly |
+| Rate limit on signup | Wait or raise limits in Supabase; different users can sign up — limit is per project/hour, not one-at-a-time |
+| Supabase default email still arrives | Hook must be enabled; only one Send Email hook should be active |
 
 ## Reference
 

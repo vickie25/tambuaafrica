@@ -10,6 +10,8 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageTransition from "@/components/layout/PageTransition";
 import { formatAuthError } from "@/lib/auth-errors";
+import { validatePassword, PASSWORD_HINT } from "@/lib/password-policy";
+import PasswordRequirements from "@/components/auth/PasswordRequirements";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -22,8 +24,9 @@ const Signup = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+    const passwordCheck = validatePassword(password);
+    if (!passwordCheck.valid) {
+      toast.error(passwordCheck.message);
       return;
     }
     setLoading(true);
@@ -31,7 +34,7 @@ const Signup = () => {
       const { needsEmailConfirmation } = await signUp(email, password, fullName);
       if (needsEmailConfirmation) {
         toast.success(
-          "Account created! Check your inbox for a confirmation link, then sign in to open your dashboard."
+          "Account created! Check your inbox for an email from Tambua Africa Tours & Safaris (also check spam), then sign in."
         );
         navigate("/login", { replace: true });
         return;
@@ -54,7 +57,9 @@ const Signup = () => {
           <div className="bg-card rounded-2xl shadow-lg border border-border p-8">
             <div className="text-center mb-8">
               <h1 className="text-2xl font-bold text-foreground">Create Account</h1>
-              <p className="text-muted-foreground mt-2">Join Tambua Africa for your next adventure</p>
+              <p className="text-muted-foreground mt-2">
+                Join Tambua Africa — you will confirm your email before signing in.
+              </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -71,11 +76,19 @@ const Signup = () => {
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-foreground">Password</label>
                 <div className="relative">
-                  <Input type={showPassword ? "text" : "password"} placeholder="Min. 6 characters" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder={PASSWORD_HINT}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    autoComplete="new-password"
+                  />
                   <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+                <PasswordRequirements password={password} className="mt-2" />
               </div>
 
               <Button type="submit" disabled={loading} className="w-full bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl py-5">

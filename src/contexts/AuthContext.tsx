@@ -5,6 +5,7 @@ import { hasSupabaseEnv, supabase } from "@/integrations/supabase/client";
 import { isAdminMailbox } from "@/lib/admin-email";
 import { getAuthSiteOrigin, getEmailConfirmRedirectUrl } from "@/lib/auth-redirect";
 import { formatAuthError } from "@/lib/auth-errors";
+import { validatePassword } from "@/lib/password-policy";
 import { isLiveDataPath } from "@/lib/site-snapshot";
 import type { User, Session } from "@supabase/supabase-js";
 
@@ -159,6 +160,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         "Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY to a saved .env file in the project root (use your Supabase anon public key from Dashboard → API), then restart the dev server. On Vercel, set the same variables in Project Settings → Environment Variables."
       );
     }
+    const passwordCheck = validatePassword(password);
+    if (!passwordCheck.valid) {
+      throw new Error(`Password requirements: ${passwordCheck.message}`);
+    }
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -171,20 +176,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     let session = data.session ?? null;
 
-    // When confirm-email is off, Supabase may return a user without a session — sign in immediately.
-    if (!session) {
+    // Confirm email OFF: Supabase may return user without session — sign in once.
+    if (!session && data.user) {
       const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       if (!signInError && signInData.session) {
         session = signInData.session;
+      } else if (
+        signInError &&
+        /not confirmed|email not confirmed/i.test(signInError.message)
+      ) {
+        return { needsEmailConfirmation: true };
       }
-    }
-
-    if (!session) {
-      const { data: sessionData } = await supabase.auth.getSession();
-      session = sessionData.session ?? null;
     }
 
     if (session) {
@@ -239,6 +244,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       throw new Error(
         "Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY to a saved .env file in the project root (use your Supabase anon public key from Dashboard → API), then restart the dev server. On Vercel, set the same variables in Project Settings → Environment Variables."
       );
+    }
+    const passwordCheck = validatePassword(password);
+    if (!passwordCheck.valid) {
+      throw new Error(`Password requirements: ${passwordCheck.message}`);
     }
     const { error } = await supabase.auth.updateUser({ password });
     if (error) throw error;

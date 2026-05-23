@@ -132,15 +132,22 @@ const buildVerifyUrl = (payload: HookPayload) => {
     Deno.env.get("SUPABASE_URL") ||
     "https://tulnrphqshxiybdreqec.supabase.co"
   ).replace(/\/$/, "");
-  const { token_hash, email_action_type } = payload.email_data;
-  const type =
-    email_action_type === "email" || email_action_type === "signup" ? "signup" : email_action_type;
+  const { token_hash, email_action_type, redirect_to: payloadRedirect } = payload.email_data;
+  const action = email_action_type === "email" ? "signup" : email_action_type;
   const liveOrigin = (
     Deno.env.get("AUTH_SITE_URL") ||
     Deno.env.get("VITE_SITE_URL") ||
     "https://tambua-africa.com"
   ).replace(/\/$/, "");
-  const redirect = `${liveOrigin}/auth/confirm`;
+
+  const redirect =
+    action === "recovery"
+      ? `${liveOrigin}/reset-password`
+      : payloadRedirect?.startsWith("http")
+        ? payloadRedirect
+        : `${liveOrigin}/auth/confirm`;
+
+  const type = action === "email" ? "signup" : action;
   return `${supabaseUrl}/auth/v1/verify?token=${encodeURIComponent(token_hash)}&type=${encodeURIComponent(type)}&redirect_to=${encodeURIComponent(redirect)}`;
 };
 
@@ -182,7 +189,7 @@ const buildHtml = (payload: HookPayload, confirmUrl: string) => {
       <p style="margin:0 0 8px;font-size:15px;">Hello ${name},</p>
       <h1 style="margin:0 0 12px;font-size:22px;">${heading}</h1>
       <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#57534e;">${line}</p>
-      <a href="${confirmUrl}" style="display:inline-block;background:#b45309;color:#fff;text-decoration:none;font-weight:600;padding:14px 28px;border-radius:10px;">Continue to Tambua Africa</a>
+      <a href="${confirmUrl}" style="display:inline-block;background:#b45309;color:#fff;text-decoration:none;font-weight:600;padding:14px 28px;border-radius:10px;">${isRecovery ? "Reset password" : "Confirm email &amp; sign in"}</a>
       <p style="margin:24px 0 0;font-size:12px;color:#78716c;"><a href="${confirmUrl}" style="color:#b45309;word-break:break-all;">${confirmUrl}</a></p>
     </td></tr>
   </table>

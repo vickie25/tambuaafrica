@@ -1,0 +1,59 @@
+/**
+ * Normalize local `/images/...` paths so they match files in `public/images`.
+ * Fixes folder typos, URL-encoding, and legacy Supabase storage keys.
+ */
+export function normalizePublicImagePath(src: string | null | undefined): string {
+  if (!src) return "";
+  let path = src.trim();
+  if (!path) return "";
+
+  if (path.includes("supabase.co/storage") && path.includes("public%5Cimages")) {
+    try {
+      const u = new URL(path);
+      const last = decodeURIComponent(u.pathname.split("/").pop() || "");
+      const match = last.match(/images[\\/]destiations[\\/](.+)$/i);
+      if (match) {
+        path = `/images/destiations/${match[1].replace(/\\/g, "/")}`;
+      }
+    } catch {
+      /* keep original */
+    }
+  }
+
+  if (path.startsWith("http://") || path.startsWith("https://")) {
+    return path;
+  }
+
+  if (path.startsWith("/images/") || path.startsWith("/")) {
+    try {
+      path = decodeURI(path);
+    } catch {
+      /* keep */
+    }
+  }
+
+  path = path.replace("/images/destinations/", "/images/destiations/");
+
+  const exact: Record<string, string> = {
+    "/images/dawn-w-FmUx8z_Tz4A-unsplash.webp": "/images/destiations/Lake Nakuru/lake elementaita.webp",
+    "/images/destiations/Lake Naivash/Sopa boat rides.webp":
+      "/images/destiations/Lake Naivasha/Sopa boat rides.webp",
+  };
+
+  if (exact[path]) return exact[path];
+
+  if (path.includes("/destiations/Lake Naivash/")) {
+    return path.replace("/destiations/Lake Naivash/", "/destiations/Lake Naivasha/");
+  }
+
+  return path;
+}
+
+/** Encode a site-root path for use in img src (decode first to avoid double-encoding). */
+export function encodePublicImageSrc(src: string): string {
+  const normalized = normalizePublicImagePath(src);
+  if (normalized.startsWith("http://") || normalized.startsWith("https://")) {
+    return normalized;
+  }
+  return encodeURI(normalized);
+}

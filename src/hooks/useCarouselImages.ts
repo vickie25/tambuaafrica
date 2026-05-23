@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { usePublicQueryMode } from "@/lib/use-public-query";
+import { normalizePublicImagePath } from "@/lib/public-image-path";
 
 export interface CarouselImageItem {
   id: string;
@@ -27,7 +28,7 @@ export const FALLBACK_HERO_IMAGES = [
   "/images/beach.webp",
   "/images/real images frm Tambua/Zebra at Nairobi park.jpeg",
   "/images/Jumping.webp",
-];
+].map(normalizePublicImagePath);
 
 type CarouselRow = {
   id?: string | null;
@@ -81,7 +82,7 @@ export const useCarouselImages = (
 
     const validUrls = rows
       .filter((item) => (item.section || "hero") === section)
-      .map((item) => item.url)
+      .map((item) => normalizePublicImagePath(item.url))
       .filter((url): url is string => Boolean(url && url.trim().length > 0));
 
     if (validUrls.length > 0) return validUrls;
@@ -127,7 +128,7 @@ export const useCarouselImageItems = (
         const parsed = extractIconMeta(item.description || null);
         return {
           id: item.id || `${section}-${idx}`,
-          url: item.url!.trim(),
+          url: normalizePublicImagePath(item.url!.trim()),
           title: item.title?.trim() || `${section} image ${idx + 1}`,
           description: parsed.description,
           iconKey: parsed.iconKey,

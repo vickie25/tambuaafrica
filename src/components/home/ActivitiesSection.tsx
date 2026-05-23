@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { Compass, Palmtree, Binoculars, Mountain, Activity, Wind } from "lucide-react";
 import OptimizedImage from "@/components/ui/optimized-image";
+import { fallbackSafariImage } from "@/lib/remote-media-fallbacks";
 import { useCarouselImageItems } from "@/hooks/useCarouselImages";
 import { motion, useReducedMotion } from "framer-motion";
 
@@ -164,6 +165,8 @@ const ActivityCard = ({
             <OptimizedImage
               src={image}
               alt={`${activity.title} image ${i + 1}`}
+              fallbackSeed={`activity-${activity.title}-${i}`}
+              fallbackSrc={fallbackSafariImage(`activity-${activity.title}-${i}`)}
               className="w-full h-full aspect-[4/5] object-cover transition-transform duration-700 md:group-hover:scale-110"
               width={600}
               height={750}

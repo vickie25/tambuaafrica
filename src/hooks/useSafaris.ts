@@ -2,15 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Safari, safaris as localSafaris } from "@/data/safaris";
 import { fallbackSafariImage } from "@/lib/remote-media-fallbacks";
+import { normalizePublicImagePath } from "@/lib/public-image-path";
 import { usePublicQueryMode } from "@/lib/use-public-query";
-
-const BROKEN_SAFARI_IMAGE_MAP: Record<string, string> = {
-  "/images/dawn-w-FmUx8z_Tz4A-unsplash.webp": "/images/destiations/Lake Nakuru/lake elementaita.webp",
-};
 
 const normalizeSafariImage = (image: string | null | undefined) => {
   if (!image) return image;
-  return BROKEN_SAFARI_IMAGE_MAP[image] ?? image;
+  return normalizePublicImagePath(image);
 };
 
 export function mapSafariRows(data: Record<string, unknown>[]): Safari[] {

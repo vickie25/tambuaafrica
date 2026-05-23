@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
+import { encodePublicImageSrc, normalizePublicImagePath } from '@/lib/public-image-path';
+import { fallbackSafariImage } from '@/lib/remote-media-fallbacks';
 
 interface OptimizedImageProps {
   src: string;
@@ -14,6 +16,8 @@ interface OptimizedImageProps {
   sizes?: string;
   /** If the primary `src` fails to load (404, etc.), swap to this URL once. */
   fallbackSrc?: string;
+  /** Used to pick a stable Unsplash fallback when `fallbackSrc` is omitted. */
+  fallbackSeed?: string;
   /** IntersectionObserver rootMargin; smaller = fewer images load ahead of scroll (default 300px). */
   rootMargin?: string;
 }
@@ -34,6 +38,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   fetchPriority = "auto",
   sizes,
   fallbackSrc,
+  fallbackSeed,
   rootMargin = '300px',
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -71,16 +76,25 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   useEffect(() => {
     setIsLoaded(false);
     setHasError(false);
-    setActiveSrc(src);
+    setActiveSrc(normalizePublicImagePath(src));
     setTriedFallback(false);
   }, [src, fallbackSrc]);
 
-  const getOptimizedSrc = (originalSrc: string) => {
-    const formatUrl = (url: string) => encodeURI(url);
+  const resolvedFallback =
+    fallbackSrc ||
+    (fallbackSeed ? fallbackSafariImage(fallbackSeed) : undefined) ||
+    (normalizePublicImagePath(src).startsWith('/images/')
+      ? fallbackSafariImage(fallbackSeed || src)
+      : undefined);
 
-    if (originalSrc.includes('images.unsplash.com')) {
+  const getOptimizedSrc = (originalSrc: string) => {
+    const normalized = normalizePublicImagePath(originalSrc);
+    const formatUrl = (url: string) => encodePublicImageSrc(url);
+
+    if (normalized.startsWith('http://') || normalized.startsWith('https://')) {
+      if (normalized.includes('images.unsplash.com')) {
       try {
-        const u = new URL(originalSrc);
+        const u = new URL(normalized);
         const w = width ?? 800;
         const h = height ?? Math.max(400, Math.round((w * 3) / 5));
         u.searchParams.set('auto', 'format');
@@ -92,20 +106,22 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
       } catch {
         /* fall through */
       }
+      }
+      if (normalized.includes('unsplash.com')) {
+        const separator = normalized.includes('?') ? '&' : '?';
+        return formatUrl(
+          `${normalized}${separator}auto=format&fit=crop&w=${width || 800}&h=${height || 600}&q=${quality}`
+        );
+      }
+      if (normalized.includes('cloudinary')) {
+        const separator = normalized.includes('?') ? '&' : '?';
+        return formatUrl(
+          `${normalized}${separator}q=${quality}&w=${width || 800}&h=${height || 600}&f_auto`
+        );
+      }
+      return normalized;
     }
-    if (originalSrc.includes('unsplash.com')) {
-      const separator = originalSrc.includes('?') ? '&' : '?';
-      return formatUrl(
-        `${originalSrc}${separator}auto=format&fit=crop&w=${width || 800}&h=${height || 600}&q=${quality}`
-      );
-    }
-    if (originalSrc.includes('cloudinary')) {
-      const separator = originalSrc.includes('?') ? '&' : '?';
-      return formatUrl(
-        `${originalSrc}${separator}q=${quality}&w=${width || 800}&h=${height || 600}&f_auto`
-      );
-    }
-    return formatUrl(originalSrc);
+    return formatUrl(normalized);
   };
 
   const optimizedActive = getOptimizedSrc(activeSrc);
@@ -150,9 +166,9 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
             decoding="async"
             onLoad={() => setIsLoaded(true)}
             onError={() => {
-              if (fallbackSrc && !triedFallback) {
+              if (resolvedFallback && !triedFallback) {
                 setTriedFallback(true);
-                setActiveSrc(fallbackSrc);
+                setActiveSrc(resolvedFallback);
                 setIsLoaded(false);
                 return;
               }

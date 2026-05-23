@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Destination, destinations as localDestinations } from "@/data/destinations";
 import { fallbackDestinationImage } from "@/lib/remote-media-fallbacks";
+import { normalizePublicImagePath } from "@/lib/public-image-path";
 import { usePublicQueryMode } from "@/lib/use-public-query";
 
 export function mapDestinationRows(data: Record<string, unknown>[]): Destination[] {
@@ -10,17 +11,23 @@ export function mapDestinationRows(data: Record<string, unknown>[]): Destination
 
   return data.map((item) => {
     const local = localById.get(String(item.id));
-    const normalizedImages = Array.isArray(item.images)
-      ? (item.images as string[])
-      : item.image
-        ? [item.image as string]
-        : [];
+    const normalizedImages = (
+      Array.isArray(item.images)
+        ? (item.images as string[])
+        : item.image
+          ? [item.image as string]
+          : []
+    ).map((url) => normalizePublicImagePath(url));
 
     const finalImage =
-      ((item.image as string) || local?.image || "").trim() ||
+      normalizePublicImagePath(((item.image as string) || local?.image || "").trim()) ||
       fallbackDestinationImage(String(item.id || "destination"));
     const finalImages =
-      normalizedImages.length > 0 ? normalizedImages : local?.images?.length ? local.images : [finalImage];
+      normalizedImages.length > 0
+        ? normalizedImages
+        : local?.images?.length
+          ? local.images.map((url) => normalizePublicImagePath(url))
+          : [finalImage];
 
     return {
       ...item,

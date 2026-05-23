@@ -5,6 +5,7 @@ import { ChevronRight, Play } from "lucide-react";
 import OptimizedImage from "@/components/ui/optimized-image";
 import { motion, useReducedMotion } from "framer-motion";
 import { useCarouselImages } from "@/hooks/useCarouselImages";
+import { fallbackSafariImage } from "@/lib/remote-media-fallbacks";
 
 const HeroSection = () => {
   const { data: backgroundImages = [] } = useCarouselImages();
@@ -54,6 +55,8 @@ const HeroSection = () => {
             <OptimizedImage
               src={image}
               alt="Maasai Mara wildebeest migration Kenya safari landscape"
+              fallbackSeed={`hero-${index}`}
+              fallbackSrc={fallbackSafariImage(`hero-${index}`)}
               className="w-full h-full object-cover"
               priority
               quality={85}

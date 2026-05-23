@@ -134,7 +134,7 @@ export const safaris: Safari[] = [
     price: 920,
     rating: 4.8,
     reviews: 151,
-    image: "/images/destiations/Lake%20Naivash/Sopa%20boat%20rides.webp",
+    image: "/images/destiations/Lake Naivasha/Sopa boat rides.webp",
     description: "Glide past hippos on a boat safari and walk alongside giraffes and zebras on Crescent Island in the Great Rift Valley.",
     highlights: ["Boat Safari", "Crescent Island Walk", "Hell's Gate Explore"],
     category: "Adventure Safari",

@@ -196,7 +196,7 @@ export const destinationLodges: DestinationLodges[] = [
           "Hot air balloon safari packages for aerial Migration viewing",
           "Cultural Maasai village visits and warrior encounters",
         ],
-        image: "/images/destinations/Maasai Mara/jambomara.webp",
+        image: "/images/destiations/Maasai Mara/jambomara.webp",
         images: [
           "/images/destiations/Maasai Mara/jambomara.webp",
           "/images/destiations/Maasai Mara/Jambo mara swimming pool.webp",

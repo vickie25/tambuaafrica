@@ -68,10 +68,12 @@ into .env, then re-run this script so edge secrets stay in sync.
     process.env.AUTH_SITE_URL?.trim() ||
     process.env.VITE_SITE_URL?.trim() ||
     "https://tambua-africa.com";
+  const skipHook = (process.env.AUTH_SKIP_EMAIL_HOOK || "true").trim().toLowerCase();
 
   secrets.push(`AUTH_FROM_EMAIL=${from}`);
   secrets.push(`AUTH_REPLY_TO=${replyTo}`);
   secrets.push(`AUTH_SITE_URL=${siteUrl}`);
+  secrets.push(`AUTH_SKIP_EMAIL_HOOK=${skipHook}`);
 
   const secretsFile = path.join(__dirname, "..", ".env.auth-email.secrets");
   fs.writeFileSync(secretsFile, secrets.join("\n") + "\n", "utf8");
@@ -102,8 +104,11 @@ Auth URL allow list (Authentication → URL Configuration):
   - http://localhost:8080/auth/confirm
   - https://tambuaafrica.com/auth/confirm
 
-Test: sign up at /signup → email from Tambua Africa → link → /dashboard
+If "Confirm email" is OFF (instant signup / dashboard redirect):
+  - AUTH_SKIP_EMAIL_HOOK=true is set by default (hook returns 200, no Resend call)
+  - OR disable Send Email hook in Supabase Dashboard
 
-Resend: use onboarding@resend.dev until your domain is verified, then set:
-  AUTH_FROM_EMAIL=Tambua Africa Tours & Safaris <info@tambuaafrica.com>
+If you turn confirm email back ON:
+  - Set AUTH_SKIP_EMAIL_HOOK=false in .env and re-run this script
+  - Use onboarding@resend.dev until your domain is verified in Resend
 `);

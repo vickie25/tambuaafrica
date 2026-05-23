@@ -86,7 +86,7 @@ https://tulnrphqshxiybdreqec.supabase.co/functions/v1/auth-send-email
 
 | Problem | Fix |
 |---------|-----|
-| **Hook 500** / `Unexpected status code returned from hook: 500` | Almost always **Resend** or missing `RESEND_API_KEY` on the function. Run `npm run setup:auth-email`. Set `AUTH_FROM_EMAIL=Tambua Africa Tours & Safaris <onboarding@resend.dev>` until your domain is verified in Resend. Check **Supabase → Edge Functions → auth-send-email → Logs**. |
+| **Hook 500** / `Unexpected status code returned from hook: 500` | Run `npm run setup:auth-email`. If **Confirm email is OFF**, set `AUTH_SKIP_EMAIL_HOOK=true` in `.env` (default in setup script) so the hook returns 200 without calling Resend. Or **disable** the Send Email hook in the dashboard. If confirmation is ON, use `AUTH_FROM_EMAIL=... <onboarding@resend.dev>` until Resend domain is verified. Check **Edge Functions → auth-send-email → Logs**. |
 | No email | Resend dashboard → Logs; function logs in Supabase → Edge Functions → auth-send-email |
 | Hook 401 | `SEND_EMAIL_HOOK_SECRET` must match dashboard exactly (include `v1,whsec_` prefix) |
 | Resend domain error | Use `onboarding@resend.dev` until domain is verified (function auto-retries with test sender) |

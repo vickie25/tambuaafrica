@@ -1,7 +1,9 @@
 /**
  * Supabase Auth Send Email hook → Resend (company-branded confirmation & recovery).
- * Deploy: npx supabase functions deploy auth-send-email --no-verify-jwt
- * @see https://supabase.com/docs/guides/auth/auth-hooks/send-email-hook
+ * Deploy: npm run setup:auth-email
+ *
+ * If "Confirm email" is OFF in Supabase, set secret AUTH_SKIP_EMAIL_HOOK=true
+ * (or disable this hook in the dashboard) so signup is not blocked by Resend.
  */
 // @ts-ignore Deno URL import
 import { Webhook } from "https://esm.sh/standardwebhooks@1.0.0";
@@ -38,9 +40,26 @@ type HookPayload = {
   };
 };
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY") ?? "");
+const JSON_HEADERS = { "Content-Type": "application/json" };
+
+const ok = () => new Response(JSON.stringify({}), { status: 200, headers: JSON_HEADERS });
+
+const fail = (status: number, message: string) =>
+  new Response(JSON.stringify({ error: { http_code: status, message } }), {
+    status,
+    headers: JSON_HEADERS,
+  });
+
+const RESEND_TEST_FROM = "Tambua Africa Tours & Safaris <onboarding@resend.dev>";
+
+const resendApiKey = () => Deno.env.get("RESEND_API_KEY")?.trim() || "";
 
 const getHookSecretRaw = () => Deno.env.get("SEND_EMAIL_HOOK_SECRET")?.trim() || "";
+
+const skipEmailHook = () => {
+  const v = (Deno.env.get("AUTH_SKIP_EMAIL_HOOK") || "").trim().toLowerCase();
+  return v === "1" || v === "true" || v === "yes";
+};
 
 const normalizeHeaders = (req: Request): Record<string, string> => {
   const out: Record<string, string> = {};
@@ -50,12 +69,17 @@ const normalizeHeaders = (req: Request): Record<string, string> => {
   return out;
 };
 
+const webhookHeaders = (headers: Record<string, string>) => ({
+  "webhook-id": headers["webhook-id"] || "",
+  "webhook-timestamp": headers["webhook-timestamp"] || "",
+  "webhook-signature": headers["webhook-signature"] || "",
+});
+
 const isGoTrueHookRequest = (headers: Record<string, string>) => {
   const ua = headers["user-agent"] || "";
   return ua.includes("Go-http-client") || ua.includes("GoTrue");
 };
 
-/** Verify Supabase Auth hook payload (standard webhooks + Bearer fallback). */
 const verifyHookPayload = (payloadText: string, headers: Record<string, string>): HookPayload => {
   let parsed: HookPayload;
   try {
@@ -70,24 +94,24 @@ const verifyHookPayload = (payloadText: string, headers: Record<string, string>)
 
   const secretRaw = getHookSecretRaw();
   if (!secretRaw) {
-    console.warn("SEND_EMAIL_HOOK_SECRET not set — accepting payload (set secret in production)");
+    console.warn("SEND_EMAIL_HOOK_SECRET not set — accepting payload");
     return parsed;
   }
 
   const secret = secretRaw.replace(/^v1,whsec_/, "");
+  const whHeaders = webhookHeaders(headers);
 
   try {
     const wh = new Webhook(secret);
-    return wh.verify(payloadText, headers) as HookPayload;
+    return wh.verify(payloadText, whHeaders) as HookPayload;
   } catch (verifyErr) {
     const auth = headers.authorization || "";
     if (auth === `Bearer ${secretRaw}` || auth === `Bearer ${secret}` || auth === secretRaw) {
       return parsed;
     }
 
-    // Known beta issue: GoTrue may omit Authorization; allow verified GoTrue agent only.
     if (isGoTrueHookRequest(headers)) {
-      console.warn("Webhook signature mismatch; accepting GoTrue hook request:", verifyErr);
+      console.warn("Webhook signature mismatch; accepting GoTrue request:", verifyErr);
       return parsed;
     }
 
@@ -95,18 +119,19 @@ const verifyHookPayload = (payloadText: string, headers: Record<string, string>)
   }
 };
 
-const RESEND_TEST_FROM = "Tambua Africa Tours & Safaris <onboarding@resend.dev>";
-
 const getFromAddress = () =>
   Deno.env.get("AUTH_FROM_EMAIL")?.trim() ||
   Deno.env.get("RESEND_FROM_EMAIL")?.trim() ||
   RESEND_TEST_FROM;
 
 const isResendDomainError = (message: string) =>
-  /domain|not verified|verify your domain|from address/i.test(message);
+  /domain|not verified|verify your domain|from address|only send/i.test(message);
 
 const buildVerifyUrl = (payload: HookPayload) => {
-  const supabaseUrl = (Deno.env.get("SUPABASE_URL") || "").replace(/\/$/, "");
+  const supabaseUrl = (
+    Deno.env.get("SUPABASE_URL") ||
+    "https://tulnrphqshxiybdreqec.supabase.co"
+  ).replace(/\/$/, "");
   const { token_hash, email_action_type } = payload.email_data;
   const type =
     email_action_type === "email" || email_action_type === "signup" ? "signup" : email_action_type;
@@ -165,72 +190,71 @@ const buildHtml = (payload: HookPayload, confirmUrl: string) => {
 </html>`;
 };
 
+async function sendWithResend(payload: HookPayload) {
+  const resend = new Resend(resendApiKey());
+  const confirmUrl = buildVerifyUrl(payload);
+  const replyTo = Deno.env.get("AUTH_REPLY_TO")?.trim() || "info@tambuaafrica.com";
+  let from = getFromAddress();
+
+  const attempt = (fromAddress: string) =>
+    resend.emails.send({
+      from: fromAddress,
+      to: [payload.user.email],
+      subject: subjectFor(payload.email_data.email_action_type),
+      html: buildHtml(payload, confirmUrl),
+      replyTo,
+    });
+
+  let result = await attempt(from);
+
+  if (result.error && from !== RESEND_TEST_FROM && isResendDomainError(result.error.message || "")) {
+    console.warn("Resend sender rejected, retrying with onboarding@resend.dev:", result.error.message);
+    from = RESEND_TEST_FROM;
+    result = await attempt(from);
+  }
+
+  return result;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204 });
   }
 
   if (req.method !== "POST") {
-    return new Response("not allowed", { status: 400 });
+    return fail(400, "Method not allowed");
   }
 
-  if (!Deno.env.get("RESEND_API_KEY")) {
-    return new Response(
-      JSON.stringify({ error: { message: "RESEND_API_KEY is not configured" } }),
-      { status: 500, headers: { "Content-Type": "application/json" } },
-    );
+  if (skipEmailHook()) {
+    console.log("AUTH_SKIP_EMAIL_HOOK=true — returning 200 without sending");
+    return ok();
+  }
+
+  if (!resendApiKey()) {
+    console.error("RESEND_API_KEY missing on edge function");
+    return fail(500, "RESEND_API_KEY is not configured on auth-send-email");
   }
 
   const payloadText = await req.text();
   const headers = normalizeHeaders(req);
 
   try {
-    const { user, email_data } = verifyHookPayload(payloadText, headers);
-    const confirmUrl = buildVerifyUrl({ user, email_data });
-    const replyTo = Deno.env.get("AUTH_REPLY_TO")?.trim() || "info@tambuaafrica.com";
-    let from = getFromAddress();
-
-    const sendOnce = () =>
-      resend.emails.send({
-        from,
-        to: [user.email],
-        subject: subjectFor(email_data.email_action_type),
-        html: buildHtml({ user, email_data }, confirmUrl),
-        replyTo,
-      });
-
-    let { error } = await sendOnce();
-
-    if (error && from !== RESEND_TEST_FROM && isResendDomainError(error.message || "")) {
-      console.warn("Resend domain error, retrying with onboarding@resend.dev:", error.message);
-      from = RESEND_TEST_FROM;
-      ({ error } = await sendOnce());
-    }
+    const payload = verifyHookPayload(payloadText, headers);
+    const { error } = await sendWithResend(payload);
 
     if (error) {
       console.error("Resend error:", JSON.stringify(error));
-      return new Response(
-        JSON.stringify({
-          error: {
-            http_code: 500,
-            message: `Resend: ${error.message}. Use onboarding@resend.dev until your domain is verified.`,
-          },
-        }),
-        { status: 500, headers: { "Content-Type": "application/json" } },
+      return fail(
+        500,
+        `Resend failed: ${error.message}. Set AUTH_FROM_EMAIL to Tambua Africa Tours & Safaris <onboarding@resend.dev> or disable the Send Email hook if confirm email is off.`,
       );
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : "Send email hook failed";
-    console.error("auth-send-email:", message);
+    console.error("auth-send-email:", message, err);
     const status = /secret|signature|unauthorized|invalid hook/i.test(message) ? 401 : 500;
-    return new Response(
-      JSON.stringify({ error: { http_code: status, message } }),
-      { status, headers: { "Content-Type": "application/json" } },
-    );
+    return fail(status, message);
   }
 
-  return new Response(JSON.stringify({}), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
-  });
+  return ok();
 });

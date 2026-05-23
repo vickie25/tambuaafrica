@@ -95,17 +95,26 @@ const verifyHookPayload = (payloadText: string, headers: Record<string, string>)
   }
 };
 
+const RESEND_TEST_FROM = "Tambua Africa Tours & Safaris <onboarding@resend.dev>";
+
 const getFromAddress = () =>
-  Deno.env.get("AUTH_FROM_EMAIL") ||
-  Deno.env.get("RESEND_FROM_EMAIL") ||
-  "Tambua Africa Tours & Safaris <onboarding@resend.dev>";
+  Deno.env.get("AUTH_FROM_EMAIL")?.trim() ||
+  Deno.env.get("RESEND_FROM_EMAIL")?.trim() ||
+  RESEND_TEST_FROM;
+
+const isResendDomainError = (message: string) =>
+  /domain|not verified|verify your domain|from address/i.test(message);
 
 const buildVerifyUrl = (payload: HookPayload) => {
   const supabaseUrl = (Deno.env.get("SUPABASE_URL") || "").replace(/\/$/, "");
   const { token_hash, email_action_type } = payload.email_data;
   const type =
     email_action_type === "email" || email_action_type === "signup" ? "signup" : email_action_type;
-  const liveOrigin = (Deno.env.get("AUTH_SITE_URL") || "https://tambuaafrica.com").replace(/\/$/, "");
+  const liveOrigin = (
+    Deno.env.get("AUTH_SITE_URL") ||
+    Deno.env.get("VITE_SITE_URL") ||
+    "https://tambua-africa.com"
+  ).replace(/\/$/, "");
   const redirect = `${liveOrigin}/auth/confirm`;
   return `${supabaseUrl}/auth/v1/verify?token=${encodeURIComponent(token_hash)}&type=${encodeURIComponent(type)}&redirect_to=${encodeURIComponent(redirect)}`;
 };
@@ -121,8 +130,15 @@ const subjectFor = (action: EmailActionType) => {
   }
 };
 
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+
 const buildHtml = (payload: HookPayload, confirmUrl: string) => {
-  const name = payload.user.user_metadata?.full_name || "there";
+  const name = escapeHtml(payload.user.user_metadata?.full_name || "there");
   const isRecovery = payload.email_data.email_action_type === "recovery";
   const heading = isRecovery ? "Reset your password" : "Confirm your email to start planning your safari";
   const line = isRecovery
@@ -171,28 +187,45 @@ Deno.serve(async (req) => {
   try {
     const { user, email_data } = verifyHookPayload(payloadText, headers);
     const confirmUrl = buildVerifyUrl({ user, email_data });
+    const replyTo = Deno.env.get("AUTH_REPLY_TO")?.trim() || "info@tambuaafrica.com";
+    let from = getFromAddress();
 
-    const { error } = await resend.emails.send({
-      from: getFromAddress(),
-      to: [user.email],
-      subject: subjectFor(email_data.email_action_type),
-      html: buildHtml({ user, email_data }, confirmUrl),
-      reply_to: Deno.env.get("AUTH_REPLY_TO") || "info@tambuaafrica.com",
-    });
+    const sendOnce = () =>
+      resend.emails.send({
+        from,
+        to: [user.email],
+        subject: subjectFor(email_data.email_action_type),
+        html: buildHtml({ user, email_data }, confirmUrl),
+        replyTo,
+      });
+
+    let { error } = await sendOnce();
+
+    if (error && from !== RESEND_TEST_FROM && isResendDomainError(error.message || "")) {
+      console.warn("Resend domain error, retrying with onboarding@resend.dev:", error.message);
+      from = RESEND_TEST_FROM;
+      ({ error } = await sendOnce());
+    }
 
     if (error) {
-      console.error("Resend error:", error);
+      console.error("Resend error:", JSON.stringify(error));
       return new Response(
-        JSON.stringify({ error: { message: error.message } }),
+        JSON.stringify({
+          error: {
+            http_code: 500,
+            message: `Resend: ${error.message}. Use onboarding@resend.dev until your domain is verified.`,
+          },
+        }),
         { status: 500, headers: { "Content-Type": "application/json" } },
       );
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : "Send email hook failed";
     console.error("auth-send-email:", message);
+    const status = /secret|signature|unauthorized|invalid hook/i.test(message) ? 401 : 500;
     return new Response(
-      JSON.stringify({ error: { message } }),
-      { status: 401, headers: { "Content-Type": "application/json" } },
+      JSON.stringify({ error: { http_code: status, message } }),
+      { status, headers: { "Content-Type": "application/json" } },
     );
   }
 

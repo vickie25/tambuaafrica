@@ -1,16 +1,14 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageTransition from "@/components/layout/PageTransition";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { waitForSessionFromUrl } from "@/lib/auth-session-from-url";
 
 /**
  * Handles Supabase email confirmation (signup / email change).
- * Supabase redirects here with tokens in the hash or ?code= for PKCE.
  */
 const AuthConfirm = () => {
   const navigate = useNavigate();
@@ -19,81 +17,26 @@ const AuthConfirm = () => {
 
   useEffect(() => {
     let cancelled = false;
-    let subscription: { unsubscribe: () => void } | undefined;
 
-    const finishSuccess = () => {
-      if (cancelled) return;
-      setStatus("success");
-      setMessage("Email confirmed! Taking you to your dashboard…");
-      window.history.replaceState({}, document.title, window.location.pathname);
-      setTimeout(() => navigate("/dashboard", { replace: true }), 800);
-    };
-
-    const finishError = (detail: string) => {
-      if (cancelled) return;
-      setStatus("error");
-      setMessage(detail);
-    };
-
-    const run = async () => {
-      const searchParams = new URLSearchParams(window.location.search);
-      const code = searchParams.get("code");
-      const hashError = new URLSearchParams(window.location.hash.replace(/^#/, "")).get("error_description");
-
-      if (hashError) {
-        finishError(decodeURIComponent(hashError.replace(/\+/g, " ")));
-        return;
-      }
-
-      if (code) {
-        const { error } = await supabase.auth.exchangeCodeForSession(code);
-        if (error) {
-          finishError(error.message);
-          return;
-        }
-        finishSuccess();
-        return;
-      }
-
-      const hash = window.location.hash;
-      const hasAuthFragment =
-        hash.includes("access_token") ||
-        hash.includes("type=signup") ||
-        hash.includes("type=email") ||
-        hash.includes("type=magiclink");
-
-      if (hasAuthFragment) {
-        subscription = supabase.auth.onAuthStateChange((event, session) => {
-          if (event === "SIGNED_IN" && session) {
-            finishSuccess();
-          }
-        });
-
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) {
-          finishError(error.message);
-          return;
-        }
-        if (session) {
-          finishSuccess();
-        }
-        return;
-      }
-
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        finishSuccess();
-        return;
-      }
-
-      finishError("This confirmation link is invalid or has expired. Sign in or request a new confirmation email.");
-    };
-
-    void run();
+    const cleanup = waitForSessionFromUrl({
+      cancelled: () => cancelled,
+      onSuccess: () => {
+        setStatus("success");
+        setMessage("Email confirmed! Taking you to your dashboard…");
+        window.history.replaceState({}, document.title, window.location.pathname);
+        setTimeout(() => navigate("/dashboard", { replace: true }), 800);
+      },
+      onError: (detail) => {
+        setStatus("error");
+        setMessage(detail);
+      },
+      timeoutMessage:
+        "This confirmation link is invalid or has expired. Sign in or request a new confirmation email.",
+    });
 
     return () => {
       cancelled = true;
-      subscription?.unsubscribe();
+      cleanup();
     };
   }, [navigate]);
 

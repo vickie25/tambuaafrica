@@ -23,6 +23,10 @@ export function formatAuthError(error: unknown): string {
     return "Google sign in is not enabled yet. Ask the site admin to enable Google under Supabase Authentication Providers.";
   }
 
+  if (/code verifier|pkce/i.test(message)) {
+    return "Google sign in was interrupted. Use the same website address you started from (tambua-africa.com or tambuaafrica.com, not both), then try again.";
+  }
+
   if (/hook requires authorization/i.test(message)) {
     return "Email service configuration issue. Try again shortly or contact support.";
   }

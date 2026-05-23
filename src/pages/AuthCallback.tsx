@@ -5,11 +5,11 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageTransition from "@/components/layout/PageTransition";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
 import { consumeAuthRedirect } from "@/lib/auth-redirect";
+import { waitForSessionFromUrl } from "@/lib/auth-session-from-url";
 
 /**
- * Handles OAuth return (Google sign-in). Supabase redirects here with ?code= (PKCE).
+ * Handles OAuth return (Google sign-in). Supabase client exchanges ?code= via detectSessionInUrl.
  */
 const AuthCallback = () => {
   const navigate = useNavigate();
@@ -18,80 +18,27 @@ const AuthCallback = () => {
 
   useEffect(() => {
     let cancelled = false;
-    let subscription: { unsubscribe: () => void } | undefined;
 
-    const finishSuccess = () => {
-      if (cancelled) return;
-      const target = consumeAuthRedirect();
-      setStatus("success");
-      setMessage("Signed in! Taking you to your dashboard…");
-      window.history.replaceState({}, document.title, window.location.pathname);
-      setTimeout(() => navigate(target, { replace: true }), 600);
-    };
-
-    const finishError = (detail: string) => {
-      if (cancelled) return;
-      setStatus("error");
-      setMessage(detail);
-    };
-
-    const run = async () => {
-      const searchParams = new URLSearchParams(window.location.search);
-      const code = searchParams.get("code");
-      const hashError = new URLSearchParams(
-        window.location.hash.replace(/^#/, ""),
-      ).get("error_description");
-
-      if (hashError) {
-        finishError(decodeURIComponent(hashError.replace(/\+/g, " ")));
-        return;
-      }
-
-      if (code) {
-        const { error } = await supabase.auth.exchangeCodeForSession(code);
-        if (error) {
-          finishError(error.message);
-          return;
-        }
-        finishSuccess();
-        return;
-      }
-
-      const hash = window.location.hash;
-      if (hash.includes("access_token")) {
-        subscription = supabase.auth.onAuthStateChange((event, session) => {
-          if (event === "SIGNED_IN" && session) {
-            finishSuccess();
-          }
-        });
-
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) {
-          finishError(error.message);
-          return;
-        }
-        if (session) {
-          finishSuccess();
-        }
-        return;
-      }
-
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        finishSuccess();
-        return;
-      }
-
-      finishError(
-        "Sign in could not be completed. Try again from the login page.",
-      );
-    };
-
-    void run();
+    const cleanup = waitForSessionFromUrl({
+      cancelled: () => cancelled,
+      onSuccess: () => {
+        const target = consumeAuthRedirect();
+        setStatus("success");
+        setMessage("Signed in! Taking you to your dashboard…");
+        window.history.replaceState({}, document.title, window.location.pathname);
+        setTimeout(() => navigate(target, { replace: true }), 600);
+      },
+      onError: (detail) => {
+        setStatus("error");
+        setMessage(detail);
+      },
+      timeoutMessage:
+        "Sign in could not be completed. Open the site on one address only (for example always tambua-africa.com or always tambuaafrica.com), then try Google again.",
+    });
 
     return () => {
       cancelled = true;
-      subscription?.unsubscribe();
+      cleanup();
     };
   }, [navigate]);
 

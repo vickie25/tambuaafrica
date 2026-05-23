@@ -33,6 +33,20 @@ Run once in **SQL Editor** (or apply migration `20250523120000_google_profile_na
 
 This sets `profiles.full_name` from Google’s `name` metadata when users sign up with Google.
 
+## PKCE / “code verifier not found”
+
+The PKCE secret is stored in **browser localStorage per domain**. It is lost if:
+
+- You start Google sign in on `tambua-africa.com` but return on `tambuaafrica.com` (or the reverse).
+- You use `www.` and the site redirects to non-www (or the reverse) mid flow.
+
+**Fix:** Always use one URL for the live site. Add **both** callback URLs in Supabase if you use two domains:
+
+- `https://tambua-africa.com/auth/callback`
+- `https://tambuaafrica.com/auth/callback`
+
+Start and finish Google sign in on the **same** hostname.
+
 ## Notes
 
 - Google users skip email/password confirmation; Google has already verified the email.

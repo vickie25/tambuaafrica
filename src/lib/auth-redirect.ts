@@ -1,20 +1,13 @@
-/** Live site used for email confirmation links (must match Supabase redirect allow list). */
+/** Primary production origin (emails, SEO). OAuth must use the tab origin — see getAuthSiteOrigin. */
 export const PRODUCTION_SITE_ORIGIN = "https://tambuaafrica.com";
 
-const CANONICAL_HOSTS = new Set(["tambuaafrica.com", "www.tambuaafrica.com"]);
-const LEGACY_HOSTS = new Set(["tambua-africa.com", "www.tambua-africa.com"]);
-
-/** Public site origin for auth redirects (must match Supabase Auth URL allow list). */
+/**
+ * Origin for auth redirects in the current browser tab.
+ * PKCE stores the code verifier in localStorage per origin — never rewrite to another host.
+ */
 export function getAuthSiteOrigin(): string {
   if (typeof window !== "undefined") {
-    const { hostname, origin } = window.location;
-    if (CANONICAL_HOSTS.has(hostname)) {
-      return PRODUCTION_SITE_ORIGIN;
-    }
-    if (LEGACY_HOSTS.has(hostname)) {
-      return "https://tambua-africa.com";
-    }
-    return origin.replace(/\/$/, "");
+    return window.location.origin.replace(/\/$/, "");
   }
 
   const fromEnv = import.meta.env.VITE_SITE_URL?.trim().replace(/\/$/, "");
@@ -24,10 +17,6 @@ export function getAuthSiteOrigin(): string {
 
   if (import.meta.env.PROD) {
     return PRODUCTION_SITE_ORIGIN;
-  }
-
-  if (typeof window !== "undefined") {
-    return window.location.origin.replace(/\/$/, "");
   }
 
   return PRODUCTION_SITE_ORIGIN;
@@ -42,25 +31,25 @@ export function getDashboardUrl(): string {
   return `${getAuthSiteOrigin()}/dashboard`;
 }
 
-/** OAuth return URL (Google, etc.) — must be in Supabase redirect allow list. */
+/** OAuth return URL — must be same origin as the page where Google sign in started. */
 export function getOAuthCallbackUrl(): string {
   return `${getAuthSiteOrigin()}/auth/callback`;
 }
 
 const AUTH_REDIRECT_STORAGE_KEY = "tambua_auth_redirect";
 
-/** Remember post-login path before redirecting to Google. */
+/** Remember post-login path before redirecting to Google (localStorage survives OAuth redirect). */
 export function stashAuthRedirect(path: string): void {
-  if (typeof sessionStorage === "undefined") return;
+  if (typeof localStorage === "undefined") return;
   const safe =
     path.startsWith("/") && !path.startsWith("//") ? path : "/dashboard";
-  sessionStorage.setItem(AUTH_REDIRECT_STORAGE_KEY, safe);
+  localStorage.setItem(AUTH_REDIRECT_STORAGE_KEY, safe);
 }
 
 export function consumeAuthRedirect(): string {
-  if (typeof sessionStorage === "undefined") return "/dashboard";
-  const path = sessionStorage.getItem(AUTH_REDIRECT_STORAGE_KEY);
-  sessionStorage.removeItem(AUTH_REDIRECT_STORAGE_KEY);
+  if (typeof localStorage === "undefined") return "/dashboard";
+  const path = localStorage.getItem(AUTH_REDIRECT_STORAGE_KEY);
+  localStorage.removeItem(AUTH_REDIRECT_STORAGE_KEY);
   if (path && path.startsWith("/") && !path.startsWith("//")) return path;
   return "/dashboard";
 }

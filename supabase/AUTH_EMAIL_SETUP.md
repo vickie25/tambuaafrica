@@ -5,7 +5,7 @@ All auth emails (signup confirm, password reset) are sent by **Tambua Africa Tou
 ## Security settings (Supabase Dashboard)
 
 1. **Authentication → Providers → Email**
-   - **Confirm email:** OFF (current app setting: instant signup, no confirmation mail)
+   - **Confirm email:** OFF recommended (instant signup). If it stays ON, migration `20250524120000_auto_confirm_email.sql` auto-confirms new users in the database.
    - **Secure email change:** ON (recommended)
 
 2. **Authentication → Hooks → Send Email**

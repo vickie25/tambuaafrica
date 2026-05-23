@@ -181,7 +181,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email,
         password,
       });
-      if (signInError) throw signInError;
+      if (signInError) {
+        if (/not confirmed|email not confirmed/i.test(signInError.message)) {
+          throw new Error(
+            "Your account was created but is waiting for activation. Wait a moment and try Sign in, or contact info@tambuaafrica.com.",
+          );
+        }
+        throw signInError;
+      }
       session = signInData.session;
     }
 

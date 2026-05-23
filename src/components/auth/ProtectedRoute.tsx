@@ -16,8 +16,11 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <SuspenseFallback />;
   }
 
-  // If user is not authenticated, redirect to login
   if (!user) {
+    const fromSignup = Boolean((location.state as { fromSignup?: boolean } | null)?.fromSignup);
+    if (fromSignup) {
+      return <SuspenseFallback />;
+    }
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

@@ -169,15 +169,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
     if (error) throw error;
 
-    if (data.session) {
-      setSession(data.session);
-      setUser(data.session.user);
-      if (data.session.user) {
-        fetchRole(data.session.user.id).catch(() => undefined);
+    let session = data.session ?? null;
+
+    // When confirm-email is off, Supabase may return a user without a session — sign in immediately.
+    if (!session) {
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (!signInError && signInData.session) {
+        session = signInData.session;
       }
     }
 
-    return { needsEmailConfirmation: !data.session };
+    if (!session) {
+      const { data: sessionData } = await supabase.auth.getSession();
+      session = sessionData.session ?? null;
+    }
+
+    if (session) {
+      setSession(session);
+      setUser(session.user);
+      if (session.user) {
+        fetchRole(session.user.id).catch(() => undefined);
+      }
+      return { needsEmailConfirmation: false };
+    }
+
+    return { needsEmailConfirmation: Boolean(data.user) };
   };
 
   const signIn = async (email: string, password: string) => {

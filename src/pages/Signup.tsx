@@ -37,7 +37,7 @@ const Signup = () => {
         return;
       }
       toast.success("Welcome to Tambua Africa!");
-      navigate("/dashboard", { replace: true });
+      navigate("/dashboard", { replace: true, state: { fromSignup: true } });
     } catch (err) {
       toast.error(formatAuthError(err));
     } finally {

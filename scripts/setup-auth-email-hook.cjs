@@ -127,12 +127,12 @@ Auth URL allow list (Authentication → URL Configuration):
   - https://tambuaafrica.com/auth/confirm
 
 Supabase Dashboard (required for security):
-  1. Authentication → Providers → Email → turn ON "Confirm email"
-  2. Authentication → Email Templates → leave enabled; the hook sends mail (not Supabase SMTP)
-  3. Rate limits: Authentication → Rate Limits — raise email limits on Pro if many signups
+  1. Authentication → Providers → Email → turn OFF "Confirm email" (instant signup)
+  2. Password reset still uses the hook when AUTH_SKIP_EMAIL_HOOK=false
+  3. Rate limits: Authentication → Rate Limits — raise email limits on Pro if needed
 
-AUTH_SKIP_EMAIL_HOOK=false by default (emails sent via Resend / Tambua Africa branding).
-Set AUTH_SKIP_EMAIL_HOOK=true only for local testing without email.
+AUTH_SKIP_EMAIL_HOOK=true by default (no signup confirmation emails).
+Set AUTH_SKIP_EMAIL_HOOK=false when you re-enable confirm email and Resend domain is verified.
 
 Resend: verify tambuaafrica.com domain to send from info@tambuaafrica.com; until then use onboarding@resend.dev
 `);

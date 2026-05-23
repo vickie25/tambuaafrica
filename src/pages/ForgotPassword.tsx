@@ -23,7 +23,7 @@ const ForgotPassword = () => {
       await resetPassword(email);
       setSent(true);
       toast.success(
-        "If that email is registered, Tambua Africa Tours & Safaris sent a reset link — check inbox and spam."
+        "If that email is registered, Tambua Africa Tours & Safaris sent a reset link. Check your inbox and spam folder."
       );
     } catch (err) {
       toast.error(formatAuthError(err));

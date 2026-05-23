@@ -150,7 +150,7 @@ const Navbar = () => {
                 size="sm"
                 className="h-8 shrink-0 px-2 text-xs text-white hover:bg-white/10 sm:text-sm"
               >
-                <Link to="/login?redirect=/admin">Sign in</Link>
+                <Link to="/login">Sign in</Link>
               </Button>
             )}
           </div>

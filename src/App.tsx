@@ -34,6 +34,7 @@ const Signup = lazy(() => import("./pages/Signup").then(m => ({ default: m.defau
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword").then(m => ({ default: m.default })));
 const ResetPassword = lazy(() => import("./pages/ResetPassword").then(m => ({ default: m.default })));
 const AuthConfirm = lazy(() => import("./pages/AuthConfirm").then(m => ({ default: m.default })));
+const AuthCallback = lazy(() => import("./pages/AuthCallback").then(m => ({ default: m.default })));
 const Dashboard = lazy(() => import("./pages/Dashboard").then(m => ({ default: m.default })));
 const Admin = lazy(() => import("./pages/Admin").then(m => ({ default: m.default })));
 const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess").then(m => ({ default: m.default })));
@@ -144,6 +145,7 @@ const AnimatedRoutes = () => {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/auth/confirm" element={<AuthConfirm />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/booking" element={<ProtectedRoute><Booking /></ProtectedRoute>} />
             
             {/* Security: Protected Routes */}

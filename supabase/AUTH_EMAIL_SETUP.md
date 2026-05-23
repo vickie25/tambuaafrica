@@ -19,7 +19,10 @@ All auth emails (signup confirm, password reset) are sent by **Tambua Africa Tou
 |-------|--------|
 | Site URL | `https://tambuaafrica.com` or `https://tambua-africa.com` |
 | Redirect URLs | `https://tambuaafrica.com/**`, `https://tambua-africa.com/**` |
-| | `https://tambuaafrica.com/auth/confirm`, `https://tambuaafrica.com/reset-password` |
+| | `https://tambuaafrica.com/auth/confirm`, `https://tambuaafrica.com/auth/callback`, `https://tambuaafrica.com/reset-password` |
+| | Same paths on `tambua-africa.com` and `http://localhost:8080` for local dev |
+
+**Google sign-in:** see [GOOGLE_AUTH_SETUP.md](./GOOGLE_AUTH_SETUP.md).
 
 4. **Authentication → Rate Limits** (many users signing up at once)
    - On **Pro**, raise **email sent** limits per hour

@@ -41,3 +41,26 @@ export function getEmailConfirmRedirectUrl(): string {
 export function getDashboardUrl(): string {
   return `${getAuthSiteOrigin()}/dashboard`;
 }
+
+/** OAuth return URL (Google, etc.) — must be in Supabase redirect allow list. */
+export function getOAuthCallbackUrl(): string {
+  return `${getAuthSiteOrigin()}/auth/callback`;
+}
+
+const AUTH_REDIRECT_STORAGE_KEY = "tambua_auth_redirect";
+
+/** Remember post-login path before redirecting to Google. */
+export function stashAuthRedirect(path: string): void {
+  if (typeof sessionStorage === "undefined") return;
+  const safe =
+    path.startsWith("/") && !path.startsWith("//") ? path : "/dashboard";
+  sessionStorage.setItem(AUTH_REDIRECT_STORAGE_KEY, safe);
+}
+
+export function consumeAuthRedirect(): string {
+  if (typeof sessionStorage === "undefined") return "/dashboard";
+  const path = sessionStorage.getItem(AUTH_REDIRECT_STORAGE_KEY);
+  sessionStorage.removeItem(AUTH_REDIRECT_STORAGE_KEY);
+  if (path && path.startsWith("/") && !path.startsWith("//")) return path;
+  return "/dashboard";
+}

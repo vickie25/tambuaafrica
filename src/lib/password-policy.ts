@@ -12,7 +12,7 @@ export const PASSWORD_RULES: Rule[] = [
   { id: "lower", label: "One lowercase letter", test: (p) => /[a-z]/.test(p) },
   { id: "upper", label: "One uppercase letter", test: (p) => /[A-Z]/.test(p) },
   { id: "number", label: "One number", test: (p) => /[0-9]/.test(p) },
-  { id: "symbol", label: "One symbol (!@#$…)", test: (p) => /[^A-Za-z0-9]/.test(p) },
+  { id: "symbol", label: "One symbol (e.g. ! or @)", test: (p) => /[^A-Za-z0-9]/.test(p) },
 ];
 
 export function validatePassword(password: string): { valid: boolean; message: string } {

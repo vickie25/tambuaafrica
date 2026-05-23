@@ -19,6 +19,10 @@ export function formatAuthError(error: unknown): string {
     return "Incorrect email or password.";
   }
 
+  if (/provider is not enabled|unsupported provider|oauth/i.test(message)) {
+    return "Google sign in is not enabled yet. Ask the site admin to enable Google under Supabase Authentication Providers.";
+  }
+
   if (/hook requires authorization/i.test(message)) {
     return "Email service configuration issue. Try again shortly or contact support.";
   }

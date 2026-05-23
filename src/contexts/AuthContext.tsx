@@ -3,7 +3,12 @@ import { useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { hasSupabaseEnv, supabase } from "@/integrations/supabase/client";
 import { isAdminMailbox } from "@/lib/admin-email";
-import { getAuthSiteOrigin, getEmailConfirmRedirectUrl } from "@/lib/auth-redirect";
+import {
+  getAuthSiteOrigin,
+  getEmailConfirmRedirectUrl,
+  getOAuthCallbackUrl,
+  stashAuthRedirect,
+} from "@/lib/auth-redirect";
 import { formatAuthError } from "@/lib/auth-errors";
 import { validatePassword } from "@/lib/password-policy";
 import { isLiveDataPath } from "@/lib/site-snapshot";
@@ -19,6 +24,7 @@ interface AuthContextType {
     fullName: string,
   ) => Promise<{ needsEmailConfirmation: boolean }>;
   signIn: (email: string, password: string) => Promise<void>;
+  signInWithGoogle: (redirectPath?: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   updatePassword: (password: string) => Promise<void>;
@@ -219,6 +225,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     console.log("Sign in successful");
   };
 
+  const signInWithGoogle = async (redirectPath = "/dashboard") => {
+    if (!hasSupabaseEnv) {
+      throw new Error(
+        "Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY to a saved .env file in the project root (use your Supabase anon public key from Dashboard → API), then restart the dev server. On Vercel, set the same variables in Project Settings → Environment Variables."
+      );
+    }
+    stashAuthRedirect(redirectPath);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: getOAuthCallbackUrl(),
+        queryParams: {
+          access_type: "offline",
+          prompt: "select_account",
+        },
+      },
+    });
+    if (error) throw error;
+  };
+
   const signOut = async () => {
     if (!hasSupabaseEnv) {
       return;
@@ -257,7 +283,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider value={{ 
-      user, session, loading, signUp, signIn, signOut, resetPassword, updatePassword, 
+      user, session, loading, signUp, signIn, signInWithGoogle, signOut, resetPassword, updatePassword, 
       role, isAdmin
     }}>
       {children}

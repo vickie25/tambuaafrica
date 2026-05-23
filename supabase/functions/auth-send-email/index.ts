@@ -201,27 +201,65 @@ const buildHtml = (payload: HookPayload, confirmUrl: string) => {
 </html>`;
 };
 
+const getNotifyInbox = () =>
+  Deno.env.get("AUTH_NOTIFY_EMAIL")?.trim() ||
+  Deno.env.get("COMPANY_EMAIL")?.trim() ||
+  "tambuaafrica@gmail.com";
+
 async function sendWithResend(payload: HookPayload) {
   const resend = new Resend(resendApiKey());
   const confirmUrl = buildVerifyUrl(payload);
   const replyTo = Deno.env.get("AUTH_REPLY_TO")?.trim() || "info@tambuaafrica.com";
   let from = getFromAddress();
+  const userEmail = payload.user.email;
 
-  const attempt = (fromAddress: string) =>
+  const attempt = (fromAddress: string, to: string[]) =>
     resend.emails.send({
       from: fromAddress,
-      to: [payload.user.email],
+      to,
       subject: subjectFor(payload.email_data.email_action_type),
       html: buildHtml(payload, confirmUrl),
       replyTo,
     });
 
-  let result = await attempt(from);
+  let result = await attempt(from, [userEmail]);
 
   if (result.error && from !== RESEND_TEST_FROM && isResendDomainError(result.error.message || "")) {
     console.warn("Resend sender rejected, retrying with onboarding@resend.dev:", result.error.message);
     from = RESEND_TEST_FROM;
-    result = await attempt(from);
+    result = await attempt(from, [userEmail]);
+  }
+
+  if (result.error && isResendDeliveryRestriction(result.error.message || "")) {
+    const notify = getNotifyInbox();
+    console.warn(
+      `Resend sandbox: cannot send to ${userEmail}. Sending link to ${notify} until domain is verified.`,
+    );
+    const action = payload.email_data.email_action_type;
+    const notifyHtml = `<!DOCTYPE html><html><body style="font-family:sans-serif;">
+      <p><strong>Resend test mode:</strong> confirmation for <code>${escapeHtml(userEmail)}</code> could not be delivered directly.</p>
+      <p>Verify <strong>tambuaafrica.com</strong> at <a href="https://resend.com/domains">resend.com/domains</a> so customers receive mail automatically.</p>
+      <p>Until then, forward this link to the customer:</p>
+      <p><a href="${confirmUrl}">${confirmUrl}</a></p>
+      <p style="color:#78716c;font-size:12px;">Action: ${escapeHtml(action)}</p>
+    </body></html>`;
+    const fallback = await resend.emails.send({
+      from: RESEND_TEST_FROM,
+      to: [notify],
+      subject: `[Tambua Africa] Confirm link for ${userEmail}`,
+      html: notifyHtml,
+      replyTo,
+    });
+    if (fallback.error) {
+      console.error("Fallback notify email failed:", fallback.error.message);
+      return result;
+    }
+    console.log("Fallback notify email sent:", fallback.data?.id);
+    return { data: fallback.data, error: null };
+  }
+
+  if (result.data?.id) {
+    console.log(`Auth email sent to ${userEmail}:`, result.data.id);
   }
 
   return result;
@@ -256,18 +294,9 @@ Deno.serve(async (req) => {
     if (error) {
       const msg = error.message || JSON.stringify(error);
       console.error("Resend error:", msg);
-
-      if (isResendDeliveryRestriction(msg) || isResendDomainError(msg)) {
-        console.warn(
-          "Allowing auth to continue without email (verify tambuaafrica.com on Resend for production delivery):",
-          msg,
-        );
-        return ok();
-      }
-
       return fail(
         500,
-        `Resend failed: ${msg}. Use AUTH_FROM_EMAIL with onboarding@resend.dev until your domain is verified.`,
+        `Resend failed: ${msg}. Verify tambuaafrica.com at resend.com/domains or check AUTH_NOTIFY_EMAIL.`,
       );
     }
   } catch (err) {

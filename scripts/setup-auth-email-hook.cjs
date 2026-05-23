@@ -78,20 +78,22 @@ into .env, then re-run this script so edge secrets stay in sync.
   }
 
   const secrets = [`RESEND_API_KEY=${resendKey}`];
-  if (hookSecret) secrets.push(`SEND_EMAIL_HOOK_SECRET=${hookSecret}`);
+  if (hookSecret) secrets.push(`SEND_EMAIL_HOOK_SECRET=${JSON.stringify(hookSecret)}`);
 
   const from =
     readEnvFromFile("AUTH_FROM_EMAIL") ||
     "Tambua Africa Tours & Safaris <onboarding@resend.dev>";
   const replyTo = readEnvFromFile("AUTH_REPLY_TO") || "info@tambuaafrica.com";
+  const notifyEmail = readEnvFromFile("AUTH_NOTIFY_EMAIL") || readEnvFromFile("COMPANY_EMAIL") || "tambuaafrica@gmail.com";
   const siteUrl =
     readEnvFromFile("AUTH_SITE_URL") ||
     readEnvFromFile("VITE_SITE_URL") ||
     "https://tambua-africa.com";
   const skipHook = (readEnvFromFile("AUTH_SKIP_EMAIL_HOOK") || "false").toLowerCase();
 
-  secrets.push(`AUTH_FROM_EMAIL=${from}`);
+  secrets.push(`AUTH_FROM_EMAIL=${JSON.stringify(from)}`);
   secrets.push(`AUTH_REPLY_TO=${replyTo}`);
+  secrets.push(`AUTH_NOTIFY_EMAIL=${notifyEmail}`);
   secrets.push(`AUTH_SITE_URL=${siteUrl}`);
   secrets.push(`AUTH_SKIP_EMAIL_HOOK=${skipHook}`);
 

@@ -35,7 +35,8 @@ const Signup = () => {
       const { needsEmailConfirmation } = await signUp(email, password, fullName);
       if (needsEmailConfirmation) {
         toast.success(
-          "Account created! Check your inbox for an email from Tambua Africa Tours & Safaris (also check spam), then sign in."
+          "Account created! Check your inbox and spam for a confirmation email from Tambua Africa Tours & Safaris, then sign in.",
+          { duration: 8000 },
         );
         navigate("/login", { replace: true });
         return;

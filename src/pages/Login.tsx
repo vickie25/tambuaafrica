@@ -14,7 +14,7 @@ import GuestOnlyRoute from "@/components/auth/GuestOnlyRoute";
 import AuthGoogleSection from "@/components/auth/AuthGoogleSection";
 
 const Login = () => {
-  const { signIn } = useAuth();
+  const { signIn, resendConfirmationEmail } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -29,6 +29,8 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [showResendConfirm, setShowResendConfirm] = useState(false);
 
   useEffect(() => {
     if (isAdminLogin && !email) {
@@ -45,7 +47,11 @@ const Login = () => {
       navigate(redirectTarget, { replace: true });
     } catch (err) {
       console.error("Login failed:", err);
-      toast.error(formatAuthError(err));
+      const msg = formatAuthError(err);
+      toast.error(msg);
+      if (/confirm your email|not confirmed/i.test(msg)) {
+        setShowResendConfirm(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -110,11 +116,35 @@ const Login = () => {
                   </div>
                 </div>
 
-                <div className="text-right">
-                  <Link to="/forgot-password" className="text-sm text-accent hover:underline">
-                    Forgot password?
-                  </Link>
-                </div>
+              <div className="flex items-center justify-between gap-2">
+                {showResendConfirm ? (
+                  <button
+                    type="button"
+                    disabled={resendLoading || !email}
+                    onClick={async () => {
+                      setResendLoading(true);
+                      try {
+                        await resendConfirmationEmail(email);
+                        toast.success(
+                          "Confirmation email sent. Check inbox and spam, or contact info@tambuaafrica.com if it does not arrive.",
+                        );
+                      } catch (err) {
+                        toast.error(formatAuthError(err));
+                      } finally {
+                        setResendLoading(false);
+                      }
+                    }}
+                    className="text-sm text-accent hover:underline disabled:opacity-50"
+                  >
+                    {resendLoading ? "Sending…" : "Resend confirmation email"}
+                  </button>
+                ) : (
+                  <span />
+                )}
+                <Link to="/forgot-password" className="text-sm text-accent hover:underline shrink-0">
+                  Forgot password?
+                </Link>
+              </div>
 
                 <Button
                   type="submit"

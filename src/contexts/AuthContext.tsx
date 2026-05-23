@@ -27,6 +27,7 @@ interface AuthContextType {
   signInWithGoogle: (redirectPath?: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  resendConfirmationEmail: (email: string) => Promise<void>;
   updatePassword: (password: string) => Promise<void>;
   role: string | null;
   isAdmin: boolean;
@@ -257,6 +258,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (error) throw error;
   };
 
+  const resendConfirmationEmail = async (email: string) => {
+    if (!hasSupabaseEnv) {
+      throw new Error(
+        "Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY to a saved .env file in the project root (use your Supabase anon public key from Dashboard → API), then restart the dev server. On Vercel, set the same variables in Project Settings → Environment Variables."
+      );
+    }
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: getEmailConfirmRedirectUrl() },
+    });
+    if (error) throw error;
+  };
+
   const updatePassword = async (password: string) => {
     if (!hasSupabaseEnv) {
       throw new Error(
@@ -275,7 +290,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider value={{ 
-      user, session, loading, signUp, signIn, signInWithGoogle, signOut, resetPassword, updatePassword, 
+      user, session, loading, signUp, signIn, signInWithGoogle, signOut, resetPassword, resendConfirmationEmail, updatePassword, 
       role, isAdmin
     }}>
       {children}

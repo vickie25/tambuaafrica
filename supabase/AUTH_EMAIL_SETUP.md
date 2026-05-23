@@ -61,10 +61,17 @@ npm run setup:auth-email
 
 Password rules in the app: 8+ chars, upper, lower, number, symbol.
 
+## No confirmation email?
+
+**Most common cause:** Resend test mode only delivers to your Resend signup email until **tambuaafrica.com** is verified. See [RESEND_DOMAIN_SETUP.md](./RESEND_DOMAIN_SETUP.md).
+
+Until the domain is verified, check **tambuaafrica@gmail.com** for `[Tambua Africa] Confirm link for user@…` and forward the link.
+
 ## Troubleshooting
 
 | Problem | Fix |
 |---------|-----|
+| **No confirmation email** to customers | Verify domain on Resend; see RESEND_DOMAIN_SETUP.md |
 | Forgot password “sent” but **no email** | Set `AUTH_SKIP_EMAIL_HOOK=false`, run `npm run setup:auth-email`. Check Resend → Logs and Supabase → Edge Functions → auth-send-email → Logs. |
 | Email in spam | Normal until domain is verified in Resend; use branded sender after verify |
 | Resend only delivers to your address | **Sandbox:** verify domain at resend.com/domains, or add recipient in Resend for testing |

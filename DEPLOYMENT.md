@@ -25,11 +25,15 @@ Do **not** add `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, or `SEND_EMAIL_HOO
 
 ## 3. Custom domain
 
-1. Vercel → **Domains** → add `tambuaafrica.com` and `www.tambuaafrica.com`
-2. DNS at your registrar → point **both** apex and `www` to Vercel (A/CNAME as shown in Vercel)
-3. `vercel.json` redirects `www` → apex automatically
+1. Vercel → **Domains** → add **all** of these to the **same** project:
+   - `tambuaafrica.com`, `www.tambuaafrica.com`
+   - `tambua-africa.com`, `www.tambua-africa.com` (legacy; keep until DNS migration is done)
+2. DNS at your registrar → point each hostname to Vercel (A/CNAME as shown)
+3. `vercel.json` redirects `www` → non-`www` on each domain. **`tambua-africa.com` is not redirected to `tambuaafrica.com`** so `/images/...` keep working on the legacy hostname.
 
-If `https://tambuaafrica.com` returns **404** but a `*.vercel.app` preview URL works, the apex domain is not linked to this project yet — finish DNS in Vercel → Domains.
+**Why images broke on `tambua-africa.com`:** A previous rule redirected every path (including `/images/...`) to `tambuaafrica.com`, where the apex host was not serving files yet → 404 for activity photos. The preview `*.vercel.app` URL had no such redirect, so images worked there.
+
+If `https://tambuaafrica.com` still returns **404**, finish apex DNS in Vercel → Domains; use `https://tambua-africa.com` until then.
 
 ## 4. Supabase (required for auth & data)
 
@@ -38,7 +42,7 @@ In **Supabase Dashboard → Authentication → URL Configuration**:
 | Setting | Value |
 |---------|--------|
 | **Site URL** | `https://tambuaafrica.com` (not `tambua-africa.com`) |
-| **Redirect URLs** | `https://tambuaafrica.com/auth/confirm`, `https://tambuaafrica.com/**` |
+| **Redirect URLs** | `https://tambuaafrica.com/auth/confirm`, `https://tambuaafrica.com/**`, `https://tambua-africa.com/auth/confirm`, `https://tambua-africa.com/**` |
 
 If signup shows `redirect_to=...tambua-africa.com` or returns **500**, the Site URL is still wrong or the **Send Email** hook failed — see `supabase/AUTH_EMAIL_SETUP.md` and re-run `npm run setup:auth-email`.
 

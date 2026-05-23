@@ -1,31 +1,25 @@
 /** Live site used for email confirmation links (must match Supabase redirect allow list). */
 export const PRODUCTION_SITE_ORIGIN = "https://tambuaafrica.com";
 
-const PRODUCTION_HOSTS = new Set(["tambuaafrica.com", "www.tambuaafrica.com"]);
-
-function isLegacyAuthHost(hostname: string): boolean {
-  return hostname === "tambua-africa.com" || hostname === "www.tambua-africa.com";
-}
+const CANONICAL_HOSTS = new Set(["tambuaafrica.com", "www.tambuaafrica.com"]);
+const LEGACY_HOSTS = new Set(["tambua-africa.com", "www.tambua-africa.com"]);
 
 /** Public site origin for auth redirects (must match Supabase Auth URL allow list). */
 export function getAuthSiteOrigin(): string {
   if (typeof window !== "undefined") {
     const { hostname, origin } = window.location;
-    if (PRODUCTION_HOSTS.has(hostname)) {
+    if (CANONICAL_HOSTS.has(hostname)) {
       return PRODUCTION_SITE_ORIGIN;
     }
-    if (!isLegacyAuthHost(hostname)) {
-      return origin.replace(/\/$/, "");
+    if (LEGACY_HOSTS.has(hostname)) {
+      return "https://tambua-africa.com";
     }
+    return origin.replace(/\/$/, "");
   }
 
   const fromEnv = import.meta.env.VITE_SITE_URL?.trim().replace(/\/$/, "");
   if (fromEnv) {
-    try {
-      if (!isLegacyAuthHost(new URL(fromEnv).hostname)) return fromEnv;
-    } catch {
-      if (!fromEnv.includes("tambua-africa.com")) return fromEnv;
-    }
+    return fromEnv;
   }
 
   if (import.meta.env.PROD) {

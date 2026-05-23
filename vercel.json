@@ -14,13 +14,7 @@
     {
       "source": "/:path*",
       "has": [{ "type": "host", "value": "www.tambua-africa.com" }],
-      "destination": "https://tambuaafrica.com/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/:path*",
-      "has": [{ "type": "host", "value": "tambua-africa.com" }],
-      "destination": "https://tambuaafrica.com/:path*",
+      "destination": "https://tambua-africa.com/:path*",
       "permanent": true
     }
   ],

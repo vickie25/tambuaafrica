@@ -89,7 +89,7 @@ into .env, then re-run this script so edge secrets stay in sync.
     readEnvFromFile("AUTH_SITE_URL") ||
     readEnvFromFile("VITE_SITE_URL") ||
     "https://tambua-africa.com";
-  const skipHook = (readEnvFromFile("AUTH_SKIP_EMAIL_HOOK") || "false").toLowerCase();
+  const skipHook = (readEnvFromFile("AUTH_SKIP_EMAIL_HOOK") || "true").toLowerCase();
 
   secrets.push(`AUTH_FROM_EMAIL=${JSON.stringify(from)}`);
   secrets.push(`AUTH_REPLY_TO=${replyTo}`);

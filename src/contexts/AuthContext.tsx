@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { hasSupabaseEnv, supabase } from "@/integrations/supabase/client";
 import { isAdminMailbox } from "@/lib/admin-email";
+import { EMAIL_CONFIRMATION_REQUIRED } from "@/lib/auth-config";
 import {
   getAuthSiteOrigin,
   getEmailConfirmRedirectUrl,
@@ -18,16 +19,11 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (
-    email: string,
-    password: string,
-    fullName: string,
-  ) => Promise<{ needsEmailConfirmation: boolean }>;
+  signUp: (email: string, password: string, fullName: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signInWithGoogle: (redirectPath?: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
-  resendConfirmationEmail: (email: string) => Promise<void>;
   updatePassword: (password: string) => Promise<void>;
   role: string | null;
   isAdmin: boolean;
@@ -171,39 +167,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       password,
       options: {
         data: { full_name: fullName },
-        emailRedirectTo: getEmailConfirmRedirectUrl(),
+        ...(EMAIL_CONFIRMATION_REQUIRED
+          ? { emailRedirectTo: getEmailConfirmRedirectUrl() }
+          : {}),
       },
     });
     if (error) throw error;
 
     let session = data.session ?? null;
 
-    // Confirm email OFF: Supabase may return user without session — sign in once.
     if (!session && data.user) {
       const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      if (!signInError && signInData.session) {
-        session = signInData.session;
-      } else if (
-        signInError &&
-        /not confirmed|email not confirmed/i.test(signInError.message)
-      ) {
-        return { needsEmailConfirmation: true };
-      }
+      if (signInError) throw signInError;
+      session = signInData.session;
     }
 
-    if (session) {
-      setSession(session);
-      setUser(session.user);
-      if (session.user) {
-        fetchRole(session.user.id).catch(() => undefined);
-      }
-      return { needsEmailConfirmation: false };
+    if (!session) {
+      throw new Error("Account was created but sign in failed. Try signing in from the login page.");
     }
 
-    return { needsEmailConfirmation: Boolean(data.user) };
+    setSession(session);
+    setUser(session.user);
+    if (session.user) {
+      fetchRole(session.user.id).catch(() => undefined);
+    }
   };
 
   const signIn = async (email: string, password: string) => {
@@ -258,20 +248,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (error) throw error;
   };
 
-  const resendConfirmationEmail = async (email: string) => {
-    if (!hasSupabaseEnv) {
-      throw new Error(
-        "Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY to a saved .env file in the project root (use your Supabase anon public key from Dashboard → API), then restart the dev server. On Vercel, set the same variables in Project Settings → Environment Variables."
-      );
-    }
-    const { error } = await supabase.auth.resend({
-      type: "signup",
-      email,
-      options: { emailRedirectTo: getEmailConfirmRedirectUrl() },
-    });
-    if (error) throw error;
-  };
-
   const updatePassword = async (password: string) => {
     if (!hasSupabaseEnv) {
       throw new Error(
@@ -290,7 +266,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider value={{ 
-      user, session, loading, signUp, signIn, signInWithGoogle, signOut, resetPassword, resendConfirmationEmail, updatePassword, 
+      user, session, loading, signUp, signIn, signInWithGoogle, signOut, resetPassword, updatePassword, 
       role, isAdmin
     }}>
       {children}

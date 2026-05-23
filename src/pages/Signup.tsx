@@ -32,15 +32,7 @@ const Signup = () => {
     }
     setLoading(true);
     try {
-      const { needsEmailConfirmation } = await signUp(email, password, fullName);
-      if (needsEmailConfirmation) {
-        toast.success(
-          "Account created! Check your inbox and spam for a confirmation email from Tambua Africa Tours & Safaris, then sign in.",
-          { duration: 8000 },
-        );
-        navigate("/login", { replace: true });
-        return;
-      }
+      await signUp(email, password, fullName);
       toast.success("Welcome to Tambua Africa!");
       navigate("/dashboard", { replace: true, state: { fromSignup: true } });
     } catch (err) {
@@ -60,7 +52,7 @@ const Signup = () => {
               <div className="text-center mb-6">
                 <h1 className="text-2xl font-bold text-foreground">Create account</h1>
                 <p className="text-muted-foreground mt-2">
-                  Join Tambua Africa. You will confirm your email before signing in.
+                  Join Tambua Africa and go straight to your dashboard.
                 </p>
               </div>
 

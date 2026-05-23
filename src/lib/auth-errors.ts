@@ -12,7 +12,7 @@ export function formatAuthError(error: unknown): string {
   }
 
   if (/email not confirmed|not confirmed/i.test(message)) {
-    return "Please confirm your email first (check your inbox), or ask an admin to confirm your account.";
+    return "This account is not active yet. Try signing up again, use Google sign in, or contact info@tambuaafrica.com for help.";
   }
 
   if (/invalid login credentials|invalid credentials/i.test(message)) {

@@ -10,6 +10,7 @@ import Footer from "@/components/layout/Footer";
 import PageTransition from "@/components/layout/PageTransition";
 import { ADMIN_LOGIN_EMAIL } from "@/lib/admin-email";
 import { formatAuthError } from "@/lib/auth-errors";
+import GuestOnlyRoute from "@/components/auth/GuestOnlyRoute";
 
 const Login = () => {
   const { signIn } = useAuth();
@@ -53,6 +54,7 @@ const Login = () => {
   };
 
   return (
+    <GuestOnlyRoute redirectTo={redirectTarget}>
     <PageTransition>
       <Navbar />
       <div className="min-h-screen bg-background flex items-center justify-center px-4 pt-24 pb-12">
@@ -115,6 +117,7 @@ const Login = () => {
       </div>
       <Footer />
     </PageTransition>
+    </GuestOnlyRoute>
   );
 };
 

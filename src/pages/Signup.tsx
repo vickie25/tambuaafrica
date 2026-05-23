@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import GuestOnlyRoute from "@/components/auth/GuestOnlyRoute";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +12,7 @@ import PageTransition from "@/components/layout/PageTransition";
 import { formatAuthError } from "@/lib/auth-errors";
 
 const Signup = () => {
+  const navigate = useNavigate();
   const { signUp } = useAuth();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -26,10 +28,16 @@ const Signup = () => {
     }
     setLoading(true);
     try {
-      await signUp(email, password, fullName);
-      toast.success(
-        "Account created! Check your inbox for a confirmation email from Tambua Africa — the link will sign you in and open your dashboard."
-      );
+      const { needsEmailConfirmation } = await signUp(email, password, fullName);
+      if (needsEmailConfirmation) {
+        toast.success(
+          "Account created! Check your inbox for a confirmation link, then sign in to open your dashboard."
+        );
+        navigate("/login", { replace: true });
+        return;
+      }
+      toast.success("Welcome to Tambua Africa!");
+      navigate("/dashboard", { replace: true });
     } catch (err) {
       toast.error(formatAuthError(err));
     } finally {
@@ -38,6 +46,7 @@ const Signup = () => {
   };
 
   return (
+    <GuestOnlyRoute redirectTo="/dashboard">
     <PageTransition>
       <Navbar />
       <div className="min-h-screen bg-background flex items-center justify-center px-4 pt-24 pb-12">
@@ -83,6 +92,7 @@ const Signup = () => {
       </div>
       <Footer />
     </PageTransition>
+    </GuestOnlyRoute>
   );
 };
 

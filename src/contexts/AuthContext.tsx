@@ -12,7 +12,11 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string) => Promise<void>;
+  signUp: (
+    email: string,
+    password: string,
+    fullName: string,
+  ) => Promise<{ needsEmailConfirmation: boolean }>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
@@ -155,15 +159,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         "Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY to a saved .env file in the project root (use your Supabase anon public key from Dashboard → API), then restart the dev server. On Vercel, set the same variables in Project Settings → Environment Variables."
       );
     }
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { 
+      options: {
         data: { full_name: fullName },
         emailRedirectTo: getEmailConfirmRedirectUrl(),
       },
     });
     if (error) throw error;
+
+    if (data.session) {
+      setSession(data.session);
+      setUser(data.session.user);
+      if (data.session.user) {
+        fetchRole(data.session.user.id).catch(() => undefined);
+      }
+    }
+
+    return { needsEmailConfirmation: !data.session };
   };
 
   const signIn = async (email: string, password: string) => {

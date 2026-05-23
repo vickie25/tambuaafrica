@@ -50,7 +50,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchRole = async (userId: string) => {
     try {
-      console.log("Fetching role for user:", userId);
       const { data, error } = await supabase
         .from("profiles")
         .select("role")
@@ -63,7 +62,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       if (data) {
-        console.log("Fetched role for user:", userId, "=>", data.role);
         setRole(data.role);
         return data.role;
       }
@@ -130,20 +128,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      console.log("Auth state change:", _event, session?.user?.id);
       try {
         if (mounted) {
           setSession(session);
           setUser(session?.user ?? null);
 
           if (session?.user) {
-            console.log("User logged in, fetching role...");
             // Fetch role in background, don't block loading
             fetchRole(session.user.id).catch(roleErr => {
               console.warn("Role fetch failed, proceeding with default permissions.");
             });
           } else {
-            console.log("User logged out");
             setRole(null);
           }
           setLoading(false);
@@ -216,13 +211,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         "Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY to a saved .env file in the project root (use your Supabase anon public key from Dashboard → API), then restart the dev server. On Vercel, set the same variables in Project Settings → Environment Variables."
       );
     }
-    console.log("Attempting sign in for:", email);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
-      console.error("Sign in error:", error);
       throw error;
     }
-    console.log("Sign in successful");
   };
 
   const signInWithGoogle = async (redirectPath = "/dashboard") => {

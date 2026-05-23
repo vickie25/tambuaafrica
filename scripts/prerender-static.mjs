@@ -39,12 +39,18 @@ function waitForServer(url, timeoutMs = 60_000) {
 }
 
 function startPreview() {
-  return new Promise((resolve) => {
-    const proc = spawn("npx", ["vite", "preview", "--host", "127.0.0.1", "--port", "4173"], {
-      cwd: root,
-      stdio: "pipe",
-      env: { ...process.env, NODE_ENV: "production" },
-    });
+  const viteBin = path.join(root, "node_modules", "vite", "bin", "vite.js");
+  return new Promise((resolve, reject) => {
+    const proc = spawn(
+      process.execPath,
+      [viteBin, "preview", "--host", "127.0.0.1", "--port", "4173"],
+      {
+        cwd: root,
+        stdio: "pipe",
+        env: { ...process.env, NODE_ENV: "production" },
+      },
+    );
+    proc.on("error", reject);
     resolve({ proc, baseUrl: "http://127.0.0.1:4173" });
   });
 }

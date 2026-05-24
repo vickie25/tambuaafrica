@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useDestinationLodges } from "@/hooks/useDestinationLodges";
 import { supabase } from "@/integrations/supabase/client";
-import { compressImage, uploadFileToSupabase } from "@/lib/image-utils";
+import { AdminLocalImageUpload } from "@/components/admin/AdminLocalImageUpload";
 import { destinationLodges as localDestinationLodges } from "@/data/destinations-lodges";
 
 type LodgeEditor = {
@@ -54,7 +54,6 @@ export const AdminLodges = () => {
   const [selectedDestination, setSelectedDestination] = useState<string>("tsavo");
   const [editing, setEditing] = useState<LodgeEditor | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [uploadMode, setUploadMode] = useState<"original" | "optimized">("original");
   const queryClient = useQueryClient();
 
@@ -161,24 +160,6 @@ export const AdminLodges = () => {
       toast.error(
         error instanceof Error ? error.message : "Failed to delete lodge. Check table and RLS (fix-destination-lodges-rls.sql)."
       );
-    }
-  };
-
-  const handleUploadCover = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !editing) return;
-    setUploading(true);
-    try {
-      const fileToUpload = uploadMode === "optimized" ? await compressImage(file) : file;
-      const url = await uploadFileToSupabase(fileToUpload);
-      setEditing((prev) => (prev ? { ...prev, image: url } : prev));
-      toast.success("Cover image uploaded");
-    } catch (error) {
-      console.error(error);
-      toast.error("Cover upload failed");
-    } finally {
-      setUploading(false);
-      e.target.value = "";
     }
   };
 
@@ -363,21 +344,20 @@ export const AdminLodges = () => {
               </div>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-sm font-medium">Cover Image URL</label>
-              <Input value={editing?.image || ""} onChange={(e) => setEditing((prev) => (prev ? { ...prev, image: e.target.value } : prev))} required />
-              <div className="grid grid-cols-2 gap-2">
-                <Select value={uploadMode} onValueChange={(v) => setUploadMode(v as "original" | "optimized")}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="original">Keep original quality</SelectItem>
-                    <SelectItem value="optimized">Optimize for speed</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Input type="file" accept="image/*" onChange={handleUploadCover} disabled={uploading} />
-              </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Cover image</label>
+              <AdminLocalImageUpload
+                buttonLabel="Upload cover from your computer"
+                uploadMode={uploadMode}
+                onUploadModeChange={setUploadMode}
+                onSingleUploaded={(url) => setEditing((prev) => (prev ? { ...prev, image: url } : prev))}
+              />
+              <Input
+                placeholder="Or paste cover image URL"
+                value={editing?.image || ""}
+                onChange={(e) => setEditing((prev) => (prev ? { ...prev, image: e.target.value } : prev))}
+                required
+              />
             </div>
 
             <div className="space-y-1">
@@ -392,8 +372,28 @@ export const AdminLodges = () => {
               <label className="text-sm font-medium">Highlights (one per line)</label>
               <Textarea rows={4} value={editing?.featuresText || ""} onChange={(e) => setEditing((prev) => (prev ? { ...prev, featuresText: e.target.value } : prev))} />
             </div>
-            <div className="space-y-1">
-              <label className="text-sm font-medium">Gallery Images (one URL per line)</label>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Gallery images (one URL per line)</label>
+              <AdminLocalImageUpload
+                multiple
+                buttonLabel="Upload gallery photos from your computer"
+                uploadMode={uploadMode}
+                onUploadModeChange={setUploadMode}
+                onBatchUploaded={(urls) => {
+                  setEditing((prev) => {
+                    if (!prev) return prev;
+                    const existing = prev.imagesText
+                      .split("\n")
+                      .map((x) => x.trim())
+                      .filter(Boolean);
+                    return {
+                      ...prev,
+                      image: prev.image || urls[0],
+                      imagesText: [...existing, ...urls].join("\n"),
+                    };
+                  });
+                }}
+              />
               <Textarea rows={4} value={editing?.imagesText || ""} onChange={(e) => setEditing((prev) => (prev ? { ...prev, imagesText: e.target.value } : prev))} />
             </div>
             <div className="space-y-1">
@@ -405,7 +405,7 @@ export const AdminLodges = () => {
               <Button type="button" variant="outline" onClick={() => setEditing(null)}>
                 Cancel
               </Button>
-              <Button type="submit" className="bg-accent hover:bg-accent/90" disabled={isSubmitting || uploading}>
+              <Button type="submit" className="bg-accent hover:bg-accent/90" disabled={isSubmitting}>
                 {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                 Save
               </Button>

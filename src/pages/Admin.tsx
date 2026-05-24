@@ -64,6 +64,9 @@ const AdminHealth = lazy(() =>
 const AdminCarousel = lazy(() =>
   import("@/components/admin/AdminCarousel").then((m) => ({ default: m.AdminCarousel })),
 );
+const AdminGallery = lazy(() =>
+  import("@/components/admin/AdminGallery").then((m) => ({ default: m.AdminGallery })),
+);
 const AdminLodges = lazy(() =>
   import("@/components/admin/AdminLodges").then((m) => ({ default: m.AdminLodges })),
 );
@@ -83,12 +86,13 @@ const statusColors: Record<string, string> = {
 
 const adminTabs = [
   { id: "bookings", label: "Bookings", hint: "Look up reservations and change status." },
-  { id: "carousel", label: "Homepage images", hint: "Hero, activities, and gallery slides." },
+  { id: "gallery", label: "Gallery", hint: "Public /gallery page — upload photos from your computer." },
+  { id: "carousel", label: "Homepage images", hint: "Hero, activities, destinations, and feature strips." },
   { id: "site_copy", label: "Home & services text", hint: "Home services strip and lodges page hero." },
   {
     id: "lodge_gallery",
-    label: "Lodge page gallery",
-    hint: "Image grid on Lodge & camp booking (/services/lodges-camps). Empty = built-in cards.",
+    label: "Lodges & camps grid",
+    hint: "Photos on /services/lodges-camps — upload, replace, reorder, add lodges.",
   },
   { id: "safaris", label: "Safaris", hint: "Packages and prices on the site." },
   { id: "destinations", label: "Destinations", hint: "Park and region pages." },
@@ -375,6 +379,11 @@ const Admin = () => {
                 </div>
               }
             >
+              {activeTab === "gallery" && (
+                <ErrorBoundary>
+                  <AdminGallery />
+                </ErrorBoundary>
+              )}
               {activeTab === "carousel" && (
                 <ErrorBoundary>
                   <AdminCarousel />

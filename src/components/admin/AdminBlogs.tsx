@@ -1,4 +1,4 @@
-import { useState, memo, type ChangeEvent } from "react";
+import { useState, memo } from "react";
 import { useBlogs } from "@/hooks/useBlogs";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/types/supabase";
@@ -12,7 +12,7 @@ import { Edit, Plus, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { compressImage, createPreviewUrl, uploadFileToSupabase } from "@/lib/image-utils";
+import { AdminLocalImageUpload } from "@/components/admin/AdminLocalImageUpload";
 
 type BlogInsert = Database["public"]["Tables"]["blogs"]["Insert"];
 
@@ -47,8 +47,6 @@ export const AdminBlogs = () => {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState<Partial<BlogPost> | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState<"processing" | "uploading" | null>(null);
   const [uploadMode, setUploadMode] = useState<"original" | "optimized">("original");
   const [blogStatus, setBlogStatus] = useState<"draft" | "published">("published");
 
@@ -87,39 +85,6 @@ export const AdminBlogs = () => {
       toast.error("Failed to post starter blogs");
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // 1. Show instant local preview
-    const previewUrl = createPreviewUrl(file);
-    const previousImage = editing?.image;
-    setEditing((prev) => prev ? { ...prev, image: previewUrl } : null);
-
-    setUploading(true);
-    setUploadStatus(uploadMode === "optimized" ? "processing" : "uploading");
-    try {
-      // 2. Optional optimization (based on selected mode)
-      const fileToUpload = uploadMode === "optimized" ? await compressImage(file) : file;
-
-      setUploadStatus("uploading");
-      // 3. Optimized upload
-      const publicUrl = await uploadFileToSupabase(fileToUpload);
-
-      // 4. Final URL update
-      setEditing((prev) => prev ? { ...prev, image: publicUrl } : null);
-      toast.success("Image uploaded!");
-    } catch (error) {
-      console.error("Upload error:", error);
-      // Revert to previous image
-      setEditing((prev) => prev ? { ...prev, image: previousImage } : null);
-      toast.error("Image upload failed. Please try again.");
-    } finally {
-      setUploading(false);
-      setUploadStatus(null);
     }
   };
 
@@ -343,40 +308,20 @@ export const AdminBlogs = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Cover Image</label>
-              <div className="flex items-center gap-4">
-                {editing?.image && <img src={editing.image} alt="Preview" className="w-16 h-16 rounded object-cover" />}
-                <div className="flex-1">
-                  <div className="space-y-1 mb-2">
-                    <label className="text-sm font-medium">Upload Mode</label>
-                    <Select
-                      value={uploadMode}
-                      onValueChange={(v) => setUploadMode(v as "original" | "optimized")}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="original">Keep original quality</SelectItem>
-                        <SelectItem value="optimized">Optimize for speed</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} />
-                  {uploading && (
-                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                      <Loader2 className="w-3 h-3 animate-spin"/> 
-                      {uploadStatus === "processing" ? "Optimizing image..." : "Uploading to cloud..."}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <Input placeholder="Or paste image URL" value={editing?.image || ""} onChange={(e) => setEditing(prev => ({ ...prev!, image: e.target.value }))} className="mt-2" />
+              <label className="text-sm font-medium">Cover image</label>
+              {editing?.image && <img src={editing.image} alt="Preview" className="h-16 w-16 rounded object-cover" />}
+              <AdminLocalImageUpload
+                buttonLabel="Upload cover from your computer"
+                uploadMode={uploadMode}
+                onUploadModeChange={setUploadMode}
+                onSingleUploaded={(url) => setEditing((prev) => (prev ? { ...prev, image: url } : null))}
+              />
+              <Input placeholder="Or paste image URL" value={editing?.image || ""} onChange={(e) => setEditing(prev => ({ ...prev!, image: e.target.value }))} />
             </div>
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
-              <Button type="submit" className="bg-accent hover:bg-accent/90" disabled={isSubmitting || uploading}>
+              <Button type="submit" className="bg-accent hover:bg-accent/90" disabled={isSubmitting}>
                 {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin"/> : null}
                 {blogStatus === "published" ? "Save & Post" : "Save Draft"}
               </Button>

@@ -11,7 +11,7 @@ import { Edit, Plus, Trash2, Loader2, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { compressImage, createPreviewUrl, uploadFileToSupabase } from "@/lib/image-utils";
+import { AdminLocalImageUpload } from "@/components/admin/AdminLocalImageUpload";
 import { SUPABASE_STORAGE_BUCKET } from "@/lib/supabase-config";
 
 const emptySafari: Partial<Safari> = {
@@ -111,8 +111,6 @@ export const AdminSafaris = () => {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState<Partial<Safari> | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState<"processing" | "uploading" | null>(null);
   const [uploadMode, setUploadMode] = useState<"original" | "optimized">("original");
   const [highlightsText, setHighlightsText] = useState("");
 
@@ -139,46 +137,6 @@ export const AdminSafaris = () => {
       toast.error("Could not sync rows");
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Check if it's already a URL - use directly without upload
-    if (file.name.startsWith('http')) {
-      setEditing((prev) => prev ? { ...prev, image: file.name } : null);
-      toast.success("URL set");
-      return;
-    }
-
-    // 1. Show instant local preview
-    const previewUrl = createPreviewUrl(file);
-    const previousImage = editing?.image;
-    setEditing((prev) => prev ? { ...prev, image: previewUrl } : null);
-    
-    setUploading(true);
-    setUploadStatus(uploadMode === "optimized" ? "processing" : "uploading");
-    try {
-      // 2. Optional optimization (based on selected mode)
-      const fileToUpload = uploadMode === "optimized" ? await compressImage(file) : file;
-      
-      setUploadStatus("uploading");
-      // 3. Optimized upload
-      const publicUrl = await uploadFileToSupabase(fileToUpload);
-
-      // 4. Update with final URL
-      setEditing((prev) => prev ? { ...prev, image: publicUrl } : null);
-      toast.success("Uploaded");
-    } catch (error) {
-      console.error("Upload error:", error);
-      // Revert to previous image
-      setEditing((prev) => prev ? { ...prev, image: previousImage } : null);
-      toast.error("Upload failed. Paste an image URL if needed.");
-    } finally {
-      setUploading(false);
-      setUploadStatus(null);
     }
   };
 
@@ -371,64 +329,23 @@ export const AdminSafaris = () => {
 
             <div className="space-y-2">
               <label className="text-sm font-medium">Cover image</label>
-              <div className="flex items-center gap-4">
-                {editing?.image && <img src={editing.image} alt="Preview" className="w-16 h-16 rounded object-cover" />}
-                <div className="flex-1">
-                  <div className="space-y-1 mb-2">
-                    <label className="text-sm font-medium">Upload Mode</label>
-                    <Select
-                      value={uploadMode}
-                      onValueChange={(v) => setUploadMode(v as "original" | "optimized")}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="original">Original file</SelectItem>
-                        <SelectItem value="optimized">Compress first</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="flex gap-2">
-                    <Input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} className="flex-1" />
-                    {uploading && (
-                      <Button type="button" variant="outline" size="sm" onClick={() => {
-                        setUploading(false);
-                        setUploadStatus(null);
-                        toast.info("Upload cancelled.");
-                      }}>
-                        Cancel
-                      </Button>
-                    )}
-                  </div>
-                  {uploading && (
-                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                      <Loader2 className="w-3 h-3 animate-spin"/> 
-                      {uploadStatus === "processing" ? "Optimizing..." : "Uploading..."}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div className="mt-2 flex items-center gap-2">
-                <span className="shrink-0 text-xs text-muted-foreground">Or URL</span>
-                <Input
-                  placeholder="https://..."
-                  value={editing?.image?.startsWith("http") ? editing.image : ""}
-                  onChange={(e) => {
-                    const url = e.target.value;
-                    if (url.startsWith("http")) {
-                      setEditing((prev) => ({ ...prev!, image: url }));
-                      toast.success("Image URL saved");
-                    }
-                  }}
-                  className="flex-1"
-                />
-              </div>
+              {editing?.image && <img src={editing.image} alt="Preview" className="h-16 w-16 rounded object-cover" />}
+              <AdminLocalImageUpload
+                buttonLabel="Upload cover from your computer"
+                uploadMode={uploadMode}
+                onUploadModeChange={setUploadMode}
+                onSingleUploaded={(url) => setEditing((prev) => (prev ? { ...prev, image: url } : null))}
+              />
+              <Input
+                placeholder="Or paste image URL"
+                value={editing?.image || ""}
+                onChange={(e) => setEditing((prev) => (prev ? { ...prev, image: e.target.value } : null))}
+              />
             </div>
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
-              <Button type="submit" className="bg-accent hover:bg-accent/90" disabled={isSubmitting || uploading}>
+              <Button type="submit" className="bg-accent hover:bg-accent/90" disabled={isSubmitting}>
                 {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Save
               </Button>

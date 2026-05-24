@@ -13,12 +13,16 @@ import {
 } from "@/components/ui/dialog";
 import { ArrowDown, ArrowUp, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import type { LodgesServiceShowcaseCard } from "@/lib/lodges-service-showcase-defaults";
+import { AdminLocalImageUpload } from "@/components/admin/AdminLocalImageUpload";
+import {
+  DEFAULT_LODGES_SERVICE_SHOWCASE,
+  resolveLodgesShowcaseImageUrl,
+  type LodgesServiceShowcaseCard,
+} from "@/lib/lodges-service-showcase-defaults";
 
 type FormState = {
   name: string;
   area: string;
-  category: string;
   note: string;
   image_url: string;
 };
@@ -26,7 +30,6 @@ type FormState = {
 const emptyForm = (): FormState => ({
   name: "",
   area: "",
-  category: "Safari lodge",
   note: "",
   image_url: "",
 });
@@ -40,6 +43,7 @@ export const AdminLodgesShowcase = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [importing, setImporting] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -50,7 +54,7 @@ export const AdminLodgesShowcase = () => {
     setLoading(false);
     if (error) {
       console.warn(error);
-      toast.error("Could not load cards (run create-lodges-service-cards.sql if the table is missing).");
+      toast.error("Could not load lodges (run create-lodges-service-cards.sql if the table is missing).");
       setRows([]);
       return;
     }
@@ -60,7 +64,7 @@ export const AdminLodgesShowcase = () => {
         sort_order: r.sort_order,
         name: r.name,
         area: r.area,
-        category: r.category,
+        category: r.category ?? "",
         note: r.note,
         image_url: r.image_url,
       })),
@@ -86,7 +90,6 @@ export const AdminLodgesShowcase = () => {
     setForm({
       name: row.name,
       area: row.area,
-      category: row.category,
       note: row.note,
       image_url: row.image_url,
     });
@@ -96,11 +99,14 @@ export const AdminLodgesShowcase = () => {
   const save = async () => {
     const name = form.name.trim();
     const area = form.area.trim();
-    const category = form.category.trim();
     const note = form.note.trim();
     const image_url = form.image_url.trim();
-    if (!name || !image_url) {
-      toast.error("Name and image URL are required.");
+    if (!name) {
+      toast.error("Property name is required.");
+      return;
+    }
+    if (!image_url) {
+      toast.error("Upload an image or paste an image URL.");
       return;
     }
     setSaving(true);
@@ -108,22 +114,22 @@ export const AdminLodgesShowcase = () => {
       if (editingId) {
         const { error } = await supabase
           .from("lodges_service_cards")
-          .update({ name, area, category, note, image_url })
+          .update({ name, area, category: "", note, image_url })
           .eq("id", editingId);
         if (error) throw error;
-        toast.success("Card updated");
+        toast.success("Lodge updated");
       } else {
         const nextOrder = rows.length ? Math.max(...rows.map((r) => r.sort_order)) + 1 : 0;
         const { error } = await supabase.from("lodges_service_cards").insert({
           name,
           area,
-          category: category || "Safari lodge",
+          category: "",
           note,
           image_url,
           sort_order: nextOrder,
         });
         if (error) throw error;
-        toast.success("Card added");
+        toast.success("Lodge added");
       }
       setDialogOpen(false);
       invalidatePublic();
@@ -136,13 +142,55 @@ export const AdminLodgesShowcase = () => {
     }
   };
 
+  const importDefaults = async () => {
+    const existingNames = new Set(rows.map((r) => r.name.toLowerCase().trim()));
+    const toAdd = DEFAULT_LODGES_SERVICE_SHOWCASE.filter(
+      (d) => !existingNames.has(d.name.toLowerCase().trim()),
+    );
+    if (!toAdd.length) {
+      toast.info("All built-in lodges are already in your list. Edit any card to change its photo.");
+      return;
+    }
+    if (
+      !window.confirm(
+        `Add ${toAdd.length} built-in lodge(s) so you can edit their photos on the live page? Existing rows are kept.`,
+      )
+    ) {
+      return;
+    }
+    setImporting(true);
+    try {
+      let nextOrder = rows.length ? Math.max(...rows.map((r) => r.sort_order)) + 1 : 0;
+      const payload = toAdd.map((d) => ({
+        name: d.name,
+        area: d.area,
+        category: "",
+        note: d.note,
+        image_url: d.image_url,
+        sort_order: nextOrder++,
+      }));
+      const { error } = await supabase.from("lodges_service_cards").insert(payload);
+      if (error) throw error;
+      toast.success(`Added ${payload.length} lodge(s) — open Edit to replace photos`);
+      invalidatePublic();
+      await load();
+    } catch (e) {
+      console.error(e);
+      toast.error(e instanceof Error ? e.message : "Import failed");
+    } finally {
+      setImporting(false);
+    }
+  };
+
   const remove = async (id: string) => {
-    if (!window.confirm("Delete this card from the live page?")) return;
+    if (!window.confirm("Remove this lodge from the editable list? (Built-in lodges may still appear until you add a custom row.)")) {
+      return;
+    }
     setBusyId(id);
     try {
       const { error } = await supabase.from("lodges_service_cards").delete().eq("id", id);
       if (error) throw error;
-      toast.success("Deleted");
+      toast.success("Removed");
       invalidatePublic();
       await load();
     } catch (e) {
@@ -176,6 +224,16 @@ export const AdminLodgesShowcase = () => {
     }
   };
 
+  const previewUrl = form.image_url ? resolveLodgesShowcaseImageUrl({
+    id: editingId ?? "preview",
+    sort_order: 0,
+    name: form.name,
+    area: form.area,
+    category: "",
+    note: form.note,
+    image_url: form.image_url,
+  }) : "";
+
   if (loading) {
     return (
       <div className="flex justify-center py-12">
@@ -186,19 +244,22 @@ export const AdminLodgesShowcase = () => {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100">
-        <p className="font-medium">How this works</p>
-        <p className="mt-1 text-amber-900/90 dark:text-amber-100/90">
-          If this list is <strong>empty</strong>, the lodge service page uses the built-in gallery. As soon as you add{" "}
-          <strong>one</strong> card, the page shows <strong>only</strong> cards from this table — add every card you want
-          visible, or delete all rows to go back to the built-in set.
+      <div className="rounded-lg border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
+        <p className="font-medium text-foreground">Lodges &amp; camps page grid</p>
+        <p className="mt-1">
+          Manage the property cards on <strong>/services/lodges-camps</strong>. Upload a photo, edit the name and area,
+          reorder with the arrows, or add new lodges. Category labels on images have been removed from the public page.
         </p>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
         <Button type="button" onClick={openCreate}>
           <Plus className="mr-2 h-4 w-4" />
-          Add card
+          Add lodge
+        </Button>
+        <Button type="button" variant="secondary" disabled={importing} onClick={() => void importDefaults()}>
+          {importing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+          Import built-in lodges
         </Button>
         <Button type="button" variant="outline" onClick={() => void load()}>
           Refresh
@@ -206,63 +267,73 @@ export const AdminLodgesShowcase = () => {
       </div>
 
       {rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No custom cards yet — the site is using the default gallery.</p>
+        <p className="text-sm text-muted-foreground">
+          No custom rows yet — the live page uses the built-in set. Click <strong>Import built-in lodges</strong> to
+          edit photos here, or <strong>Add lodge</strong> for new properties.
+        </p>
       ) : (
-        <ul className="space-y-3">
+        <ul className="grid gap-4 sm:grid-cols-2">
           {rows.map((row, index) => (
             <li
               key={row.id}
-              className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between"
+              className="flex flex-col overflow-hidden rounded-xl border border-border bg-card"
             >
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-semibold text-foreground">{row.name}</p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {row.area} · {row.category}
-                </p>
-                <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{row.note}</p>
+              <div className="relative aspect-[5/3] bg-muted">
+                <img
+                  src={resolveLodgesShowcaseImageUrl(row)}
+                  alt={row.name}
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                />
               </div>
-              <div className="flex shrink-0 flex-wrap items-center gap-1">
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="outline"
-                  className="h-8 w-8"
-                  disabled={busyId !== null || index === 0}
-                  onClick={() => void move(index, -1)}
-                  aria-label="Move up"
-                >
-                  <ArrowUp className="h-4 w-4" />
-                </Button>
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="outline"
-                  className="h-8 w-8"
-                  disabled={busyId !== null || index === rows.length - 1}
-                  onClick={() => void move(index, 1)}
-                  aria-label="Move down"
-                >
-                  <ArrowDown className="h-4 w-4" />
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="secondary"
-                  disabled={busyId !== null}
-                  onClick={() => openEdit(row)}
-                >
-                  <Pencil className="mr-1 h-3.5 w-3.5" />
-                  Edit
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="destructive"
-                  disabled={busyId !== null}
-                  onClick={() => void remove(row.id)}
-                >
-                  {busyId === row.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                </Button>
+              <div className="flex flex-1 flex-col gap-2 p-4">
+                <p className="font-semibold text-foreground">{row.name}</p>
+                <p className="text-xs text-muted-foreground">{row.area || "—"}</p>
+                <p className="line-clamp-2 text-xs text-muted-foreground">{row.note}</p>
+                <div className="mt-auto flex flex-wrap gap-1 pt-2">
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="outline"
+                    className="h-8 w-8"
+                    disabled={busyId !== null || index === 0}
+                    onClick={() => void move(index, -1)}
+                    aria-label="Move up"
+                  >
+                    <ArrowUp className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="outline"
+                    className="h-8 w-8"
+                    disabled={busyId !== null || index === rows.length - 1}
+                    onClick={() => void move(index, 1)}
+                    aria-label="Move down"
+                  >
+                    <ArrowDown className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    className="flex-1"
+                    disabled={busyId !== null}
+                    onClick={() => openEdit(row)}
+                  >
+                    <Pencil className="mr-1 h-3.5 w-3.5" />
+                    Edit / replace photo
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="destructive"
+                    disabled={busyId !== null}
+                    onClick={() => void remove(row.id)}
+                  >
+                    {busyId === row.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                  </Button>
+                </div>
               </div>
             </li>
           ))}
@@ -272,13 +343,20 @@ export const AdminLodgesShowcase = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editingId ? "Edit card" : "New card"}</DialogTitle>
+            <DialogTitle>{editingId ? "Edit lodge" : "Add lodge"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 py-2">
+            <AdminLocalImageUpload
+              buttonLabel="Upload photo from your computer"
+              onSingleUploaded={(url) => setForm((f) => ({ ...f, image_url: url }))}
+            />
+            {previewUrl ? (
+              <img src={previewUrl} alt="Preview" className="h-40 w-full rounded-lg object-cover" />
+            ) : null}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Image URL</label>
+              <label className="text-sm font-medium">Or paste image URL</label>
               <Input
-                placeholder="https://… (Unsplash or your CDN; use modest width for speed)"
+                placeholder="https://…"
                 value={form.image_url}
                 onChange={(e) => setForm((f) => ({ ...f, image_url: e.target.value }))}
               />
@@ -289,14 +367,10 @@ export const AdminLodgesShowcase = () => {
             </div>
             <div className="space-y-1.5">
               <label className="text-sm font-medium">Area / region</label>
-              <Input value={form.area} onChange={(e) => setForm((f) => ({ ...f, area: e.target.value }))} />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Category label</label>
               <Input
-                placeholder="Safari lodge, Tented camp, …"
-                value={form.category}
-                onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+                placeholder="Masai Mara, Amboseli, …"
+                value={form.area}
+                onChange={(e) => setForm((f) => ({ ...f, area: e.target.value }))}
               />
             </div>
             <div className="space-y-1.5">

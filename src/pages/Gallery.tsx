@@ -6,53 +6,21 @@ import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import OptimizedImage from "@/components/ui/optimized-image";
 import { fallbackSafariImage } from "@/lib/remote-media-fallbacks";
 import { useCarouselImageItems } from "@/hooks/useCarouselImages";
-
-const folderGalleryImages = [
-  "/images/real images frm Tambua/at MAasai mara.jpeg",
-  "/images/real images frm Tambua/DR. Amos Shibale from Seattle USA.jpeg",
-  "/images/real images frm Tambua/A drive.jpeg",
-  "/images/real images frm Tambua/Maasai Culture.jpeg",
-  "/images/real images frm Tambua/Dr. Palca  Shibale from Seattle USa.jpeg",
-  "/images/real images frm Tambua/Tourists at Nairobi park.jpeg",
-  "/images/real images frm Tambua/Tourists with the team at the park.jpeg",
-  "/images/real images frm Tambua/lion at Nairobi park.jpeg",
-  "/images/real images frm Tambua/Nairobi park.jpeg",
-  "/images/real images frm Tambua/safari vehicle.jpeg",
-  "/images/real images frm Tambua/Team Bonding with Maasai Culture.jpeg",
-  "/images/real images frm Tambua/team outside.jpeg",
-  "/images/real images frm Tambua/Lion spotting.jpeg",
-  "/images/real images frm Tambua/Tourist learning about the culture.jpeg",
-  "/images/real images frm Tambua/Team.jpeg",
-  "/images/real images frm Tambua/Zebra at Nairobi park.jpeg",
-  "/images/real images frm Tambua/hotel.jpeg",
-  "/images/real images frm Tambua/A snap with tourist.jpeg",
-  "/images/real images frm Tambua/Tourist happy with Tambua africa Services.jpeg",
-  "/images/real images frm Tambua/Drive Vehicle.jpeg",
-  "/images/real images frm Tambua/Drive at the park.jpeg",
-  "/images/real images frm Tambua/ready for the tour.jpeg",
-  "/images/real images frm Tambua/St the park drive.jpeg",
-  "/images/real images frm Tambua/Tambua Africa safari vehicle.jpeg",
-  "/images/real images frm Tambua/Mrs Odilliah Sagali from Seattle USA.jpeg",
-  "/images/real images frm Tambua/the safari.jpeg",
-  "/images/real images frm Tambua/Eng. Briscan Shibale from Seattle USA.jpeg",
-] as const;
+import { buildGalleryPhotoList, galleryImageSrc } from "@/lib/gallery-defaults";
 
 const Gallery = () => {
   const { data: adminGallery = [] } = useCarouselImageItems("gallery");
   const [lightbox, setLightbox] = useState<number | null>(null);
 
-  const photos =
-    adminGallery.length > 0
-      ? adminGallery.map((item) => ({
-          src: item.url,
-          alt: item.title || "Tambua Gallery Image",
-          category: "Gallery",
-        }))
-      : folderGalleryImages.map((src, index) => ({
-          src,
-          alt: `Tambua Gallery ${index + 1}`,
-          category: "Gallery",
-        }));
+  const dbPhotos = [...adminGallery]
+    .sort((a, b) => a.order - b.order)
+    .map((item) => ({
+      src: item.url,
+      alt: item.title || "Tambua Gallery Image",
+      category: "Gallery",
+    }));
+
+  const photos = buildGalleryPhotoList(dbPhotos);
 
   const filtered = photos;
 
@@ -89,7 +57,7 @@ const Gallery = () => {
             <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 space-y-4">
               {filtered.map((photo, i) => (
                 <motion.div
-                  key={photo.src}
+                  key={`${galleryImageSrc(photo.src)}-${i}`}
                   layout
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -145,11 +113,11 @@ const Gallery = () => {
               <ChevronRight className="w-8 h-8" />
             </button>
             <motion.img
-              key={filtered[lightbox].src}
+              key={galleryImageSrc(filtered[lightbox].src)}
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              src={filtered[lightbox].src}
+              src={galleryImageSrc(filtered[lightbox].src)}
               alt={filtered[lightbox].alt}
               className="max-w-full max-h-[85vh] object-contain rounded-lg"
               onClick={(e) => e.stopPropagation()}

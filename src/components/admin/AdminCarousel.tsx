@@ -8,7 +8,7 @@ import { Edit, Plus, Trash2, Loader2, Compass, Palmtree, Binoculars, Mountain, A
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { compressImage, createPreviewUrl, uploadFileToSupabase } from "@/lib/image-utils";
+import { AdminLocalImageUpload } from "@/components/admin/AdminLocalImageUpload";
 
 interface CarouselImage {
   id: string;
@@ -93,36 +93,6 @@ const defaultActivities = [
   },
 ] as const;
 
-const defaultGalleryImages = [
-  "/images/real images frm Tambua/at MAasai mara.jpeg",
-  "/images/real images frm Tambua/DR. Amos Shibale from Seattle USA.jpeg",
-  "/images/real images frm Tambua/A drive.jpeg",
-  "/images/real images frm Tambua/Maasai Culture.jpeg",
-  "/images/real images frm Tambua/Dr. Palca  Shibale from Seattle USa.jpeg",
-  "/images/real images frm Tambua/Tourists at Nairobi park.jpeg",
-  "/images/real images frm Tambua/Tourists with the team at the park.jpeg",
-  "/images/real images frm Tambua/lion at Nairobi park.jpeg",
-  "/images/real images frm Tambua/Nairobi park.jpeg",
-  "/images/real images frm Tambua/safari vehicle.jpeg",
-  "/images/real images frm Tambua/Team Bonding with Maasai Culture.jpeg",
-  "/images/real images frm Tambua/team outside.jpeg",
-  "/images/real images frm Tambua/Lion spotting.jpeg",
-  "/images/real images frm Tambua/Tourist learning about the culture.jpeg",
-  "/images/real images frm Tambua/Team.jpeg",
-  "/images/real images frm Tambua/Zebra at Nairobi park.jpeg",
-  "/images/real images frm Tambua/hotel.jpeg",
-  "/images/real images frm Tambua/A snap with tourist.jpeg",
-  "/images/real images frm Tambua/Tourist happy with Tambua africa Services.jpeg",
-  "/images/real images frm Tambua/Drive Vehicle.jpeg",
-  "/images/real images frm Tambua/Drive at the park.jpeg",
-  "/images/real images frm Tambua/ready for the tour.jpeg",
-  "/images/real images frm Tambua/St the park drive.jpeg",
-  "/images/real images frm Tambua/Tambua Africa safari vehicle.jpeg",
-  "/images/real images frm Tambua/Mrs Odilliah Sagali from Seattle USA.jpeg",
-  "/images/real images frm Tambua/the safari.jpeg",
-  "/images/real images frm Tambua/Eng. Briscan Shibale from Seattle USA.jpeg",
-] as const;
-
 const activityTemplates = defaultActivities.map((item) => ({
   title: item.title,
   description: item.description,
@@ -157,12 +127,14 @@ export const AdminCarousel = () => {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Partial<CarouselImage> | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState<"processing" | "uploading" | null>(null);
   const [uploadMode, setUploadMode] = useState<"original" | "optimized">("original");
   const [activityIcon, setActivityIcon] = useState<string>("compass");
   const [selectedActivityTitle, setSelectedActivityTitle] = useState<string>(activityTemplates[0].title);
   const queryClient = useQueryClient();
+
+  const homepageSections = (Object.keys(sectionLabelMap) as CarouselImage["section"][]).filter(
+    (s) => s !== "gallery",
+  );
 
   const fetchImages = async () => {
     try {
@@ -253,74 +225,6 @@ export const AdminCarousel = () => {
       toast.error("Failed to load default activities");
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const handleLoadFolderGallery = async () => {
-    setIsSubmitting(true);
-    try {
-      const payload = defaultGalleryImages.map((url, index) => ({
-        id:
-          typeof crypto !== "undefined" && "randomUUID" in crypto
-            ? crypto.randomUUID()
-            : `carousel-gallery-${Date.now()}-${index}`,
-        url,
-        title: "Tambua Gallery",
-        description: "Real safari moments from Tambua Africa",
-        order: index,
-        section: "gallery" as const,
-      }));
-
-      const { error: deleteError } = await supabase.from("carousel_images").delete().eq("section", "gallery");
-      if (deleteError) throw deleteError;
-
-      const { error } = await supabase.from("carousel_images").upsert(payload);
-      if (error) throw error;
-
-      toast.success("Gallery rows replaced");
-      await fetchImages();
-      queryClient.invalidateQueries({ queryKey: ["carousel-images"] });
-      queryClient.invalidateQueries({ queryKey: ["carousel-image-items"] });
-    } catch (error) {
-      console.error("Error loading folder gallery:", error);
-      const message = String((error as { message?: string })?.message || "").toLowerCase();
-      if (message.includes("carousel_images_section_check") || message.includes("violates check constraint")) {
-        toast.error(
-          "Your DB section constraint doesn't include 'gallery'. Run scripts/extend-carousel-sections.sql in Supabase, then retry."
-        );
-      } else {
-        toast.error("Failed to load gallery images");
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const previewUrl = createPreviewUrl(file);
-    const previousImage = editing?.url;
-    setEditing((prev) => (prev ? { ...prev, url: previewUrl } : null));
-
-    setUploading(true);
-    setUploadStatus(uploadMode === "optimized" ? "processing" : "uploading");
-    try {
-      const fileToUpload = uploadMode === "optimized" ? await compressImage(file) : file;
-      setUploadStatus("uploading");
-
-      const publicUrl = await uploadFileToSupabase(fileToUpload);
-      setEditing((prev) => (prev ? { ...prev, url: publicUrl } : null));
-      toast.success("Carousel image uploaded");
-    } catch (error) {
-      console.error("Carousel upload error:", error);
-      setEditing((prev) => (prev ? { ...prev, url: previousImage } : null));
-      toast.error("Upload failed. Paste a URL or try again.");
-    } finally {
-      setUploading(false);
-      setUploadStatus(null);
-      e.target.value = "";
     }
   };
 
@@ -487,13 +391,11 @@ export const AdminCarousel = () => {
               <SelectValue placeholder="Select section" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="hero">Hero</SelectItem>
-              <SelectItem value="activities">Activities</SelectItem>
-              <SelectItem value="destinations">Destinations</SelectItem>
-              <SelectItem value="gallery">Gallery</SelectItem>
-              <SelectItem value="feature_wild">Wild strip</SelectItem>
-              <SelectItem value="feature_culture">Culture strip</SelectItem>
-              <SelectItem value="feature_luxury">Luxury strip</SelectItem>
+              {homepageSections.map((section) => (
+                <SelectItem key={section} value={section}>
+                  {sectionLabelMap[section]}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <Button onClick={handleAdd} className="shrink-0 bg-accent hover:bg-accent/90">
@@ -511,19 +413,10 @@ export const AdminCarousel = () => {
               Reset activities
             </Button>
           )}
-          {selectedSection === "gallery" && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleLoadFolderGallery}
-              disabled={isSubmitting}
-              className="shrink-0"
-            >
-              {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-              Load Folder Gallery
-            </Button>
-          )}
         </div>
+        <p className="text-xs text-muted-foreground">
+          Gallery photos are managed in the <strong>Gallery</strong> section of the admin menu.
+        </p>
       </div>
 
       <div className="overflow-hidden rounded-lg border border-border bg-card">
@@ -688,37 +581,11 @@ export const AdminCarousel = () => {
                 placeholder="https://example.com/image.jpg"
                 required
               />
-              <div className="space-y-2">
-                <div className="space-y-1">
-                  <label className="text-sm font-medium">Upload Mode</label>
-                  <Select
-                    value={uploadMode}
-                    onValueChange={(v) => setUploadMode(v as "original" | "optimized")}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="original">Keep original quality</SelectItem>
-                      <SelectItem value="optimized">Optimize for speed</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">
-                    {uploadMode === "original"
-                      ? "Best visual quality. Larger files may load slower on weak connections."
-                      : "Smaller files for faster loading with slight quality reduction on very large images."}
-                  </p>
-                </div>
-                <Input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} />
-                {uploading && (
-                  <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Loader2 className="w-3 h-3 animate-spin" />
-                    {uploadStatus === "processing"
-                      ? "Optimizing image..."
-                      : "Uploading to cloud..."}
-                  </p>
-                )}
-              </div>
+              <AdminLocalImageUpload
+                uploadMode={uploadMode}
+                onUploadModeChange={setUploadMode}
+                onSingleUploaded={(url) => setEditing((prev) => (prev ? { ...prev, url } : null))}
+              />
               {editing?.url && (
                 <img src={editing.url} alt="Preview" className="w-full h-48 object-cover rounded-lg mt-2" />
               )}
@@ -824,13 +691,11 @@ export const AdminCarousel = () => {
                   <SelectValue placeholder="Select section" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="hero">Hero Section</SelectItem>
-                  <SelectItem value="activities">Activities Section</SelectItem>
-                  <SelectItem value="destinations">Destinations Section</SelectItem>
-                  <SelectItem value="gallery">Gallery Section</SelectItem>
-                  <SelectItem value="feature_wild">Experience the Wild</SelectItem>
-                  <SelectItem value="feature_culture">Our Cultural Heritage</SelectItem>
-                  <SelectItem value="feature_luxury">Luxury Reimagined</SelectItem>
+                  {homepageSections.map((section) => (
+                    <SelectItem key={section} value={section}>
+                      {sectionLabelMap[section]}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
@@ -843,7 +708,7 @@ export const AdminCarousel = () => {
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
-              <Button type="submit" className="bg-accent hover:bg-accent/90" disabled={isSubmitting || uploading}>
+              <Button type="submit" className="bg-accent hover:bg-accent/90" disabled={isSubmitting}>
                 {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null} Save
               </Button>
             </DialogFooter>

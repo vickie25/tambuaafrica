@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase, hasSupabaseEnv } from "@/integrations/supabase/client";
 import {
-  DEFAULT_LODGES_SERVICE_SHOWCASE,
+  mergeShowcaseCardsWithDefaults,
   type LodgesServiceShowcaseCard,
 } from "@/lib/lodges-service-showcase-defaults";
 import { usePublicQueryMode } from "@/lib/use-public-query";
@@ -16,7 +16,7 @@ type Row = {
   image_url: string;
 };
 
-function mapRow(r: Row): LodgesServiceShowcaseCard {
+function rowToCard(r: Row): LodgesServiceShowcaseCard {
   return {
     id: r.id,
     sort_order: r.sort_order,
@@ -61,19 +61,10 @@ export function useLodgesServiceShowcaseCards(): {
     ...queryOptions,
   });
 
-  const rows = q.data;
-  if (rows && rows.length > 0) {
-    return {
-      cards: rows.map(mapRow),
-      fromDatabase: true,
-      isLoading: q.isLoading,
-      isError: q.isError,
-    };
-  }
-
+  const rows = q.data ?? [];
   return {
-    cards: DEFAULT_LODGES_SERVICE_SHOWCASE,
-    fromDatabase: false,
+    cards: mergeShowcaseCardsWithDefaults(rows.map(rowToCard)),
+    fromDatabase: rows.length > 0,
     isLoading: q.isLoading,
     isError: q.isError,
   };

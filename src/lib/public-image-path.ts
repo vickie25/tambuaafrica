@@ -4,7 +4,7 @@
  */
 export function normalizePublicImagePath(src: string | null | undefined): string {
   if (!src) return "";
-  let path = src.trim();
+  let path = src.trim().replace(/\\/g, "/");
   if (!path) return "";
 
   if (path.includes("supabase.co/storage") && path.includes("public%5Cimages")) {
@@ -21,6 +21,27 @@ export function normalizePublicImagePath(src: string | null | undefined): string
   }
 
   if (path.startsWith("http://") || path.startsWith("https://")) {
+    try {
+      const u = new URL(path);
+      const host = u.hostname.replace(/^www\./i, "").toLowerCase();
+      const isThisSite =
+        host === "localhost" ||
+        host === "127.0.0.1" ||
+        host === "tambuaafrica.com" ||
+        host === "tambua-africa.com" ||
+        host.endsWith(".vercel.app");
+      if (isThisSite && u.pathname.startsWith("/images/")) {
+        let local = u.pathname;
+        try {
+          local = decodeURI(local);
+        } catch {
+          /* keep */
+        }
+        return local;
+      }
+    } catch {
+      /* keep full URL */
+    }
     return path;
   }
 

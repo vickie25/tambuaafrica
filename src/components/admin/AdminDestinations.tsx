@@ -11,7 +11,7 @@ import { Edit, Plus, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { compressImage, createPreviewUrl, uploadFileToSupabase } from "@/lib/image-utils";
+import { AdminLocalImageUpload } from "@/components/admin/AdminLocalImageUpload";
 
 const emptyDestination: Partial<Destination> = {
   id: "", name: "", country: "", description: "", image: "", safariCount: 0
@@ -37,8 +37,6 @@ export const AdminDestinations = () => {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState<Partial<Destination> | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState<"processing" | "uploading" | null>(null);
   const [uploadMode, setUploadMode] = useState<"original" | "optimized">("original");
   const [galleryText, setGalleryText] = useState("");
 
@@ -50,78 +48,6 @@ export const AdminDestinations = () => {
   const handleAdd = () => {
     setEditing({ ...emptyDestination, id: `dest-${Date.now()}` });
     setGalleryText("");
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // 1. Show instant local preview
-    const previewUrl = createPreviewUrl(file);
-    const previousImage = editing?.image;
-    setEditing((prev) => prev ? { ...prev, image: previewUrl } : null);
-
-    setUploading(true);
-    setUploadStatus(uploadMode === "optimized" ? "processing" : "uploading");
-    try {
-      // 2. Optional optimization (based on selected mode)
-      const fileToUpload = uploadMode === "optimized" ? await compressImage(file) : file;
-      
-      setUploadStatus("uploading");
-      // 3. Optimized upload
-      const publicUrl = await uploadFileToSupabase(fileToUpload);
-
-      // 4. Final URL update
-      setEditing((prev) => prev ? { ...prev, image: publicUrl } : null);
-      setGalleryText((prev) => {
-        const lines = prev.split("\n").map((line) => line.trim()).filter(Boolean);
-        if (!lines.includes(publicUrl)) lines.unshift(publicUrl);
-        return lines.join("\n");
-      });
-      toast.success("Image uploaded!");
-    } catch (error) {
-      console.error("Upload error:", error);
-      // Revert to previous image
-      setEditing((prev) => prev ? { ...prev, image: previousImage } : null);
-      toast.error("Image upload failed. Please try again.");
-    } finally {
-      setUploading(false);
-      setUploadStatus(null);
-    }
-  };
-
-  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-
-    setUploading(true);
-    setUploadStatus(uploadMode === "optimized" ? "processing" : "uploading");
-    try {
-      const uploadedUrls: string[] = [];
-      for (const file of files) {
-        const fileToUpload = uploadMode === "optimized" ? await compressImage(file) : file;
-        setUploadStatus("uploading");
-        const publicUrl = await uploadFileToSupabase(fileToUpload);
-        uploadedUrls.push(publicUrl);
-      }
-
-      if (uploadedUrls.length > 0) {
-        setGalleryText((prev) => {
-          const current = prev.split("\n").map((line) => line.trim()).filter(Boolean);
-          const merged = [...uploadedUrls, ...current.filter((url) => !uploadedUrls.includes(url))];
-          return merged.join("\n");
-        });
-        setEditing((prev) => (prev ? { ...prev, image: prev.image || uploadedUrls[0] } : prev));
-        toast.success(`${uploadedUrls.length} gallery image(s) uploaded`);
-      }
-    } catch (error) {
-      console.error("Gallery upload error:", error);
-      toast.error("Gallery upload failed. Please try again.");
-    } finally {
-      setUploading(false);
-      setUploadStatus(null);
-      e.target.value = "";
-    }
   };
 
   const handleLoadWebsiteDestinations = async () => {
@@ -309,40 +235,40 @@ export const AdminDestinations = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Cover Image</label>
-              <div className="flex items-center gap-4">
-                {editing?.image && <img src={editing.image} alt="Preview" className="w-16 h-16 rounded object-cover" />}
-                <div className="flex-1">
-                  <div className="space-y-1 mb-2">
-                    <label className="text-sm font-medium">Upload Mode</label>
-                    <Select
-                      value={uploadMode}
-                      onValueChange={(v) => setUploadMode(v as "original" | "optimized")}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="original">Keep original quality</SelectItem>
-                        <SelectItem value="optimized">Optimize for speed</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} />
-                  {uploading && (
-                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                      <Loader2 className="w-3 h-3 animate-spin"/> 
-                      {uploadStatus === "processing" ? "Compressing..." : "Uploading..."}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <Input placeholder="Or paste image URL" value={editing?.image || ""} onChange={(e) => setEditing(prev => ({ ...prev!, image: e.target.value }))} className="mt-2" />
+              <label className="text-sm font-medium">Cover image</label>
+              {editing?.image && <img src={editing.image} alt="Preview" className="h-16 w-16 rounded object-cover" />}
+              <AdminLocalImageUpload
+                buttonLabel="Upload cover from your computer"
+                uploadMode={uploadMode}
+                onUploadModeChange={setUploadMode}
+                onSingleUploaded={(url) => {
+                  setEditing((prev) => (prev ? { ...prev, image: url } : null));
+                  setGalleryText((prev) => {
+                    const lines = prev.split("\n").map((line) => line.trim()).filter(Boolean);
+                    if (!lines.includes(url)) lines.unshift(url);
+                    return lines.join("\n");
+                  });
+                }}
+              />
+              <Input placeholder="Or paste image URL" value={editing?.image || ""} onChange={(e) => setEditing(prev => ({ ...prev!, image: e.target.value }))} />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Gallery Images (one URL per line)</label>
-              <Input type="file" accept="image/*" multiple onChange={handleGalleryUpload} disabled={uploading} />
+              <label className="text-sm font-medium">Gallery images (one URL per line)</label>
+              <AdminLocalImageUpload
+                multiple
+                buttonLabel="Upload gallery photos from your computer"
+                uploadMode={uploadMode}
+                onUploadModeChange={setUploadMode}
+                onBatchUploaded={(urls) => {
+                  setGalleryText((prev) => {
+                    const current = prev.split("\n").map((line) => line.trim()).filter(Boolean);
+                    const merged = [...urls, ...current.filter((url) => !urls.includes(url))];
+                    return merged.join("\n");
+                  });
+                  setEditing((prev) => (prev ? { ...prev, image: prev.image || urls[0] } : prev));
+                }}
+              />
               <Textarea
                 rows={5}
                 value={galleryText}
@@ -356,7 +282,7 @@ export const AdminDestinations = () => {
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
-              <Button type="submit" className="bg-accent hover:bg-accent/90" disabled={isSubmitting || uploading}>
+              <Button type="submit" className="bg-accent hover:bg-accent/90" disabled={isSubmitting}>
                 {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin"/> : null} Save
               </Button>
             </DialogFooter>

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ServicePageLayout } from "@/components/services/ServicePageLayout";
 import OptimizedImage from "@/components/ui/optimized-image";
+import { explicitShowcaseImageForCard } from "@/lib/lodges-service-showcase-defaults";
 import { fallbackLodgeImage } from "@/lib/remote-media-fallbacks";
 import { useSiteMarketingBlock } from "@/hooks/useSiteMarketingBlocks";
 import { useLodgesServiceShowcaseCards } from "@/hooks/useLodgesServiceShowcase";
@@ -60,7 +61,8 @@ const LodgesCampsService = () => {
 
       <ul className="mx-auto mt-10 grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((stay) => {
-          const primary = stay.image_url?.trim() || fallbackLodgeImage(stay.id);
+          const primary = stay.image_url?.trim() || explicitShowcaseImageForCard(stay);
+          const imageFallback = explicitShowcaseImageForCard(stay);
           return (
             <li
               key={stay.id}
@@ -69,7 +71,7 @@ const LodgesCampsService = () => {
               <div className="relative aspect-[5/3]">
                 <OptimizedImage
                   src={primary}
-                  fallbackSrc={fallbackLodgeImage(`${stay.id}-alt`)}
+                  fallbackSrc={imageFallback}
                   alt={stay.name}
                   className="h-full w-full object-cover"
                   width={640}
@@ -79,9 +81,6 @@ const LodgesCampsService = () => {
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   rootMargin="80px"
                 />
-                <span className="absolute bottom-3 left-3 rounded-full bg-background/90 px-3 py-1 text-xs font-medium text-foreground backdrop-blur-sm">
-                  {stay.category}
-                </span>
               </div>
               <div className="flex flex-1 flex-col p-4 sm:p-5">
                 <p className="text-xs font-semibold uppercase tracking-wide text-accent">{stay.area}</p>

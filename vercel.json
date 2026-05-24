@@ -20,7 +20,7 @@
   ],
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!assets/|images/|data/|favicon\\.ico|robots\\.txt|sitemap\\.xml|manifest\\.webmanifest|tambua-logo\\.png|registerSW\\.js).*)",
       "destination": "/index.html"
     }
   ],

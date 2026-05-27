@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { MapPin, Info, ArrowRight } from "lucide-react";
-import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
+import { motion, useReducedMotion, useInView } from "framer-motion";
 import OptimizedImage from "@/components/ui/optimized-image";
 
 interface HomeFeatureHeroProps {
@@ -19,20 +19,23 @@ const HomeFeatureHero = ({
   slogan,
   title,
   description,
-  interval = 2600,
+  interval = 3200,
   align = "left",
 }: HomeFeatureHeroProps) => {
   const [currentImage, setCurrentImage] = useState(0);
+  const shouldReduceMotion = useReducedMotion();
+  const sectionRef = useRef<HTMLElement>(null);
+  const isInView = useInView(sectionRef, { once: true, margin: "-80px" });
+  const isLeft = align === "left";
 
   useEffect(() => {
-    if (images.length <= 1) return;
+    if (images.length <= 1 || shouldReduceMotion) return;
     const timer = setInterval(() => {
       setCurrentImage((prev) => (prev + 1) % images.length);
-    }, Math.max(interval, 2400));
+    }, Math.max(interval, 2800));
     return () => clearInterval(timer);
-  }, [images, interval]);
+  }, [images, interval, shouldReduceMotion]);
 
-  // Warm up only first and next frame to avoid flooding initial network.
   useEffect(() => {
     const preload = (src?: string) => {
       if (!src) return;
@@ -44,74 +47,119 @@ const HomeFeatureHero = ({
     preload(images[1]);
   }, [images]);
 
-  // Alternate background and content alignment
-  const isLeft = align === "left";
-  const sectionBg = isLeft
-    ? "bg-gradient-to-b from-white/80 via-accent/10 to-white/60"
-    : "bg-gradient-to-b from-accent/10 via-white/80 to-white/60";
-  const borderClass = isLeft ? "border-t-4 border-accent" : "border-t-4 border-primary";
-  const contentAlign = isLeft
-    ? "absolute left-0 top-0 h-full flex flex-col justify-center items-start text-left max-w-xl w-full px-0 sm:px-2 lg:px-4 py-12 shadow-2xl border-r-8 border-accent"
-    : "absolute right-0 top-0 h-full flex flex-col justify-center items-end text-right max-w-xl w-full px-0 sm:px-2 lg:px-4 py-12 shadow-2xl border-l-8 border-primary";
-
   return (
-    <section className={`relative min-h-screen flex items-center overflow-hidden ${borderClass} shadow-2xl ${sectionBg}`}>
-      {/* Background Slideshow - Smooth crossfade */}
-      <div className="absolute inset-0 z-0">
+    <section
+      ref={sectionRef}
+      className="relative flex min-h-[min(85vh,48rem)] items-stretch overflow-hidden"
+    >
+      {/* Image Column */}
+      <div className={`absolute inset-0 lg:relative lg:flex-1 ${isLeft ? "lg:order-2" : "lg:order-1"}`}>
         {images.map((image, index) => (
           <motion.div
             key={image}
             initial={false}
-            animate={{ opacity: index === currentImage ? 1 : 0 }}
-            transition={{ duration: 0.45, ease: "easeInOut" }}
+            animate={{ opacity: shouldReduceMotion ? (index === 0 ? 1 : 0) : index === currentImage ? 1 : 0 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.9, ease: "easeInOut" }}
             className="absolute inset-0"
           >
             <OptimizedImage
               src={image}
-              alt={`${title} background ${index + 1}`}
-              className="w-full h-full"
-              quality={80}
+              alt={`${title} — image ${index + 1}`}
+              className="h-full w-full object-cover"
+              quality={82}
               priority={index === 0}
             />
           </motion.div>
         ))}
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-black/50" />
+        {/* Dark overlay for mobile legibility */}
+        <div className="absolute inset-0 overlay-maroon-strong lg:hidden" />
+        {/* Angled clip for desktop */}
+        <div
+          className={`absolute inset-y-0 hidden lg:block w-48 bg-card ${
+            isLeft ? "right-0 bg-gradient-to-r from-transparent to-card" : "left-0 bg-gradient-to-l from-transparent to-card"
+          }`}
+          style={{
+            clipPath: isLeft
+              ? "polygon(40% 0%, 100% 0%, 100% 100%, 0% 100%)"
+              : "polygon(0% 0%, 60% 0%, 100% 100%, 0% 100%)",
+          }}
+        />
       </div>
 
-      {/* Content */}
-      <div className="container-wide relative z-10 mx-auto flex w-full h-full">
-        <div className={`${contentAlign} gap-2`}>
-          <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-2 leading-tight">
-            <span className="block text-yellow-400 font-semibold tracking-wider" style={{margin:isLeft?"0 0 0 -2px":"0 -2px 0 0",padding:isLeft?"0 0 0 8px":"0 8px 0 0"}}>{slogan}</span>
-            {title}
-          </h2>
-          <p className="text-lg sm:text-xl text-white/80 mb-8 max-w-2xl leading-relaxed">
-            {description}
-          </p>
+      {/* Content Column */}
+      <div className={`relative z-10 flex lg:flex-1 items-center bg-card/0 lg:bg-card px-6 sm:px-10 lg:px-16 xl:px-20 py-24 lg:py-20 ${isLeft ? "lg:order-1" : "lg:order-2"}`}>
+        <div className="max-w-md">
+          {/* Eyebrow */}
+          <motion.div
+            initial={{ opacity: 0, x: isLeft ? -20 : 20 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="flex items-center gap-3 mb-5"
+          >
+            <div className="h-px w-8 bg-accent flex-shrink-0" />
+            <span className="font-sans text-[11px] font-semibold uppercase tracking-[0.25em] text-accent lg:text-accent">
+              {slogan}
+            </span>
+          </motion.div>
 
-          <div className="flex flex-wrap gap-4">
+          {/* Title */}
+          <motion.h2
+            initial={{ opacity: 0, y: 24 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.7, delay: 0.2 }}
+            className="font-display font-bold leading-tight text-white lg:text-foreground mb-5 text-balance"
+            style={{ fontSize: "clamp(2.2rem, 4.5vw, 3.2rem)" }}
+          >
+            {title}
+          </motion.h2>
+
+          {/* Description */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.7, delay: 0.35 }}
+            className="section-lead text-white/75 lg:text-muted-foreground mb-8"
+          >
+            {description}
+          </motion.p>
+
+          {/* CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.5 }}
+          >
             <Button
               asChild
-              className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-xl px-8 py-6 h-auto font-bold group"
+              className="btn-pill bg-primary text-white hover:bg-primary/90 px-8 py-6 text-sm font-semibold group shadow-lg shadow-primary/20"
             >
-              <Link to="/destinations" className="flex items-center">
-                <MapPin className="w-5 h-5 mr-2" />
-                Safari Destinations
-                <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+              <Link to="/destinations" className="inline-flex items-center gap-2">
+                Explore More
+                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
               </Link>
             </Button>
-            <Button
-              asChild
-              variant="outline"
-              className="bg-white/10 hover:bg-white/20 border-white/30 text-white rounded-xl px-8 py-6 h-auto font-bold"
+          </motion.div>
+
+          {/* Image dots indicator */}
+          {images.length > 1 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={isInView ? { opacity: 1 } : {}}
+              transition={{ duration: 0.5, delay: 0.7 }}
+              className="flex items-center gap-2 mt-8"
             >
-              <Link to="/about" className="flex items-center">
-                <Info className="w-5 h-5 mr-2" />
-                About Us
-              </Link>
-            </Button>
-          </div>
+              {images.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentImage(i)}
+                  aria-label={`View image ${i + 1}`}
+                  className={`rounded-full transition-all duration-300 cursor-pointer ${
+                    i === currentImage ? "w-8 h-1.5 bg-accent" : "w-2 h-1.5 bg-accent/30 hover:bg-accent/60"
+                  }`}
+                />
+              ))}
+            </motion.div>
+          )}
         </div>
       </div>
     </section>

@@ -27,3 +27,8 @@ supabase/.temp/
 *.njsproj
 *.sln
 *.sw?
+
+# Local AI agent skill artifacts (generated during experimentation)
+.agent/skills/
+.agent/skills/**/data/
+.agent/skills/**/__pycache__/

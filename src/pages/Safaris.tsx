@@ -10,12 +10,13 @@ import { Star, MapPin, Clock, Filter, Loader2 } from "lucide-react";
 import OptimizedImage from "@/components/ui/optimized-image";
 import { fallbackSafariImage } from "@/lib/remote-media-fallbacks";
 import { Skeleton } from "@/components/ui/skeleton";
+import PageHero from "@/components/layout/PageHero";
 
 const categories = ["All", "Wildlife Safari", "Beach Holiday", "Cultural Tour", "Adventure"];
 
 // Skeleton loader for safari cards
 const SafariSkeleton = () => (
-  <div className="bg-card rounded-2xl overflow-hidden border border-border">
+  <div className="surface-card overflow-hidden">
     <div className="aspect-[16/10]">
       <Skeleton className="w-full h-full" />
     </div>
@@ -60,26 +61,13 @@ const Safaris = () => {
       <div className="min-h-screen">
         <Navbar />
         <main>
-          <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden bg-primary text-primary-foreground">
-            <div className="absolute inset-0 z-0 opacity-20">
-              <OptimizedImage 
-                src="/images/amboseli-real.webp" 
-                alt="Amboseli elephants Kenya safari package wildlife tour" 
-                className="w-full h-full object-cover"
-                priority
-                width={1920}
-                height={800}
-              />
-            </div>
-            <div className="container-wide relative z-10 mx-auto px-4 sm:px-6 lg:px-8 text-center">
-              <span className="text-accent font-semibold text-sm uppercase tracking-wider">Our Packages</span>
-              <h1 className="text-4xl sm:text-5xl font-bold mt-3">Kenya Safari Packages &amp; Wildlife Tours</h1>
-              <p className="text-primary-foreground/70 mt-4 max-w-2xl mx-auto text-lg text-base">
-                Compare Maasai Mara safari, Amboseli, Tsavo, and affordable Kenya safari packages. Africa safari tours with
-                flights, transfers, and lodge nights bundled by our Nairobi tour operator.
-              </p>
-            </div>
-          </section>
+          <PageHero
+            eyebrow="Our Packages"
+            title="Kenya Safari Packages & Wildlife Tours"
+            description="Compare Maasai Mara safari, Amboseli, Tsavo, and affordable Kenya safari packages. Africa safari tours with flights, transfers, and lodge nights bundled by our Nairobi tour operator."
+            imageSrc="/images/amboseli-real.webp"
+            imageAlt="Amboseli elephants Kenya safari package wildlife tour"
+          />
 
           <section className="section-padding bg-background">
             <div className="container-wide mx-auto">
@@ -111,7 +99,7 @@ const Safaris = () => {
                     <SafariSkeleton />
                   </>
                 ) : filtered.length === 0 ? (
-                  <div className="col-span-full rounded-2xl border border-dashed border-border bg-muted/30 py-16 text-center">
+                  <div className="col-span-full rounded-none border border-dashed border-border bg-muted/30 py-16 text-center">
                     <p className="text-muted-foreground">
                       No packages match this filter right now. Reset the category or contact us, we publish new routes
                       often.
@@ -124,7 +112,7 @@ const Safaris = () => {
                   filtered.map((safari, index) => (
                     <div
                       key={safari.id}
-                      className="group bg-card rounded-2xl overflow-hidden border border-border hover:shadow-xl transition-all duration-500"
+                      className="group surface-card-interactive overflow-hidden transition-all duration-300"
                     >
                     <Link to={`/safaris/${safari.id}`} className="block">
                       <div className="relative aspect-[16/10] overflow-hidden">
@@ -168,7 +156,7 @@ const Safaris = () => {
                           <span className="text-xl font-bold text-primary ml-1">${safari.price}</span>
                           <span className="text-xs text-muted-foreground">/person</span>
                         </div>
-                        <Button size="sm" onClick={() => handleBook(safari.id)} className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-lg">
+                        <Button size="sm" onClick={() => handleBook(safari.id)} className="btn-pill bg-accent text-accent-foreground hover:bg-accent/90">
                           Book Now
                         </Button>
                       </div>

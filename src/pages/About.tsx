@@ -5,6 +5,7 @@ import PageTransition from "@/components/layout/PageTransition";
 import { useScrollAnimation, useCounter } from "@/hooks/useScrollAnimation";
 import { CheckCircle2, Heart, Leaf, Globe, Users, Award, Plane, Bus, Hotel } from "lucide-react";
 import OptimizedImage from "@/components/ui/optimized-image";
+import PageHero from "@/components/layout/PageHero";
 
 const values = [
   { icon: Heart, title: "Passion", description: "We are passionate about East Africa and crafting journeys that feel personal, immersive, and memorable." },
@@ -50,28 +51,18 @@ const About = () => {
     <div className="min-h-screen">
       <Navbar />
       <main>
-        <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden bg-primary text-primary-foreground">
-          <div className="absolute inset-0 z-0 opacity-20">
-            <OptimizedImage
-              src="/images/real images frm Tambua/St the park drive.jpeg"
-              alt="Our Story Background"
-              className="w-full h-full object-cover"
-              priority
-            />
-          </div>
-          <div className="container-wide relative z-10 mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <span className="text-accent font-semibold text-sm uppercase tracking-wider">About Us</span>
-            <h1 className="text-4xl sm:text-5xl font-bold mt-3">Our Story</h1>
-            <p className="text-primary-foreground/70 mt-4 max-w-2xl mx-auto text-lg">
-              Over 16 years of designing unforgettable journeys across Kenya and the wider East Africa region.
-            </p>
-          </div>
-        </section>
+        <PageHero
+          eyebrow="About Us"
+          title="Our Story"
+          description="Over 16 years of designing unforgettable journeys across Kenya and the wider East Africa region."
+          imageSrc="/images/real images frm Tambua/St the park drive.jpeg"
+          imageAlt="Safari drive through a Kenyan national park"
+        />
 
         <section className="section-padding bg-background" ref={storyRef}>
           <div className="container-wide mx-auto">
             <div className={`grid grid-cols-1 lg:grid-cols-2 gap-12 items-center transition-all duration-700 ${storyVisible ? "opacity-100" : "opacity-0 translate-y-8"}`}>
-              <div className="rounded-2xl overflow-hidden aspect-[4/3]">
+              <div className="aspect-[4/3] overflow-hidden rounded-2xl border border-border/50 shadow-xl ring-1 ring-border/40">
                 <img src="/images/real images frm Tambua/Tourists at Nairobi park.jpeg" alt="Tourists at Nairobi park" className="w-full h-full object-cover" loading="lazy" />
               </div>
               <div className="space-y-5">
@@ -138,10 +129,10 @@ const About = () => {
               ].map((item, i) => (
                 <div
                   key={item.title}
-                  className={`rounded-2xl border border-border bg-card p-6 transition-all duration-500 ${servicesVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+                  className={`rounded-none border border-border/50 bg-card p-8 shadow-sm hover:shadow-xl transition-all duration-700 hover:-translate-y-1 ${servicesVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
                   style={{ transitionDelay: `${i * 80}ms` }}
                 >
-                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
+                  <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-none bg-accent/10 group-hover:bg-accent transition-colors">
                     <item.icon className="h-6 w-6 text-accent" />
                   </div>
                   <h3 className="font-bold text-lg text-foreground">{item.title}</h3>
@@ -168,10 +159,10 @@ const About = () => {
               {values.map((v, i) => (
                 <div
                   key={v.title}
-                  className={`p-6 rounded-2xl border border-border bg-card hover:shadow-lg transition-all duration-500 ${valuesVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+                  className={`p-8 rounded-none border border-border/50 bg-card hover:shadow-xl transition-all duration-700 hover:-translate-y-1 border-t-4 hover:border-t-accent ${valuesVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
                   style={{ transitionDelay: `${i * 100}ms` }}
                 >
-                  <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-4">
+                  <div className="w-14 h-14 rounded-none bg-accent/10 flex items-center justify-center mb-6 transition-colors hover:bg-accent">
                     <v.icon className="w-6 h-6 text-accent" />
                   </div>
                   <h3 className="font-bold text-lg text-foreground mb-2">{v.title}</h3>
@@ -195,7 +186,7 @@ const About = () => {
                   className={`text-center transition-all duration-500 justify-self-center ${teamVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
                   style={{ transitionDelay: `${i * 100}ms` }}
                 >
-                  <div className="aspect-square rounded-2xl overflow-hidden mb-4 w-64 max-w-full">
+                  <div className="aspect-[3/4] rounded-none overflow-hidden mb-5 w-64 max-w-full mx-auto shadow-lg hover:shadow-2xl transition-shadow border border-border/50">
                     <img src={member.image} alt={member.name} className="w-full h-full object-cover" loading="lazy" />
                   </div>
                   <h3 className="font-bold text-foreground">{member.name}</h3>

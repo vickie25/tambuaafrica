@@ -2,6 +2,7 @@ import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { Calendar, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useBlogs } from "@/hooks/useBlogs";
+import SectionHeader from "@/components/layout/SectionHeader";
 
 const BlogPreview = () => {
   const { ref, isVisible } = useScrollAnimation();
@@ -10,10 +11,7 @@ const BlogPreview = () => {
   return (
     <section className="section-padding bg-background" ref={ref}>
       <div className="container-wide mx-auto">
-        <div className="text-center mb-12">
-          <span className="text-accent font-semibold text-sm uppercase tracking-wider">Our Blog</span>
-          <h2 className="text-3xl sm:text-4xl font-bold text-foreground mt-2">Latest News & Stories</h2>
-        </div>
+        <SectionHeader eyebrow="Our Blog" title="Latest News & Stories" />
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
           {posts.map((post, index) => (

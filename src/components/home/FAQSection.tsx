@@ -5,6 +5,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import SectionHeader from "@/components/layout/SectionHeader";
 
 const faqs = [
   {
@@ -55,13 +56,11 @@ const FAQSection = () => {
   return (
     <section className="section-padding bg-background" ref={ref}>
       <div className="container-wide mx-auto">
-        <div className="text-center mb-12">
-          <span className="text-accent font-semibold text-sm uppercase tracking-wider">FAQ</span>
-          <h2 className="text-3xl sm:text-4xl font-bold text-foreground mt-2">Frequently Asked Questions</h2>
-          <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
-            Everything you need to know before planning your safari adventure.
-          </p>
-        </div>
+        <SectionHeader
+          eyebrow="FAQ"
+          title="Frequently Asked Questions"
+          description="Everything you need to know before planning your safari adventure."
+        />
 
         <div
           className={`max-w-3xl mx-auto transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}

@@ -14,6 +14,7 @@ import OptimizedImage from "@/components/ui/optimized-image";
 import BookingModal from "@/components/booking/BookingModal";
 import { useReducedMotion } from "framer-motion";
 import { fallbackDestinationImage, fallbackLodgeImage } from "@/lib/remote-media-fallbacks";
+import PageHero from "@/components/layout/PageHero";
 
 const DESTINATION_DISPLAY_ORDER = [
   "tsavo",
@@ -540,28 +541,14 @@ const Destinations = () => {
       <div className="min-h-screen">
         <Navbar />
         <main>
-          {/* Hero */}
-          <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden bg-primary text-primary-foreground">
-            <div className="absolute inset-0 z-0 opacity-20">
-              <OptimizedImage 
-                src="/images/chale-extra-1.webp"
-                fallbackSrc={fallbackDestinationImage("page-hero")}
-                alt="Destinations Background" 
-                className="w-full h-full object-cover"
-                priority 
-              />
-            </div>
-            <div className="container-wide relative z-10 mx-auto px-4 sm:px-6 lg:px-8 text-center">
-              <span className="text-white font-semibold text-sm uppercase tracking-wider">
-                Ready to Travel With Real Adventure and Enjoy Natural
-              </span>
-              <h1 className="text-4xl sm:text-5xl font-bold mt-3">Destinations</h1>
-              <p className="text-primary-foreground/70 mt-4 max-w-2xl mx-auto text-lg">
-                Explore Kenya&apos;s premier safari destinations, coast, and lakes, each card opens curated lodges and
-                camp ideas you can book with Tambua.
-              </p>
-            </div>
-          </section>
+          <PageHero
+            eyebrow="Ready to travel with real adventure"
+            title="Destinations"
+            description="Explore Kenya's premier safari destinations, coast, and lakes. Each card opens curated lodges and camp ideas you can book with Tambua."
+            imageSrc="/images/chale-extra-1.webp"
+            imageAlt="Kenya safari destination coastline"
+            fallbackSrc={fallbackDestinationImage("page-hero")}
+          />
 
           {/* Kenya Destinations */}
           <section className="section-padding bg-background" ref={ref}>
@@ -578,7 +565,7 @@ const Destinations = () => {
               ) : (
               <>
               <div
-                className={`mb-12 grid gap-6 rounded-2xl border border-border bg-card/80 p-6 sm:p-8 shadow-sm sm:grid-cols-3 transition-all duration-700 ${
+                className={`mb-12 grid gap-6 rounded-none border border-border/50 bg-card p-8 sm:p-10 shadow-sm sm:grid-cols-3 transition-all duration-700 ${
                   isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
                 }`}
               >
@@ -627,7 +614,7 @@ const Destinations = () => {
                     <button
                       type="button"
                       key={dest.id}
-                      className={`group relative rounded-2xl overflow-hidden aspect-[4/3] cursor-pointer transition-all duration-500 ${
+                      className={`group relative rounded-none overflow-hidden aspect-[4/3] cursor-pointer border border-border/50 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-700 ${
                         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
                       }`}
                       style={{ transitionDelay: `${index * 80}ms` }}

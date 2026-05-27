@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageTransition from "@/components/layout/PageTransition";
-import OptimizedImage from "@/components/ui/optimized-image";
+import PageHero from "@/components/layout/PageHero";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
@@ -40,54 +40,41 @@ export function ServicePageLayout({
     <PageTransition>
       <div className="min-h-screen bg-background">
         <Navbar />
-        <header className="relative overflow-hidden bg-primary pt-28 pb-16 text-primary-foreground lg:pt-36 lg:pb-24">
-          <div className="absolute inset-0 z-0 opacity-25">
-            <OptimizedImage
-              src={heroImage}
-              fallbackSrc={heroFallback}
-              alt={heroAlt}
-              className="h-full w-full object-cover"
-              priority
-              width={1280}
-              height={720}
-              quality={72}
-              sizes="100vw"
-            />
-          </div>
-          <div className="container-wide relative z-10 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <nav className="mb-6 text-sm text-primary-foreground/80">
-              <Link to="/services" className="hover:text-white">
+        <PageHero
+          align="left"
+          eyebrow={eyebrow}
+          title={title}
+          description={subtitle}
+          imageSrc={heroImage}
+          imageAlt={heroAlt}
+          fallbackSrc={heroFallback}
+          breadcrumb={
+            <nav>
+              <Link to="/services" className="transition-colors hover:text-white">
                 Services
               </Link>
               <span className="mx-2 opacity-60">/</span>
               <span className="text-white">{title}</span>
             </nav>
-            <p className="text-sm font-semibold uppercase tracking-wider text-accent">{eyebrow}</p>
-            <h1 className="mt-2 text-3xl font-bold tracking-tight text-balance text-primary-foreground sm:text-4xl md:text-5xl md:leading-[1.1]">
-              {title}
-            </h1>
-            <p className="mt-4 max-w-2xl text-base leading-relaxed text-pretty text-primary-foreground/90 sm:text-lg">
-              {subtitle}
-            </p>
-          </div>
-        </header>
+          }
+        />
 
         <main className="container-wide mx-auto px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">{children}</main>
 
-        <section className="border-t border-border bg-muted/40 py-12 sm:py-16">
+        <section className="border-t border-border section-alt py-12 sm:py-16">
           <div className="container-wide mx-auto flex flex-col items-center gap-4 px-4 text-center sm:px-6 lg:px-8">
-            <h2 className="text-xl font-bold text-foreground sm:text-2xl">Ready to plan the logistics?</h2>
-            <p className="max-w-xl text-sm text-muted-foreground sm:text-base">
-              Tell us dates, party size, and preferences, we reply with options and next steps. You can also browse curated
+            <h2 className="section-title text-2xl sm:text-3xl">Ready to plan the logistics?</h2>
+            <p className="section-lead max-w-xl">
+              Tell us dates, party size, and preferences — we reply with options and next steps. You can also browse curated
               stays on our Destinations page.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3">
-              <Button asChild size="lg" className="rounded-xl">
+              <Button asChild size="lg" className="btn-pill">
                 <Link to={`/contact?topic=${ctaTopic}`} className="inline-flex items-center gap-2">
                   Request a quote <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="rounded-xl bg-background">
+              <Button asChild variant="outline" size="lg" className="btn-pill bg-background">
                 <Link to="/destinations">Browse destinations & lodges</Link>
               </Button>
             </div>

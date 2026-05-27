@@ -3,12 +3,15 @@
  * Run: node scripts/generate-site-snapshot.cjs
  */
 const { createClient } = require("@supabase/supabase-js");
+const dotenv = require("dotenv");
 const fs = require("fs");
 const path = require("path");
 const zlib = require("zlib");
 
 const root = path.resolve(__dirname, "..");
 const envPath = path.join(root, ".env");
+
+dotenv.config({ path: envPath });
 
 function loadEnv() {
   const env = {};
@@ -20,9 +23,12 @@ function loadEnv() {
   return env;
 }
 
-const env = loadEnv();
+const env = { ...loadEnv(), ...process.env };
 const supabaseUrl = env.VITE_SUPABASE_URL;
-const supabaseKey = env.VITE_SUPABASE_PUBLISHABLE_KEY || env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseKey =
+  env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+  env.SUPABASE_SERVICE_ROLE_KEY ||
+  env.SUPABASE_ANON_KEY;
 
 const OUT_PUBLIC = path.join(root, "public/data/site-snapshot.json");
 const OUT_SRC = path.join(root, "src/generated/site-snapshot.json");

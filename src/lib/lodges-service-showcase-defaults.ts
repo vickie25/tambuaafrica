@@ -26,7 +26,7 @@ export const SHOWCASE_LODGE_IMAGE_BY_DEFAULT_ID: Record<string, string> = {
   "default-loisaba": "/images/samburu-reserve.webp",
   "default-elephant-bedroom": "/images/samburu-reserve.webp",
   "default-hells-gate": "/images/Park.webp",
-  "default-naivasha-camp": "/images/destiations/Lake Naivasha/lake elementaita.webp",
+  "default-naivasha-camp": "/images/destiations/Lake Naivasha/Sopa resort.webp",
   "default-nakuru-lodge": "/images/destiations/Lake Nakuru/lake elementaita.webp",
 };
 

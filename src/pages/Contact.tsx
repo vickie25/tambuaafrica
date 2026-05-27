@@ -13,7 +13,7 @@ import { submitInquiry } from "@/lib/inquiry";
 import { toast } from "sonner";
 import { TEAM_CONTACT_EMAILS } from "@/lib/admin-email";
 import { WHATSAPP_DISPLAY } from "@/lib/whatsapp";
-import { trackConversion } from "@/components/seo/GoogleAnalytics";
+import { trackConversion } from "@/lib/analytics";
 
 const emptyForm = { name: "", email: "", phone: "", subject: "", message: "" };
 

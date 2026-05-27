@@ -30,6 +30,37 @@ export const FALLBACK_HERO_IMAGES = [
   "/images/Jumping.webp",
 ].map(normalizePublicImagePath);
 
+export const FALLBACK_FEATURE_WILD_IMAGES = [
+  "/images/wildbeast-migration-1.webp",
+  "/images/wildbeast-migration-2.webp",
+  "/images/wildbeast-migration-3.webp",
+].map(normalizePublicImagePath);
+
+export const FALLBACK_FEATURE_CULTURE_IMAGES = [
+  "/images/maasai-mara-authentic.webp",
+  "/images/culture.webp",
+  "/images/real images frm Tambua/Maasai Culture.jpeg",
+].map(normalizePublicImagePath);
+
+export const FALLBACK_FEATURE_LUXURY_IMAGES = [
+  "/images/HOTEL ROOM.webp",
+  "/images/destiations/Tsavo/voi lodge swimming pool.webp",
+  "/images/destiations/Tsavo/Kilaguni serena safari lodge food sfood.webp",
+].map(normalizePublicImagePath);
+
+const FEATURE_FALLBACKS: Partial<
+  Record<
+    | "feature_wild"
+    | "feature_culture"
+    | "feature_luxury",
+    readonly string[]
+  >
+> = {
+  feature_wild: FALLBACK_FEATURE_WILD_IMAGES,
+  feature_culture: FALLBACK_FEATURE_CULTURE_IMAGES,
+  feature_luxury: FALLBACK_FEATURE_LUXURY_IMAGES,
+};
+
 type CarouselRow = {
   id?: string | null;
   url?: string | null;
@@ -77,7 +108,8 @@ export const useCarouselImages = (
   const data = useMemo(() => {
     const rows = allQuery.data ?? [];
     if (!rows.length) {
-      return section === "hero" ? FALLBACK_HERO_IMAGES : [];
+      if (section === "hero") return FALLBACK_HERO_IMAGES;
+      return FEATURE_FALLBACKS[section] ?? [];
     }
 
     const validUrls = rows
@@ -86,13 +118,20 @@ export const useCarouselImages = (
       .filter((url): url is string => Boolean(url && url.trim().length > 0));
 
     if (validUrls.length > 0) return validUrls;
-    return section === "hero" ? FALLBACK_HERO_IMAGES : [];
+
+    if (section === "hero") return FALLBACK_HERO_IMAGES;
+    return FEATURE_FALLBACKS[section] ?? [];
   }, [allQuery.data, section]);
+
+  const placeholderData =
+    section === "hero"
+      ? FALLBACK_HERO_IMAGES
+      : FEATURE_FALLBACKS[section] ?? [];
 
   return {
     ...allQuery,
-    data,
-    placeholderData: section === "hero" ? FALLBACK_HERO_IMAGES : [],
+    data: data.length > 0 ? data : placeholderData,
+    placeholderData,
   };
 };
 

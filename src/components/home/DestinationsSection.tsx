@@ -3,12 +3,37 @@ import { MapPin, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import { encodePublicImageSrc } from "@/lib/public-image-path";
 
 const destinations = [
-  { id: "masai-mara", title: "Maasai Mara", country: "Kenya", image: "/images/real images frm Tambua/Mara.jpeg", size: "large" },
-  { id: "serengeti", title: "Serengeti", country: "Tanzania", image: "/images/real images frm Tambua/serengenti.jpeg", size: "small" },
-  { id: "amboseli", title: "Amboseli", country: "Kenya", image: "/images/real images frm Tambua/Elephant.jpeg", size: "small" },
-  { id: "ngorongoro", title: "Ngorongoro", country: "Tanzania", image: "/images/real images frm Tambua/Tanzania.jpeg", size: "large" },
+  {
+    id: "masai-mara",
+    title: "Maasai Mara",
+    country: "Kenya",
+    image: "/images/real images frm Tambua/at MAasai mara.jpeg",
+    size: "large",
+  },
+  {
+    id: "serengeti",
+    title: "Serengeti",
+    country: "Tanzania",
+    image: "/images/real images frm Tambua/the safari.jpeg",
+    size: "small",
+  },
+  {
+    id: "amboseli",
+    title: "Amboseli",
+    country: "Kenya",
+    image: "/images/amboseli-real.webp",
+    size: "small",
+  },
+  {
+    id: "ngorongoro",
+    title: "Ngorongoro",
+    country: "Tanzania",
+    image: "/images/real images frm Tambua/Tourist learning about the culture.jpeg",
+    size: "large",
+  },
 ];
 
 const DestinationsSection = () => {
@@ -80,7 +105,7 @@ const DestinationsSection = () => {
               >
                 <Link to={`/destinations/${dest.id}`} className="block w-full h-full">
                   <img
-                    src={dest.image}
+                    src={encodePublicImageSrc(dest.image)}
                     alt={dest.title}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                   />

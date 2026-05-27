@@ -60,11 +60,12 @@ const HeroSection = () => {
               alt="Maasai Mara wildebeest migration Kenya safari landscape"
               fallbackSeed={`hero-${index}`}
               fallbackSrc={fallbackSafariImage(`hero-${index}`)}
-              className="w-full h-full object-cover scale-[1.03] motion-safe:animate-[kenBurns_14s_ease-in-out_infinite]"
+              fill
               priority
               quality={90}
               width={1920}
               height={1080}
+              className="scale-[1.03] motion-safe:animate-[kenBurns_14s_ease-in-out_infinite]"
             />
           </motion.div>
         ))}

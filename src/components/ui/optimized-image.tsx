@@ -20,6 +20,10 @@ interface OptimizedImageProps {
   fallbackSeed?: string;
   /** IntersectionObserver rootMargin; smaller = fewer images load ahead of scroll (default 300px). */
   rootMargin?: string;
+  /** Fill the parent box (for hero/carousel backgrounds). Parent must be positioned. */
+  fill?: boolean;
+  /** Reserve layout space before load (reduces CLS). e.g. "16/9", "4/3", "1/1". */
+  aspectRatio?: string;
 }
 
 // Ultra-fast LQIP (Low Quality Image Placeholder) - 1px data URL
@@ -40,8 +44,10 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   fallbackSrc,
   fallbackSeed,
   rootMargin = '300px',
+  fill = false,
+  aspectRatio,
 }) => {
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(priority);
   const [isInView, setIsInView] = useState(priority);
   const [hasError, setHasError] = useState(false);
   const [activeSrc, setActiveSrc] = useState(src);
@@ -74,11 +80,11 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   }, [priority, rootMargin]);
 
   useEffect(() => {
-    setIsLoaded(false);
+    setIsLoaded(priority);
     setHasError(false);
     setActiveSrc(normalizePublicImagePath(src));
     setTriedFallback(false);
-  }, [src, fallbackSrc]);
+  }, [src, fallbackSrc, priority]);
 
   const resolvedFallback =
     fallbackSrc ||
@@ -142,47 +148,52 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
     );
   }
 
+  const showImage = priority || isLoaded;
+
   return (
-    <div ref={containerRef} className={cn('relative overflow-hidden', className)}>
+    <div
+      ref={containerRef}
+      className={cn(fill ? 'absolute inset-0' : 'relative', 'overflow-hidden', className)}
+      style={!fill && aspectRatio ? { aspectRatio } : undefined}
+    >
       {/* Ultra-fast LQIP background - shows instantly while image loads */}
-      {!isLoaded && (
-        <div 
-          className="absolute inset-0" 
+      {!showImage && (
+        <div
+          className="absolute inset-0"
           style={{ backgroundImage: `url('${lqip}')`, backgroundSize: 'cover' }}
         />
       )}
 
-      {/* Actual image,  rendered only after the container enters the viewport */}
+      {/* Actual image — priority/hero loads immediately; others when in view */}
       {isInView && (
-        <>
-          <img
-            src={optimizedActive}
-            alt={alt}
-            width={width}
-            height={height}
-            loading={priority ? 'eager' : 'lazy'}
-            fetchPriority={priority ? "high" : fetchPriority}
-            sizes={sizes}
-            decoding="async"
-            onLoad={() => setIsLoaded(true)}
-            onError={() => {
-              if (resolvedFallback && !triedFallback) {
-                setTriedFallback(true);
-                setActiveSrc(resolvedFallback);
-                setIsLoaded(false);
-                return;
-              }
-              setHasError(true);
-            }}
-            className={cn(
-              'w-full h-full transition-opacity duration-300',
-              isLoaded ? 'opacity-100' : 'opacity-0'
-            )}
-            style={{
-              objectFit: 'cover',
-            }}
-          />
-        </>
+        <img
+          src={optimizedActive}
+          alt={alt}
+          width={width}
+          height={height}
+          loading={priority ? 'eager' : 'lazy'}
+          {...(priority || fetchPriority !== 'auto'
+            ? { fetchpriority: (priority ? 'high' : fetchPriority) as 'high' | 'low' | 'auto' }
+            : {})}
+          sizes={sizes}
+          decoding="async"
+          onLoad={() => setIsLoaded(true)}
+          onError={() => {
+            if (resolvedFallback && !triedFallback) {
+              setTriedFallback(true);
+              setActiveSrc(resolvedFallback);
+              setIsLoaded(priority);
+              return;
+            }
+            setHasError(true);
+          }}
+          className={cn(
+            fill ? 'absolute inset-0 h-full w-full' : 'h-full w-full',
+            !priority && 'transition-opacity duration-300',
+            showImage ? 'opacity-100' : 'opacity-0',
+          )}
+          style={{ objectFit: 'cover' }}
+        />
       )}
     </div>
   );

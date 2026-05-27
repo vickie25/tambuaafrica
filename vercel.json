@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npm run prebuild && vite build",
+  "buildCommand": "npm run prebuild && vite build && npx playwright install chromium && node scripts/prerender-static.mjs",
   "outputDirectory": "dist",
   "framework": "vite",
   "regions": ["fra1"],

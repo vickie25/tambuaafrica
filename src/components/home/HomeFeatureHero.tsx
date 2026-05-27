@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { motion, useReducedMotion, useInView } from "framer-motion";
 import OptimizedImage from "@/components/ui/optimized-image";
+import { fallbackSafariImage } from "@/lib/remote-media-fallbacks";
 
 interface HomeFeatureHeroProps {
   images: string[];
@@ -53,7 +54,9 @@ const HomeFeatureHero = ({
       className="relative flex min-h-[min(85vh,48rem)] items-stretch overflow-hidden"
     >
       {/* Image Column */}
-      <div className={`absolute inset-0 lg:relative lg:flex-1 ${isLeft ? "lg:order-2" : "lg:order-1"}`}>
+      <div
+        className={`absolute inset-0 min-h-[min(85vh,48rem)] lg:relative lg:min-h-0 lg:flex-1 ${isLeft ? "lg:order-2" : "lg:order-1"}`}
+      >
         {images.map((image, index) => (
           <motion.div
             key={image}
@@ -65,9 +68,11 @@ const HomeFeatureHero = ({
             <OptimizedImage
               src={image}
               alt={`${title} — image ${index + 1}`}
-              className="h-full w-full object-cover"
+              fallbackSrc={fallbackSafariImage(`${title}-${index}`)}
+              fill
+              priority
               quality={82}
-              priority={index === 0}
+              rootMargin="800px"
             />
           </motion.div>
         ))}

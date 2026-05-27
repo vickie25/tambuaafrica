@@ -4,14 +4,53 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Mountain, Camera, Sunrise, Map, Heart, Compass } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import { encodePublicImageSrc } from "@/lib/public-image-path";
 
 const activities = [
-  { id: "wildlife", icon: Camera, title: "Wildlife Safaris", description: "Witness the Big Five and the Great Migration in world-renowned national parks and reserves.", image: "/images/real images frm Tambua/Tanzania.jpeg" },
-  { id: "mountain", icon: Mountain, title: "Mountain Trekking", description: "Scale the heights of Mount Kenya or Kilimanjaro with our experienced climbing guides.", image: "/images/real images frm Tambua/kilimajaro.webp" },
-  { id: "cultural", icon: Heart, title: "Cultural Encounters", description: "Engage authentically with local Maasai and Samburu communities and learn their rich traditions.", image: "/images/real images frm Tambua/Masai.webp" },
-  { id: "balloon", icon: Sunrise, title: "Balloon Safaris", description: "Float silently over the savanna at dawn, followed by a champagne breakfast in the bush.", image: "/images/real images frm Tambua/balooon.webp" },
-  { id: "beach", icon: Compass, title: "Beach Extensions", description: "Unwind on the pristine white-sand beaches of Diani or Zanzibar after your thrilling safari.", image: "/images/real images frm Tambua/Diani.jpeg" },
-  { id: "custom", icon: Map, title: "Bespoke Itineraries", description: "Work with our experts to design a completely personalized journey that matches your exact dreams.", image: "/images/real images frm Tambua/Elephant.jpeg" },
+  {
+    id: "wildlife",
+    icon: Camera,
+    title: "Wildlife Safaris",
+    description:
+      "Witness the Big Five and the Great Migration in world-renowned national parks and reserves.",
+    image: "/images/real images frm Tambua/the safari.jpeg",
+  },
+  {
+    id: "mountain",
+    icon: Mountain,
+    title: "Mountain Trekking",
+    description: "Scale the heights of Mount Kenya or Kilimanjaro with our experienced climbing guides.",
+    image: "/images/mount-kenya.webp",
+  },
+  {
+    id: "cultural",
+    icon: Heart,
+    title: "Cultural Encounters",
+    description:
+      "Engage authentically with local Maasai and Samburu communities and learn their rich traditions.",
+    image: "/images/real images frm Tambua/Maasai Culture.jpeg",
+  },
+  {
+    id: "balloon",
+    icon: Sunrise,
+    title: "Balloon Safaris",
+    description: "Float silently over the savanna at dawn, followed by a champagne breakfast in the bush.",
+    image: "/images/Wild beast migration 2.webp",
+  },
+  {
+    id: "beach",
+    icon: Compass,
+    title: "Beach Extensions",
+    description: "Unwind on the pristine white-sand beaches of Diani or Zanzibar after your thrilling safari.",
+    image: "/images/diani.webp",
+  },
+  {
+    id: "custom",
+    icon: Map,
+    title: "Bespoke Itineraries",
+    description: "Work with our experts to design a completely personalized journey that matches your exact dreams.",
+    image: "/images/amboseli-real.webp",
+  },
 ];
 
 const ActivitiesSection = () => {
@@ -109,7 +148,7 @@ const ActivitiesSection = () => {
                     className="absolute inset-0"
                   >
                     <img
-                      src={activity.image}
+                      src={encodePublicImageSrc(activity.image)}
                       alt={activity.title}
                       className="w-full h-full object-cover"
                     />

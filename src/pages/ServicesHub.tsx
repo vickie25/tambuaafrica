@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import TopicClusterNav from "@/components/seo/TopicClusterNav";
 import PageTransition from "@/components/layout/PageTransition";
 import PageHero from "@/components/layout/PageHero";
 import { Button } from "@/components/ui/button";
@@ -99,6 +100,10 @@ const ServicesHub = () => {
                 </article>
               );
             })}
+          </div>
+
+          <div className="container-wide mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 pb-16">
+            <TopicClusterNav />
           </div>
         </main>
 

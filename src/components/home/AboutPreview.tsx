@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useScrollAnimation, useCounter } from "@/hooks/useScrollAnimation";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { motion, useInView } from "framer-motion";
+import { encodePublicImageSrc } from "@/lib/public-image-path";
 
 const stats = [
   { value: 16, suffix: "+", label: "Years Experience" },
@@ -92,7 +93,7 @@ const AboutPreview = () => {
               className="relative aspect-[4/3] sm:aspect-[16/10] lg:aspect-[4/3] xl:aspect-[16/10] overflow-hidden rounded-3xl shadow-2xl"
             >
               <img
-                src="/images/real images frm Tambua/Team.jpeg"
+                src={encodePublicImageSrc("/images/real images frm Tambua/Team.jpeg")}
                 alt="Tambua Africa safari guides team"
                 className="w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
                 loading="lazy"

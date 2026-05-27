@@ -6,21 +6,29 @@ import { useEffect } from 'react';
  */
 export const usePerformanceOptimization = () => {
   useEffect(() => {
-    // Optimize Web Fonts loading
-    if ('fonts' in document) {
+    if ("fonts" in document) {
       document.fonts.ready.then(() => {
-        document.documentElement.classList.add('fonts-loaded');
+        document.documentElement.classList.add("fonts-loaded");
       });
     }
 
-    // Disable network information tracking if available
-    if ('connection' in navigator) {
-      const connection = (navigator as any).connection;
-      if (connection && connection.saveData) {
-        // Respect data-saving mode
-        console.log('Data-saving mode enabled');
+    // Defer non-critical work to reduce INP impact on first interaction
+    const defer = (fn: () => void) => {
+      if ("requestIdleCallback" in window) {
+        (window as Window & { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(fn);
+      } else {
+        setTimeout(fn, 1);
       }
-    }
+    };
+
+    defer(() => {
+      if ("connection" in navigator) {
+        const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+        if (connection?.saveData) {
+          document.documentElement.classList.add("save-data");
+        }
+      }
+    });
   }, []);
 };
 

@@ -6,7 +6,9 @@ import { Calendar, ArrowLeft, Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { useBlog } from "@/hooks/useBlogs";
 import { Helmet } from "react-helmet-async";
-import { SITE_NAME, SITE_ORIGIN, absoluteUrl, truncateMetaDescription } from "@/lib/seo";
+import { SITE_NAME, SITE_ORIGIN, absoluteUrl, truncateMetaDescription, truncateTitle } from "@/lib/seo";
+import JsonLd from "@/components/seo/JsonLd";
+import { buildBlogPostingJsonLd, buildBreadcrumbJsonLdFromTrail } from "@/lib/schema";
 
 const BlogDetail = () => {
   const { id } = useParams();
@@ -30,13 +32,28 @@ const BlogDetail = () => {
   if (!post) return null;
 
   const pageUrl = `${SITE_ORIGIN}/blog/${post.id}`;
+  const pageTitle = truncateTitle(`${post.title} | ${SITE_NAME}`);
   const metaDescription = truncateMetaDescription(post.excerpt);
   const ogImage = absoluteUrl(post.image);
+  const articleLd = buildBlogPostingJsonLd({
+    id: post.id,
+    title: post.title,
+    excerpt: post.excerpt,
+    image: ogImage,
+    date: post.date,
+    category: post.category,
+    readTime: post.readTime,
+  });
+  const breadcrumbLd = buildBreadcrumbJsonLdFromTrail([
+    { name: "Home", path: "/" },
+    { name: "Blog", path: "/blog" },
+    { name: post.title, path: `/blog/${post.id}` },
+  ]);
 
   return (
     <PageTransition>
       <Helmet>
-        <title>{`${post.title} | ${SITE_NAME}`}</title>
+        <title>{pageTitle}</title>
         <meta name="description" content={metaDescription} />
         <meta name="keywords" content={`${post.category}, safari, Kenya, Tanzania, Uganda, Rwanda, East Africa tourism`} />
         <meta property="og:site_name" content={SITE_NAME} />
@@ -51,6 +68,7 @@ const BlogDetail = () => {
         <meta name="twitter:image" content={ogImage} />
         <link rel="canonical" href={pageUrl} />
       </Helmet>
+      <JsonLd data={[articleLd, breadcrumbLd]} />
       <div className="min-h-screen">
         <Navbar />
         <main>

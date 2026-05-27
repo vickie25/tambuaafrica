@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import TopicClusterNav from "@/components/seo/TopicClusterNav";
 import PageTransition from "@/components/layout/PageTransition";
 import { Button } from "@/components/ui/button";
 import { useSafaris } from "@/hooks/useSafaris";
@@ -164,6 +165,12 @@ const Safaris = () => {
                   </div>
                 )))}
               </div>
+            </div>
+          </section>
+
+          <section className="section-padding pt-0">
+            <div className="container-wide mx-auto max-w-3xl">
+              <TopicClusterNav />
             </div>
           </section>
         </main>

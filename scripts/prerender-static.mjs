@@ -63,8 +63,8 @@ function writeHtmlForRoute(route, html) {
 }
 
 async function main() {
-  if (process.env.VERCEL === "1") {
-    console.log("Skipping prerender on Vercel (SPA + meta tags; run npm run prerender locally if needed).");
+  if (process.env.SKIP_PRERENDER === "1") {
+    console.log("Skipping prerender (SKIP_PRERENDER=1).");
     process.exit(0);
   }
 

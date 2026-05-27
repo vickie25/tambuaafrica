@@ -37,6 +37,16 @@ export type RouteSeoEntry = {
   robots?: string;
 };
 
+/** Truncate for SERP title (~60 visible characters). */
+export function truncateTitle(text: string, max = 60): string {
+  const t = text.trim();
+  if (t.length <= max) return t;
+  const cut = t.slice(0, max - 1);
+  const lastSpace = cut.lastIndexOf(" ");
+  const base = lastSpace > 24 ? cut.slice(0, lastSpace) : cut;
+  return `${base.trimEnd()}…`;
+}
+
 /** Truncate for meta description (~155–160 visible characters in SERPs). */
 export function truncateMetaDescription(text: string, max = 158): string {
   const t = text.trim();
@@ -149,6 +159,11 @@ export const SEO_BY_ROUTE: Record<string, RouteSeoEntry> = {
     description: "Confirm your Tambua Africa account email.",
     robots: "noindex, follow",
   },
+  "/auth/callback": {
+    title: `Signing In | ${SITE_NAME}`,
+    description: "Completing secure sign-in to your Tambua Africa account.",
+    robots: "noindex, follow",
+  },
   "/booking": {
     title: `Complete Booking | ${SITE_NAME}`,
     description: "Finish payment and details for your confirmed Tambua Africa safari or tour booking.",
@@ -178,30 +193,50 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   "/privacy": "Privacy",
 };
 
+/** Canonical NAP — keep identical across footer, schema, and Google Business Profile. */
+export const BUSINESS_NAP = {
+  name: SITE_NAME,
+  streetAddress: "Standard Street, Floor 4, Suite 16",
+  addressLocality: "Nairobi",
+  addressRegion: "Nairobi County",
+  postalCode: "00100",
+  addressCountry: "KE",
+  telephone: "+254726207900",
+  telephoneDisplay: "+254 726 207 900",
+  email: "info@tambuaafrica.com",
+} as const;
+
+export const SOCIAL_PROFILES = [
+  "https://www.facebook.com/Tambuasafaris/",
+  "https://twitter.com/TambuaAfrica",
+] as const;
+
 export const TRAVEL_AGENCY_JSON_LD = {
   "@context": "https://schema.org",
   "@type": "TravelAgency",
-  name: SITE_NAME,
+  name: BUSINESS_NAP.name,
   url: SITE_ORIGIN,
   logo: LOGO_URL,
   description:
     "Nairobi-based tour operator specializing in tailor-made Kenya safaris, wildlife tours, beach holidays and cultural experiences across Africa.",
   address: {
     "@type": "PostalAddress",
-    streetAddress: "Standard Street, Floor 4, Suite 16",
-    addressLocality: "Nairobi",
-    addressCountry: "KE",
+    streetAddress: BUSINESS_NAP.streetAddress,
+    addressLocality: BUSINESS_NAP.addressLocality,
+    addressRegion: BUSINESS_NAP.addressRegion,
+    postalCode: BUSINESS_NAP.postalCode,
+    addressCountry: BUSINESS_NAP.addressCountry,
   },
-  telephone: "+254726207900",
-  email: "info@tambuaafrica.com",
-  sameAs: [
-    "https://www.facebook.com/Tambuasafaris/",
-    "https://twitter.com/TambuaAfrica",
-  ],
+  telephone: BUSINESS_NAP.telephone,
+  email: BUSINESS_NAP.email,
+  sameAs: [...SOCIAL_PROFILES],
   openingHours: "Mo-Fr 08:00-17:00",
   priceRange: "$$$",
-  areaServed: "Kenya, Africa",
+  areaServed: ["Kenya", "Tanzania", "Uganda", "Rwanda", "East Africa"],
 };
+
+/** First hero slide for LCP preload (matches FALLBACK_HERO_IMAGES[0]). */
+export const HERO_LCP_IMAGE_PATH = "/images/Wild beast migration 2.webp";
 
 export function buildBreadcrumbJsonLd(pathname: string): Record<string, unknown> | null {
   const label = BREADCRUMB_LABELS[pathname];

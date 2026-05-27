@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "snapshot": "node scripts/generate-site-snapshot.cjs",
-    "prebuild": "node scripts/generate-site-snapshot.cjs",
+    "sitemap": "node scripts/generate-sitemap.cjs",
+    "prebuild": "node scripts/generate-site-snapshot.cjs && node scripts/generate-sitemap.cjs",
     "build": "vite build",
     "postbuild": "node scripts/prerender-static.mjs",
     "prerender": "node scripts/prerender-static.mjs",
@@ -86,6 +87,7 @@
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.9",
     "vite-plugin-pwa": "^1.2.0",
+    "web-vitals": "^5.2.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {

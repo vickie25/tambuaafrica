@@ -10,7 +10,9 @@ import BookingModal from "@/components/booking/BookingModal";
 import { Star, MapPin, Clock, CheckCircle2, ArrowLeft, Users, Calendar, Shield, Loader2 } from "lucide-react";
 import OptimizedImage from "@/components/ui/optimized-image";
 import { fallbackSafariImage } from "@/lib/remote-media-fallbacks";
-import { SITE_NAME, SITE_ORIGIN, absoluteUrl, truncateMetaDescription } from "@/lib/seo";
+import { SITE_NAME, SITE_ORIGIN, absoluteUrl, truncateMetaDescription, truncateTitle } from "@/lib/seo";
+import JsonLd from "@/components/seo/JsonLd";
+import { buildTouristTripJsonLd, buildBreadcrumbJsonLdFromTrail } from "@/lib/schema";
 
 const itineraries: Record<string, string[]> = {
   "masai-mara-serengeti-circuit": [
@@ -93,42 +95,34 @@ const SafariDetail = () => {
 
   const days = itineraries[safari.id] || ["Contact us for a detailed itinerary."];
   const pageUrl = `${SITE_ORIGIN}/safaris/${safari.id}`;
+  const pageTitle = truncateTitle(`${safari.title} | ${SITE_NAME}`);
   const metaDescription = truncateMetaDescription(`${safari.description} ${safari.location}. ${safari.duration}.`);
   const ogImage = absoluteUrl(safari.image);
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "TouristTrip",
-    name: safari.title,
+  const structuredData = buildTouristTripJsonLd({
+    id: safari.id,
+    title: safari.title,
     description: safari.description,
-    touristType: "Safari",
     image: ogImage,
-    provider: {
-      "@type": "TravelAgency",
-      name: SITE_NAME,
-      url: SITE_ORIGIN,
-    },
-    ...(safari.price > 0
-      ? {
-          offers: {
-            "@type": "Offer",
-            price: safari.price,
-            priceCurrency: "USD",
-            url: pageUrl,
-          },
-        }
-      : {}),
-  };
+    price: safari.price,
+    location: safari.location,
+    duration: safari.duration,
+  });
+  const breadcrumbLd = buildBreadcrumbJsonLdFromTrail([
+    { name: "Home", path: "/" },
+    { name: "Safari Packages", path: "/safaris" },
+    { name: safari.title, path: `/safaris/${safari.id}` },
+  ]);
 
   return (
     <div className="min-h-screen">
       <Helmet>
-        <title>{`${safari.title} | ${SITE_NAME}`}</title>
+        <title>{pageTitle}</title>
         <meta name="description" content={metaDescription} />
         <link rel="canonical" href={pageUrl} />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content={SITE_NAME} />
         <meta property="og:url" content={pageUrl} />
-        <meta property="og:title" content={`${safari.title} | ${SITE_NAME}`} />
+        <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={metaDescription} />
         <meta property="og:image" content={ogImage} />
         <meta property="og:locale" content="en_US" />
@@ -136,8 +130,8 @@ const SafariDetail = () => {
         <meta name="twitter:title" content={safari.title} />
         <meta name="twitter:description" content={metaDescription} />
         <meta name="twitter:image" content={ogImage} />
-        <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
+      <JsonLd data={[structuredData, breadcrumbLd]} />
       <Navbar />
       <main>
         <section className="relative h-[60vh] min-h-[400px]">

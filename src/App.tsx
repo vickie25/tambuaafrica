@@ -53,13 +53,16 @@ import {
   SITE_ORIGIN,
   absoluteUrl,
   truncateMetaDescription,
-  GLOBAL_OG,
-  GLOBAL_TWITTER,
-  TRAVEL_AGENCY_JSON_LD,
+  truncateTitle,
   buildBreadcrumbJsonLd,
   DEFAULT_OG_IMAGE_PATH,
+  HERO_LCP_IMAGE_PATH,
 } from "@/lib/seo";
-import GoogleAnalytics from "@/components/seo/GoogleAnalytics";
+import { encodePublicImageSrc } from "@/lib/public-image-path";
+import AnalyticsProvider from "@/components/seo/AnalyticsProvider";
+import JsonLd from "@/components/seo/JsonLd";
+import { buildWebSiteJsonLd, buildOrganizationJsonLd, buildFaqPageJsonLd } from "@/lib/schema";
+import { HOME_FAQS } from "@/data/faqs";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -85,6 +88,7 @@ const AnimatedRoutes = () => {
   const routeSeo = SEO_BY_ROUTE[location.pathname];
   const shouldRenderRouteSeo = !isBlogDetail && !isSafariDetail && !!routeSeo;
   const canonicalUrl = `${SITE_ORIGIN}${location.pathname === "/" ? "/" : location.pathname.replace(/\/$/, "")}`;
+  const pageTitle = routeSeo ? truncateTitle(routeSeo.title) : "";
   const metaDescription = routeSeo ? truncateMetaDescription(routeSeo.description) : "";
   const ogImageUrl = absoluteUrl(routeSeo?.ogImage ?? DEFAULT_OG_IMAGE_PATH);
   const breadcrumbLd = buildBreadcrumbJsonLd(location.pathname);
@@ -92,36 +96,44 @@ const AnimatedRoutes = () => {
 
   return (
     <ErrorBoundary>
-      <GoogleAnalytics />
+      <AnalyticsProvider />
       <Suspense fallback={<SuspenseFallback />}>
         {shouldRenderRouteSeo && routeSeo && (
           <Helmet>
-            <title>{routeSeo.title}</title>
+            <title>{pageTitle}</title>
             <meta name="description" content={metaDescription} />
             {routeSeo.robots ? <meta name="robots" content={routeSeo.robots} /> : <meta name="robots" content="index, follow" />}
             <link rel="canonical" href={canonicalUrl} />
 
-            <meta property="og:type" content={GLOBAL_OG.type} />
-            <meta property="og:title" content={GLOBAL_OG.title} />
-            <meta property="og:description" content={GLOBAL_OG.description} />
+            <meta property="og:type" content="website" />
+            <meta property="og:site_name" content="Tambua Africa Tours & Safaris" />
+            <meta property="og:title" content={pageTitle} />
+            <meta property="og:description" content={metaDescription} />
             <meta property="og:url" content={canonicalUrl} />
             <meta property="og:image" content={ogImageUrl} />
-            <meta property="og:locale" content={GLOBAL_OG.locale} />
+            <meta property="og:locale" content="en_KE" />
 
-            <meta name="twitter:card" content={GLOBAL_TWITTER.card} />
-            <meta name="twitter:site" content={GLOBAL_TWITTER.site} />
-            <meta name="twitter:title" content={GLOBAL_TWITTER.title} />
-            <meta name="twitter:description" content={GLOBAL_TWITTER.description} />
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:site" content="@TambuaAfrica" />
+            <meta name="twitter:title" content={pageTitle} />
+            <meta name="twitter:description" content={metaDescription} />
             <meta name="twitter:image" content={ogImageUrl} />
 
             {isHome && (
-              <script type="application/ld+json">{JSON.stringify(TRAVEL_AGENCY_JSON_LD)}</script>
-            )}
-            {breadcrumbLd && (
-              <script type="application/ld+json">{JSON.stringify(breadcrumbLd)}</script>
+              <link rel="preload" as="image" href={encodePublicImageSrc(HERO_LCP_IMAGE_PATH)} fetchpriority="high" />
             )}
           </Helmet>
         )}
+        {shouldRenderRouteSeo && isHome && (
+          <JsonLd
+            data={[
+              buildOrganizationJsonLd(),
+              buildWebSiteJsonLd(),
+              buildFaqPageJsonLd(HOME_FAQS, `${SITE_ORIGIN}/#faq`),
+            ]}
+          />
+        )}
+        {shouldRenderRouteSeo && breadcrumbLd && <JsonLd data={breadcrumbLd} />}
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={<Index />} />

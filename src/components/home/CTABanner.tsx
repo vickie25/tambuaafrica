@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { motion, useInView } from "framer-motion";
+import { encodePublicImageSrc } from "@/lib/public-image-path";
 
 const CTABanner = () => {
   const ref = useRef<HTMLElement>(null);
@@ -16,7 +17,7 @@ const CTABanner = () => {
           initial={{ scale: 1.1 }}
           animate={isInView ? { scale: 1 } : { scale: 1.1 }}
           transition={{ duration: 1.5, ease: "easeOut" }}
-          src="/images/real images frm Tambua/Lion.jpeg"
+          src={encodePublicImageSrc("/images/real images frm Tambua/Lion spotting.jpeg")}
           alt="African Safari Landscape"
           className="w-full h-full object-cover"
         />

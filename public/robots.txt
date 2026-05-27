@@ -10,5 +10,6 @@ Disallow: /forgot-password
 Disallow: /reset-password
 Disallow: /diagnostics
 Disallow: /payment-success
+Disallow: /auth/
 
 Sitemap: https://tambuaafrica.com/sitemap.xml

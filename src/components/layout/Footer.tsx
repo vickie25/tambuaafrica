@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Mail, MapPin, Phone, ArrowRight, Instagram, Facebook, Twitter, Linkedin } from "lucide-react";
+import { Mail, MapPin, Phone, ArrowRight, Facebook, Twitter } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BUSINESS_NAP, SOCIAL_PROFILES } from "@/lib/seo";
+import { trackConversion } from "@/lib/analytics";
 
 const Footer = () => {
   const [email, setEmail] = useState("");
@@ -34,16 +36,16 @@ const Footer = () => {
             </p>
             <div className="flex gap-4">
               {[
-                { icon: Facebook, href: "#" },
-                { icon: Instagram, href: "#" },
-                { icon: Twitter, href: "#" },
-                { icon: Linkedin, href: "#" }
+                { icon: Facebook, href: SOCIAL_PROFILES[0], label: "Facebook" },
+                { icon: Twitter, href: SOCIAL_PROFILES[1], label: "Twitter" },
               ].map((social, i) => (
                 <a 
                   key={i} 
                   href={social.href} 
                   className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-white/60 hover:bg-accent hover:text-white hover:border-accent transition-all duration-300"
-                  aria-label="Social link"
+                  aria-label={social.label}
+                  rel="noopener noreferrer"
+                  target="_blank"
                 >
                   <social.icon className="w-4 h-4" />
                 </a>
@@ -55,14 +57,20 @@ const Footer = () => {
           <div className="lg:col-span-2">
             <h4 className="font-display font-bold text-lg mb-6 text-white">Discover</h4>
             <ul className="space-y-4">
-              {["Safaris", "Destinations", "Experiences", "About Us", "Contact"].map((link) => (
-                <li key={link}>
+              {[
+                { label: "Safaris", to: "/safaris" },
+                { label: "Destinations", to: "/destinations" },
+                { label: "Travel Info", to: "/travel-info" },
+                { label: "About Us", to: "/about" },
+                { label: "Contact", to: "/contact" },
+              ].map((link) => (
+                <li key={link.to}>
                   <Link 
-                    to={`/${link.toLowerCase().replace(" ", "-")}`} 
+                    to={link.to} 
                     className="font-sans text-sm text-white/60 hover:text-accent transition-colors duration-300 inline-flex items-center group"
                   >
                     <ArrowRight className="w-3 h-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all duration-300 text-accent" />
-                    {link}
+                    {link.label}
                   </Link>
                 </li>
               ))}
@@ -90,8 +98,12 @@ const Footer = () => {
                 </div>
                 <div>
                   <span className="block font-sans text-xs uppercase tracking-wider text-white/40 mb-1">Phone</span>
-                  <a href="tel:+254700000000" className="font-sans text-sm text-white/80 hover:text-accent transition-colors">
-                    +254 700 000 000
+                  <a
+                    href={`tel:${BUSINESS_NAP.telephone}`}
+                    className="font-sans text-sm text-white/80 hover:text-accent transition-colors"
+                    onClick={() => trackConversion("click_to_call", { location: "footer" })}
+                  >
+                    {BUSINESS_NAP.telephoneDisplay}
                   </a>
                 </div>
               </li>
@@ -101,8 +113,8 @@ const Footer = () => {
                 </div>
                 <div>
                   <span className="block font-sans text-xs uppercase tracking-wider text-white/40 mb-1">Email</span>
-                  <a href="mailto:info@tambuaafrica.com" className="font-sans text-sm text-white/80 hover:text-accent transition-colors">
-                    info@tambuaafrica.com
+                  <a href={`mailto:${BUSINESS_NAP.email}`} className="font-sans text-sm text-white/80 hover:text-accent transition-colors">
+                    {BUSINESS_NAP.email}
                   </a>
                 </div>
               </li>

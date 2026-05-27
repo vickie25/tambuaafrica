@@ -3,6 +3,7 @@ import { Star, ChevronLeft, ChevronRight, Quote } from "lucide-react";
 import { testimonials } from "@/data/testimonials";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import SectionHeader from "@/components/layout/SectionHeader";
+import { encodePublicImageSrc } from "@/lib/public-image-path";
 
 const TestimonialsSection = () => {
   const [current, setCurrent] = useState(0);
@@ -36,7 +37,7 @@ const TestimonialsSection = () => {
             <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center bg-accent/10 border-2 border-accent text-accent font-bold text-xl select-none">
               {t.avatar ? (
                 <img
-                  src={t.avatar}
+                  src={encodePublicImageSrc(t.avatar)}
                   alt={t.name}
                   className="w-full h-full object-cover"
                   loading="lazy"

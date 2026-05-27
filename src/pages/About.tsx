@@ -6,6 +6,8 @@ import { useScrollAnimation, useCounter } from "@/hooks/useScrollAnimation";
 import { CheckCircle2, Heart, Leaf, Globe, Users, Award, Plane, Bus, Hotel } from "lucide-react";
 import OptimizedImage from "@/components/ui/optimized-image";
 import PageHero from "@/components/layout/PageHero";
+import { encodePublicImageSrc } from "@/lib/public-image-path";
+import { fallbackSafariImage } from "@/lib/remote-media-fallbacks";
 
 const values = [
   { icon: Heart, title: "Passion", description: "We are passionate about East Africa and crafting journeys that feel personal, immersive, and memorable." },
@@ -57,13 +59,14 @@ const About = () => {
           description="Over 16 years of designing unforgettable journeys across Kenya and the wider East Africa region."
           imageSrc="/images/real images frm Tambua/St the park drive.jpeg"
           imageAlt="Safari drive through a Kenyan national park"
+          fallbackSrc={fallbackSafariImage("about-hero")}
         />
 
         <section className="section-padding bg-background" ref={storyRef}>
           <div className="container-wide mx-auto">
             <div className={`grid grid-cols-1 lg:grid-cols-2 gap-12 items-center transition-all duration-700 ${storyVisible ? "opacity-100" : "opacity-0 translate-y-8"}`}>
               <div className="aspect-[4/3] overflow-hidden rounded-2xl border border-border/50 shadow-xl ring-1 ring-border/40">
-                <img src="/images/real images frm Tambua/Tourists at Nairobi park.jpeg" alt="Tourists at Nairobi park" className="w-full h-full object-cover" loading="lazy" />
+                <img src={encodePublicImageSrc("/images/real images frm Tambua/Tourists at Nairobi park.jpeg")} alt="Tourists at Nairobi park" className="w-full h-full object-cover" loading="lazy" />
               </div>
               <div className="space-y-5">
                 <h2 className="text-3xl font-bold text-foreground">Crafting East Africa Journeys Since 2008</h2>
@@ -187,7 +190,7 @@ const About = () => {
                   style={{ transitionDelay: `${i * 100}ms` }}
                 >
                   <div className="aspect-[3/4] rounded-none overflow-hidden mb-5 w-64 max-w-full mx-auto shadow-lg hover:shadow-2xl transition-shadow border border-border/50">
-                    <img src={member.image} alt={member.name} className="w-full h-full object-cover" loading="lazy" />
+                    <img src={encodePublicImageSrc(member.image)} alt={member.name} className="w-full h-full object-cover" loading="lazy" />
                   </div>
                   <h3 className="font-bold text-foreground">{member.name}</h3>
                   <p className="text-sm text-muted-foreground">{member.role}</p>

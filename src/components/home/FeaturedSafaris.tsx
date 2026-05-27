@@ -64,10 +64,11 @@ const FeaturedSafaris = () => {
               >
                 {/* Image Container */}
                 <Link to={`/safaris/${safari.id}`} className="relative aspect-[4/3] sm:aspect-[3/2] overflow-hidden block">
-                  <OptimizedImage 
+                  <OptimizedImage
                     src={safari.image}
                     fallbackSrc={fallbackSafariImage(safari.id)}
-                    alt={safari.title} 
+                    alt={safari.title}
+                    aspectRatio="16/10" 
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
                   />
                   {/* Subtle gradient overlay */}

@@ -59,6 +59,18 @@ export function normalizePublicImagePath(src: string | null | undefined): string
     "/images/dawn-w-FmUx8z_Tz4A-unsplash.webp": "/images/destiations/Lake Nakuru/lake elementaita.webp",
     "/images/destiations/Lake Naivash/Sopa boat rides.webp":
       "/images/destiations/Lake Naivasha/Sopa boat rides.webp",
+    "/images/destiations/Lake Naivasha/lake elementaita.webp":
+      "/images/destiations/Lake Nakuru/lake elementaita.webp",
+    "/images/real images frm Tambua/Mara.jpeg": "/images/real images frm Tambua/at MAasai mara.jpeg",
+    "/images/real images frm Tambua/serengenti.jpeg": "/images/real images frm Tambua/the safari.jpeg",
+    "/images/real images frm Tambua/Elephant.jpeg": "/images/amboseli-real.webp",
+    "/images/real images frm Tambua/Tanzania.jpeg":
+      "/images/real images frm Tambua/Tourist learning about the culture.jpeg",
+    "/images/real images frm Tambua/Diani.jpeg": "/images/diani.webp",
+    "/images/real images frm Tambua/kilimajaro.webp": "/images/mount-kenya.webp",
+    "/images/real images frm Tambua/Masai.webp": "/images/real images frm Tambua/Maasai Culture.jpeg",
+    "/images/real images frm Tambua/balooon.webp": "/images/Wild beast migration 2.webp",
+    "/images/real images frm Tambua/Lion.jpeg": "/images/real images frm Tambua/Lion spotting.jpeg",
   };
 
   if (exact[path]) return exact[path];

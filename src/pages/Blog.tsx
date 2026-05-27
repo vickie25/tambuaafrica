@@ -7,6 +7,8 @@ import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useBlogs } from "@/hooks/useBlogs";
 import PageHero from "@/components/layout/PageHero";
 import { Skeleton } from "@/components/ui/skeleton";
+import OptimizedImage from "@/components/ui/optimized-image";
+import { fallbackSafariImage } from "@/lib/remote-media-fallbacks";
 
 const Blog = () => {
   const { ref, isVisible } = useScrollAnimation();
@@ -71,6 +73,8 @@ const Blog = () => {
                           <OptimizedImage
                             src={post.image}
                             alt={post.title}
+                            fallbackSrc={fallbackSafariImage(`blog-${post.id}`)}
+                            aspectRatio="16/9"
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           />

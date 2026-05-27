@@ -1,5 +1,6 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import TopicClusterNav from "@/components/seo/TopicClusterNav";
 import PageTransition from "@/components/layout/PageTransition";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Plane, ShieldCheck, ThermometerSun, Wallet, Camera, HelpCircle } from "lucide-react";
@@ -189,6 +190,8 @@ const TravelInfo = () => {
               </AccordionItem>
 
             </Accordion>
+
+            <TopicClusterNav className="mt-12" />
           </div>
         </main>
         

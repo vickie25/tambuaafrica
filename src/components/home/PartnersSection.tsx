@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import SectionHeader from "@/components/layout/SectionHeader";
 
 const partners = [
   { name: "TRA (Tourism Regulatory Authority)", logo: "/TRA.png" },
@@ -13,10 +14,11 @@ const PartnersSection = () => {
   return (
     <section className="py-16 bg-card border-y border-border" ref={ref}>
       <div className="container-wide mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-10">
-          <span className="text-accent font-semibold text-sm uppercase tracking-wider">Trusted By</span>
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mt-2">Our Partners & Affiliations</h2>
-        </div>
+        <SectionHeader
+          eyebrow="Trusted By"
+          title="Our Partners & Affiliations"
+          className="mb-10 sm:mb-12"
+        />
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 lg:gap-8">
           {partners.map((partner, i) => (

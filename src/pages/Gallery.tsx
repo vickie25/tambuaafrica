@@ -7,6 +7,7 @@ import OptimizedImage from "@/components/ui/optimized-image";
 import { fallbackSafariImage } from "@/lib/remote-media-fallbacks";
 import { useCarouselImageItems } from "@/hooks/useCarouselImages";
 import { buildGalleryPhotoList, galleryImageSrc } from "@/lib/gallery-defaults";
+import PageHero from "@/components/layout/PageHero";
 
 const Gallery = () => {
   const { data: adminGallery = [] } = useCarouselImageItems("gallery");
@@ -33,24 +34,14 @@ const Gallery = () => {
     <div className="min-h-screen">
       <Navbar />
       <main>
-        <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden bg-primary text-primary-foreground">
-          <div className="absolute inset-0 z-0 opacity-20">
-            <OptimizedImage
-              src="/images/real images frm Tambua/Team Bonding with Maasai Culture.jpeg"
-              fallbackSrc={fallbackSafariImage("gallery-hero")}
-              alt="Gallery Background"
-              className="w-full h-full object-cover"
-              priority
-            />
-          </div>
-          <div className="container-wide relative z-10 mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <span className="text-accent font-semibold text-sm uppercase tracking-wider">Gallery</span>
-            <h1 className="text-4xl sm:text-5xl font-bold mt-3">Safari Moments</h1>
-            <p className="text-primary-foreground/70 mt-4 max-w-2xl mx-auto text-lg">
-              A glimpse into the breathtaking experiences that await you across Kenya.
-            </p>
-          </div>
-        </section>
+        <PageHero
+          eyebrow="Gallery"
+          title="Safari Moments"
+          description="A glimpse into the breathtaking experiences that await you across Kenya."
+          imageSrc="/images/real images frm Tambua/Team Bonding with Maasai Culture.jpeg"
+          imageAlt="Maasai cultural experience on safari"
+          fallbackSrc={fallbackSafariImage("gallery-hero")}
+        />
 
         <section className="section-padding bg-background">
           <div className="container-wide mx-auto">
@@ -66,7 +57,7 @@ const Gallery = () => {
                   className="break-inside-avoid cursor-pointer group"
                   onClick={() => setLightbox(i)}
                 >
-                  <div className="relative rounded-2xl overflow-hidden">
+                  <div className="surface-card-interactive relative overflow-hidden">
                     <OptimizedImage
                       src={photo.src}
                       fallbackSrc={fallbackSafariImage(`gallery-tile-${i}`)}
@@ -119,7 +110,7 @@ const Gallery = () => {
               exit={{ scale: 0.9, opacity: 0 }}
               src={galleryImageSrc(filtered[lightbox].src)}
               alt={filtered[lightbox].alt}
-              className="max-w-full max-h-[85vh] object-contain rounded-lg"
+              className="max-w-full max-h-[85vh] object-contain rounded-none shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             />
             <div className="absolute bottom-6 text-white/70 text-sm">

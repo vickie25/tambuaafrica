@@ -188,7 +188,7 @@ const SafariDetail = () => {
                   <h2 className="text-2xl font-bold text-foreground mb-4">Highlights</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {safari.highlights.map((h) => (
-                      <div key={h} className="flex items-center gap-3 p-3 bg-card rounded-xl border border-border">
+                      <div key={h} className="flex items-center gap-3 p-3 bg-card rounded-none border border-border/50 shadow-sm hover:shadow-md transition-shadow">
                         <CheckCircle2 className="w-5 h-5 text-accent shrink-0" />
                         <span className="text-foreground text-sm font-medium">{h}</span>
                       </div>
@@ -207,7 +207,7 @@ const SafariDetail = () => {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.3 + i * 0.1 }}
-                        className="flex gap-4 p-4 bg-card rounded-xl border border-border"
+                        className="flex gap-4 p-4 bg-card rounded-none border border-border/50 shadow-sm hover:shadow-md transition-shadow"
                       >
                         <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
                           <span className="text-accent font-bold text-sm">{i + 1}</span>
@@ -243,7 +243,7 @@ const SafariDetail = () => {
               </div>
 
               <div className="lg:col-span-1">
-                <div className="sticky top-24 bg-card rounded-2xl border border-border p-6 shadow-lg space-y-5">
+                <div className="sticky top-24 bg-card rounded-none border border-border/50 p-6 shadow-lg space-y-5">
                   <div>
                     <span className="text-xs text-muted-foreground">From</span>
                     <div className="text-3xl font-bold text-primary">${safari.price}<span className="text-base text-muted-foreground font-normal">/person</span></div>
@@ -272,12 +272,12 @@ const SafariDetail = () => {
 
                   <Button
                     onClick={() => setBookingOpen(true)}
-                    className="w-full bg-accent text-accent-foreground hover:bg-accent/90 rounded-xl py-5 text-base font-semibold"
+                    className="w-full bg-accent text-accent-foreground hover:bg-accent/90 rounded-none py-5 text-base font-semibold"
                   >
                     Book This Safari
                   </Button>
 
-                  <div className="flex items-start gap-2 p-3 bg-primary/5 rounded-lg">
+                  <div className="flex items-start gap-2 p-4 bg-primary/5 rounded-none border border-primary/10">
                     <Shield className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                     <div className="text-xs text-muted-foreground">
                       <span className="font-semibold text-foreground">Flexible planning</span> with tailored routing, regional add-ons, and expert support before departure.

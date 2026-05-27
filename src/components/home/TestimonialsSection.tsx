@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Star, ChevronLeft, ChevronRight, Quote } from "lucide-react";
 import { testimonials } from "@/data/testimonials";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import SectionHeader from "@/components/layout/SectionHeader";
 
 const TestimonialsSection = () => {
   const [current, setCurrent] = useState(0);
@@ -18,12 +19,9 @@ const TestimonialsSection = () => {
     .slice(0, 2);
 
   return (
-    <section className="section-padding bg-card" ref={ref}>
+    <section className="section-padding section-alt" ref={ref}>
       <div className="container-wide mx-auto">
-        <div className="text-center mb-12">
-          <span className="text-accent font-semibold text-sm uppercase tracking-wider">Testimonials</span>
-          <h2 className="text-3xl sm:text-4xl font-bold text-foreground mt-2">What Our Clients Say</h2>
-        </div>
+        <SectionHeader eyebrow="Testimonials" title="What Our Clients Say" />
 
         <div
           className={`max-w-3xl mx-auto text-center transition-all duration-700 ${

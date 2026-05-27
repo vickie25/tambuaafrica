@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle2, Loader2, MessageCircle } from "lucide-react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
-import OptimizedImage from "@/components/ui/optimized-image";
+import PageHero from "@/components/layout/PageHero";
 import { submitInquiry } from "@/lib/inquiry";
 import { toast } from "sonner";
 import { TEAM_CONTACT_EMAILS } from "@/lib/admin-email";
@@ -116,43 +116,31 @@ const Contact = () => {
     <div className="min-h-screen">
       <Navbar />
       <main>
-        <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden bg-primary text-primary-foreground">
-          <div className="absolute inset-0 z-0 opacity-20">
-            <OptimizedImage 
-              src="/images/amboseli-real.webp" 
-              alt="Contact Tambua Africa Nairobi Kenya safari operator" 
-              className="w-full h-full object-cover"
-              priority
-              width={1920}
-              height={800}
-            />
-          </div>
-          <div className="container-wide relative z-10 mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <span className="text-accent font-semibold text-sm uppercase tracking-wider">Get In Touch</span>
-            <h1 className="text-4xl sm:text-5xl font-bold mt-3">Contact Tambua Africa Tours &amp; Safaris</h1>
-            <p className="text-primary-foreground/70 mt-4 max-w-2xl mx-auto text-lg">
-              Planning Kenya, Uganda, Tanzania, Rwanda, or a wider East Africa journey? We&apos;d love to help, including
-              air & road ticketing, private transfers, and lodge or camp bookings alongside your safari.
-            </p>
-            <p className="mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm text-primary-foreground/85">
-              <Link to="/services" className="font-semibold underline-offset-2 hover:underline">
-                All services
-              </Link>
-              <span className="opacity-50" aria-hidden>
-                |
-              </span>
-              <Link to="/services/ticketing" className="hover:underline">
-                Ticketing
-              </Link>
-              <Link to="/services/transfers" className="hover:underline">
-                Transfers
-              </Link>
-              <Link to="/services/lodges-camps" className="hover:underline">
-                Lodges & camps
-              </Link>
-            </p>
-          </div>
-        </section>
+        <PageHero
+          eyebrow="Get In Touch"
+          title="Contact Tambua Africa Tours & Safaris"
+          description="Planning Kenya, Uganda, Tanzania, Rwanda, or a wider East Africa journey? We'd love to help, including air & road ticketing, private transfers, and lodge or camp bookings alongside your safari."
+          imageSrc="/images/amboseli-real.webp"
+          imageAlt="Contact Tambua Africa Nairobi Kenya safari operator"
+        >
+          <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm text-primary-foreground/90">
+            <Link to="/services" className="font-semibold underline-offset-2 transition-colors hover:text-white hover:underline">
+              All services
+            </Link>
+            <span className="opacity-50" aria-hidden>
+              |
+            </span>
+            <Link to="/services/ticketing" className="transition-colors hover:text-white hover:underline">
+              Ticketing
+            </Link>
+            <Link to="/services/transfers" className="transition-colors hover:text-white hover:underline">
+              Transfers
+            </Link>
+            <Link to="/services/lodges-camps" className="transition-colors hover:text-white hover:underline">
+              Lodges & camps
+            </Link>
+          </p>
+        </PageHero>
 
         <section className="section-padding bg-background" ref={ref}>
           <div className="container-wide mx-auto">
@@ -169,7 +157,7 @@ const Contact = () => {
 
                 <div className="space-y-5">
                   {/* UK Office Block */}
-                  <div className="p-5 rounded-2xl bg-muted/40 border border-border">
+                  <div className="p-6 rounded-none bg-muted/40 border border-border/50 shadow-sm hover:shadow-md transition-shadow">
                     <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
                       <MapPin className="w-5 h-5 text-accent" /> UK Office
                     </h3>
@@ -199,7 +187,7 @@ const Contact = () => {
                   </div>
 
                   {/* Kenya Office Block */}
-                  <div className="p-5 rounded-2xl bg-muted/40 border border-border">
+                  <div className="p-6 rounded-none bg-muted/40 border border-border/50 shadow-sm hover:shadow-md transition-shadow">
                     <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
                       <MapPin className="w-5 h-5 text-accent" /> Kenya Office
                     </h3>
@@ -237,7 +225,7 @@ const Contact = () => {
 
                   {/* Working Hours */}
                   <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+                    <div className="w-12 h-12 rounded-none bg-accent/10 flex items-center justify-center shrink-0">
                       <Clock className="w-5 h-5 text-accent" />
                     </div>
                     <div>
@@ -247,7 +235,7 @@ const Contact = () => {
                   </div>
                 </div>
 
-                <div className="p-5 rounded-2xl bg-primary text-primary-foreground">
+                <div className="p-6 rounded-none bg-primary text-primary-foreground shadow-md">
                   <h3 className="font-bold mb-2 flex items-center gap-2">
                     <CheckCircle2 className="w-5 h-5 text-accent" /> Why Travel With Us?
                   </h3>
@@ -259,7 +247,7 @@ const Contact = () => {
                   </ul>
                 </div>
 
-                <div className="rounded-2xl overflow-hidden border border-border aspect-[16/10] min-h-[240px]">
+                <div className="rounded-none overflow-hidden border border-border/50 aspect-[16/10] min-h-[240px] shadow-sm">
                   <iframe
                     title="Tambua Africa Tours office location in Nairobi, Kenya"
                     src="https://maps.google.com/maps?q=Standard+Street%2C+Nairobi%2C+Kenya&z=15&output=embed"
@@ -272,7 +260,7 @@ const Contact = () => {
               </div>
 
               <div className="lg:col-span-3">
-                <form onSubmit={handleSubmit} className="bg-card rounded-2xl border border-border p-6 sm:p-8 space-y-5">
+                <form onSubmit={handleSubmit} className="bg-card rounded-none border border-border/50 p-8 sm:p-10 space-y-6 shadow-sm">
                   <h3 className="text-xl font-bold text-foreground">Send us a Message</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -298,7 +286,7 @@ const Contact = () => {
                     <label className="text-sm font-medium text-foreground">Message</label>
                     <Textarea placeholder="Tell us about your dream itinerary, countries of interest, travel dates, or budget..." rows={5} value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} required />
                   </div>
-                  <Button type="submit" disabled={isSubmitting} className="w-full bg-accent text-accent-foreground hover:bg-accent/90 rounded-xl py-6 text-base font-semibold disabled:opacity-70">
+                  <Button type="submit" disabled={isSubmitting} className="w-full bg-accent text-accent-foreground hover:bg-accent/90 rounded-none py-6 text-base font-semibold disabled:opacity-70">
                     {isSubmitting ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Send className="w-5 h-5 mr-2" />} Send Message
                   </Button>
                 </form>

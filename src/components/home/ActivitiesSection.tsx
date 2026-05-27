@@ -1,269 +1,135 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, Mountain, Camera, Sunrise, Map, Heart, Compass } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
-import { Compass, Palmtree, Binoculars, Mountain, Activity, Wind } from "lucide-react";
-import OptimizedImage from "@/components/ui/optimized-image";
-import { fallbackSafariImage } from "@/lib/remote-media-fallbacks";
-import { useCarouselImageItems } from "@/hooks/useCarouselImages";
-import { motion, useReducedMotion } from "framer-motion";
 
 const activities = [
-  {
-    icon: Binoculars,
-    title: "Game Drive",
-    section: "Wildlife Safaris",
-    description: "Track the Big Five with expert guides on sunrise and sunset drives across iconic savannah parks.",
-    images: [
-      "/images/popular activities/game drives.webp",
-      "/images/popular activities/game drives1.webp",
-    ],
-    imageAlt: "Kenya wildlife game drive safari in Maasai Mara",
-  },
-  {
-    icon: Palmtree,
-    title: "Beach Holidays",
-    section: "Beach Holidays",
-    description: "Unwind on white-sand beaches, enjoy ocean views, and experience laid-back coastal island life.",
-    images: [
-      "/images/popular activities/beach.webp",
-      "/images/popular activities/Diani Beach (2).webp",
-      "/images/popular activities/Chale Island.webp",
-      "/images/popular activities/chale Hotel.webp",
-    ],
-    imageAlt: "Diani Beach Kenya holiday package coastal safari",
-  },
-  {
-    icon: Wind,
-    title: "Zipline Canopy",
-    section: "Wildlife Safaris",
-    description: "Glide above forest canopies for adrenaline-filled aerial views and unforgettable nature thrills.",
-    images: [
-      "/images/popular activities/Zipline 2.webp",
-      "/images/popular activities/Zipline.webp",
-      "/images/popular activities/zipline (2).webp",
-    ],
-    imageAlt: "Forest zipline adventure tour Kenya",
-  },
-  {
-    icon: Mountain,
-    title: "Hiking Adventures",
-    section: "Wildlife Safaris",
-    description: "Take guided trails through hills and mountains, from scenic day hikes to challenging summit routes.",
-    images: [
-      "/images/popular activities/Hiking.webp",
-      "/images/popular activities/Hike.webp",
-      "/images/popular activities/Hiking (2).webp",
-    ],
-    imageAlt: "Kenya hiking adventure wildlife tours",
-  },
-  {
-    icon: Compass,
-    title: "Cultural Tours",
-    section: "Cultural Tours",
-    description: "Meet local communities, explore living traditions, and discover authentic East African heritage.",
-    images: [
-      "/images/popular activities/culture tours.webp",
-      "/images/popular activities/culture tours (2).webp",
-    ],
-    imageAlt: "Cultural tours Kenya Maasai community experience",
-  },
-  {
-    icon: Activity,
-    title: "Bungee & Jumping",
-    section: "Wildlife Safaris",
-    description: "Push your limits with high-energy jumps and bungee experiences designed for pure adventure.",
-    images: [
-      "/images/popular activities/Bangee and Jumping.webp",
-      "/images/popular activities/Jumping (2).webp",
-      "/images/popular activities/Jumping.webp",
-    ],
-    imageAlt: "Adventure bungee jumping experience Kenya",
-  },
+  { id: "wildlife", icon: Camera, title: "Wildlife Safaris", description: "Witness the Big Five and the Great Migration in world-renowned national parks and reserves.", image: "/images/real images frm Tambua/Tanzania.jpeg" },
+  { id: "mountain", icon: Mountain, title: "Mountain Trekking", description: "Scale the heights of Mount Kenya or Kilimanjaro with our experienced climbing guides.", image: "/images/real images frm Tambua/kilimajaro.webp" },
+  { id: "cultural", icon: Heart, title: "Cultural Encounters", description: "Engage authentically with local Maasai and Samburu communities and learn their rich traditions.", image: "/images/real images frm Tambua/Masai.webp" },
+  { id: "balloon", icon: Sunrise, title: "Balloon Safaris", description: "Float silently over the savanna at dawn, followed by a champagne breakfast in the bush.", image: "/images/real images frm Tambua/balooon.webp" },
+  { id: "beach", icon: Compass, title: "Beach Extensions", description: "Unwind on the pristine white-sand beaches of Diani or Zanzibar after your thrilling safari.", image: "/images/real images frm Tambua/Diani.jpeg" },
+  { id: "custom", icon: Map, title: "Bespoke Itineraries", description: "Work with our experts to design a completely personalized journey that matches your exact dreams.", image: "/images/real images frm Tambua/Elephant.jpeg" },
 ];
-
-const DISPLAY_ORDER = [
-  "Game Drive",
-  "Beach Holidays",
-  "Cultural Tours",
-  "Bungee & Jumping",
-  "Zipline Canopy",
-  "Hiking Adventures",
-] as const;
-
-type ActivityItem = (typeof activities)[number];
-type ActivityIconKey = "compass" | "palmtree" | "binoculars" | "mountain" | "activity" | "wind";
-
-const activityIconMap: Record<ActivityIconKey, ActivityItem["icon"]> = {
-  compass: Compass,
-  palmtree: Palmtree,
-  binoculars: Binoculars,
-  mountain: Mountain,
-  activity: Activity,
-  wind: Wind,
-};
-
-const ActivityCard = ({
-  activity,
-  index,
-  isVisible,
-  shouldReduceMotion,
-}: {
-  activity: ActivityItem;
-  index: number;
-  isVisible: boolean;
-  shouldReduceMotion: boolean;
-}) => {
-  const cardRef = useRef<HTMLDivElement | null>(null);
-  const [isInView, setIsInView] = useState(false);
-  const [currentImage, setCurrentImage] = useState(0);
-
-  useEffect(() => {
-    const target = cardRef.current;
-    if (!target) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsInView(entry.isIntersecting);
-      },
-      { threshold: 0.35, rootMargin: "150px 0px" }
-    );
-
-    observer.observe(target);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!isInView || shouldReduceMotion || activity.images.length <= 1) return;
-    const timer = setInterval(() => {
-      setCurrentImage((prev) => (prev + 1) % activity.images.length);
-    }, 2200 + ((index % 6) * 350));
-    return () => clearInterval(timer);
-  }, [activity.images.length, index, isInView, shouldReduceMotion]);
-
-  useEffect(() => {
-    if (currentImage >= activity.images.length) {
-      setCurrentImage(0);
-    }
-  }, [activity.images.length, currentImage]);
-
-  return (
-    <div
-      ref={cardRef}
-      className={`group relative rounded-2xl overflow-hidden aspect-[4/5] cursor-pointer transition-all duration-500 ${
-        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-      }`}
-      style={{ transitionDelay: `${index * 150}ms` }}
-    >
-      <div className="absolute inset-0">
-        {activity.images.map((image, i) => (
-          <motion.div
-            key={image}
-            initial={false}
-            animate={{ opacity: i === currentImage ? 1 : 0 }}
-            transition={{ duration: shouldReduceMotion ? 0 : 0.45, ease: "linear" }}
-            className="absolute inset-0"
-          >
-            <OptimizedImage
-              src={image}
-              alt={`${activity.title} image ${i + 1}`}
-              fallbackSeed={`activity-${activity.title}-${i}`}
-              fallbackSrc={fallbackSafariImage(`activity-${activity.title}-${i}`)}
-              className="w-full h-full aspect-[4/5] object-cover transition-transform duration-700 md:group-hover:scale-110"
-              width={600}
-              height={750}
-            />
-          </motion.div>
-        ))}
-      </div>
-      {activity.images.length > 1 && (
-        <div className="absolute bottom-4 left-0 right-0 z-20 flex justify-center gap-1.5">
-          {activity.images.map((_, dotIndex) => (
-            <button
-              key={`${activity.title}-${dotIndex}`}
-              type="button"
-              aria-label={`Go to activity image ${dotIndex + 1}`}
-              className={`h-2 min-w-[8px] min-h-[8px] rounded-full transition-all ${
-                dotIndex === currentImage ? "w-4 bg-white" : "w-2 bg-white/50"
-              }`}
-              onClick={() => setCurrentImage(dotIndex)}
-            />
-          ))}
-        </div>
-      )}
-
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-      <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-        <div className="w-12 h-12 rounded-xl bg-accent/90 flex items-center justify-center mb-3">
-          <activity.icon className="w-6 h-6 text-accent-foreground" />
-        </div>
-        <h3 className="text-xl font-bold">{activity.title}</h3>
-        <p className="text-white/70 text-sm mt-1 leading-relaxed">{activity.description}</p>
-      </div>
-    </div>
-  );
-};
 
 const ActivitiesSection = () => {
   const { ref, isVisible } = useScrollAnimation();
-  const shouldReduceMotion = useReducedMotion();
-  const { data: adminActivities = [] } = useCarouselImageItems("activities");
-
-  const activityByTitle = activities.reduce<Record<string, ActivityItem>>((acc, activity) => {
-    acc[activity.title.toLowerCase()] = activity;
-    return acc;
-  }, {});
-
-  const groupedAdminImages = adminActivities.reduce<Record<string, { images: string[]; iconKey?: string | null }>>(
-    (acc, item) => {
-      const titleKey = (item.title || "").trim().toLowerCase();
-      if (!titleKey || !activityByTitle[titleKey]) return acc;
-      if (!acc[titleKey]) acc[titleKey] = { images: [], iconKey: item.iconKey || null };
-      acc[titleKey].images.push(item.url);
-      if (item.iconKey) acc[titleKey].iconKey = item.iconKey;
-      return acc;
-    },
-    {}
-  );
-
-  const displayActivities: ActivityItem[] = activities.map((baseActivity) => {
-    const key = baseActivity.title.toLowerCase();
-    const adminGroup = groupedAdminImages[key];
-    const resolvedIcon =
-      adminGroup?.iconKey && activityIconMap[adminGroup.iconKey as ActivityIconKey]
-        ? activityIconMap[adminGroup.iconKey as ActivityIconKey]
-        : baseActivity.icon;
-
-    return {
-      ...baseActivity,
-      icon: resolvedIcon,
-      images: adminGroup?.images?.length ? adminGroup.images : baseActivity.images,
-    };
-  });
-
-  const orderedActivities = DISPLAY_ORDER.map((title) =>
-    displayActivities.find((a) => a.title === title)
-  ).filter((a): a is ActivityItem => Boolean(a));
+  const [activeTab, setActiveTab] = useState(activities[0].id);
 
   return (
-    <section className="section-padding bg-background" ref={ref}>
+    <section className="section-padding bg-background relative overflow-hidden" ref={ref}>
       <div className="container-wide mx-auto">
-        <div className="text-center mb-12">
-          <span className="text-accent font-semibold text-sm uppercase tracking-wider">What We Offer</span>
-          <h2 className="text-3xl sm:text-4xl font-bold text-foreground mt-2">Popular Activities</h2>
-          <p className="text-muted-foreground mt-3 max-w-2xl mx-auto text-base">
-            Wildlife safaris, Kenya beach holiday packages, and cultural tours Kenya travelers love — all planned by our Nairobi team.
-          </p>
+        
+        {/* Header */}
+        <div className="text-center max-w-3xl mx-auto mb-16 sm:mb-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={isVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.7 }}
+            className="flex items-center justify-center gap-3 mb-4"
+          >
+            <div className="h-px w-8 bg-accent" />
+            <span className="font-sans text-[11px] font-semibold uppercase tracking-[0.25em] text-accent">
+              Experiences
+            </span>
+            <div className="h-px w-8 bg-accent" />
+          </motion.div>
+          
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            animate={isVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.7, delay: 0.1 }}
+            className="font-display font-bold text-foreground leading-tight mb-6"
+            style={{ fontSize: "clamp(2.5rem, 5vw, 3.5rem)" }}
+          >
+            Curated <em className="text-accent not-italic" style={{ fontStyle: "italic" }}>Adventures</em>
+          </motion.h2>
+          
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={isVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.7, delay: 0.2 }}
+            className="section-lead mx-auto"
+          >
+            Beyond traditional game drives, we offer a diverse portfolio of authentic African experiences designed to create memories that last a lifetime.
+          </motion.p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 lg:gap-8">
-          {orderedActivities.map((activity, index) => (
-            <ActivityCard
-              key={activity.title}
-              activity={activity}
-              index={index}
-              isVisible={isVisible}
-              shouldReduceMotion={!!shouldReduceMotion}
-            />
-          ))}
+        {/* Content Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 min-h-[600px] lg:min-h-[500px]">
+          
+          {/* Interactive List (Left) */}
+          <div className="lg:col-span-5 flex flex-col justify-center space-y-2 lg:pr-8">
+            {activities.map((activity, index) => {
+              const isActive = activeTab === activity.id;
+              return (
+                <motion.button
+                  key={activity.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={isVisible ? { opacity: 1, x: 0 } : {}}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  onClick={() => setActiveTab(activity.id)}
+                  className={`w-full text-left p-5 sm:p-6 rounded-2xl transition-all duration-300 flex items-start gap-5 group cursor-pointer ${
+                    isActive 
+                      ? "bg-secondary border border-border shadow-sm" 
+                      : "hover:bg-secondary/50 border border-transparent"
+                  }`}
+                >
+                  <div className={`mt-0.5 shrink-0 transition-colors duration-300 ${isActive ? "text-accent" : "text-muted-foreground group-hover:text-primary"}`}>
+                    <activity.icon className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className={`font-display font-bold text-xl mb-2 transition-colors duration-300 ${isActive ? "text-foreground" : "text-foreground/80 group-hover:text-foreground"}`}>
+                      {activity.title}
+                    </h3>
+                    <div className={`grid transition-all duration-300 ease-in-out ${isActive ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
+                      <p className="overflow-hidden text-muted-foreground text-sm leading-relaxed font-sans pr-4">
+                        {activity.description}
+                      </p>
+                    </div>
+                  </div>
+                </motion.button>
+              );
+            })}
+          </div>
+
+          {/* Image Display (Right) */}
+          <div className="lg:col-span-7 relative h-[400px] sm:h-[500px] lg:h-auto rounded-3xl overflow-hidden shadow-2xl">
+            <AnimatePresence mode="wait">
+              {activities.map((activity) => (
+                activity.id === activeTab && (
+                  <motion.div
+                    key={activity.id}
+                    initial={{ opacity: 0, scale: 1.05 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.6, ease: "easeInOut" }}
+                    className="absolute inset-0"
+                  >
+                    <img
+                      src={activity.image}
+                      alt={activity.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent opacity-80" />
+                    
+                    {/* Floating Content over image */}
+                    <div className="absolute bottom-0 left-0 right-0 p-8 sm:p-12">
+                      <Button asChild className="btn-pill bg-white text-primary hover:bg-white/90 shadow-xl group px-8">
+                        <Link to={`/safaris?type=${activity.id}`} className="inline-flex items-center gap-2 font-semibold">
+                          Explore {activity.title}
+                          <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </motion.div>
+                )
+              ))}
+            </AnimatePresence>
+          </div>
+
         </div>
       </div>
     </section>

@@ -5,6 +5,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Plane, ShieldCheck, ThermometerSun, Wallet, Camera, HelpCircle } from "lucide-react";
 import OptimizedImage from "@/components/ui/optimized-image";
 import { fallbackSafariImage } from "@/lib/remote-media-fallbacks";
+import PageHero from "@/components/layout/PageHero";
 
 const TravelInfo = () => {
   return (
@@ -12,40 +13,30 @@ const TravelInfo = () => {
       <div className="min-h-screen bg-background">
         <Navbar />
         
-        {/* Hero Section */}
-        <div className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden bg-primary text-white">
-          <div className="absolute inset-0 z-0 opacity-20">
-            <OptimizedImage 
-              src="/images/maasai-mara-authentic.webp"
-              fallbackSrc={fallbackSafariImage("travel-info-hero")}
-              alt="Travel Info Background" 
-              className="w-full h-full object-cover"
-              priority 
-            />
-          </div>
-          <div className="container-wide relative z-10 mx-auto px-4 text-center">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6">Essential Travel Info</h1>
-            <p className="text-lg sm:text-xl max-w-2xl mx-auto text-white/90">
-              Everything you need to know before embarking on your unforgettable Kenyan Safari.
-            </p>
-          </div>
-        </div>
+        <PageHero
+          eyebrow="Plan with confidence"
+          title="Essential Travel Info"
+          description="Everything you need to know before embarking on your unforgettable Kenyan safari."
+          imageSrc="/images/maasai-mara-authentic.webp"
+          imageAlt="Maasai Mara landscape"
+          fallbackSrc={fallbackSafariImage("travel-info-hero")}
+        />
 
         <section className="border-b border-border bg-muted/25 py-10">
           <div className="container-wide mx-auto grid gap-6 px-4 sm:grid-cols-3 sm:px-6 lg:px-8">
-            <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+            <div className="surface-card p-6">
               <p className="text-xs font-semibold uppercase tracking-wider text-accent">Before you fly</p>
               <p className="mt-2 text-sm text-muted-foreground">
                 eTA rules, passport validity, and yellow-fever notes. Start here so immigration stays smooth.
               </p>
             </div>
-            <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+            <div className="surface-card p-6">
               <p className="text-xs font-semibold uppercase tracking-wider text-accent">On safari</p>
               <p className="mt-2 text-sm text-muted-foreground">
                 Packing colours, layers for dawn drives, and soft bags for light aircraft. Small details that matter.
               </p>
             </div>
-            <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+            <div className="surface-card p-6">
               <p className="text-xs font-semibold uppercase tracking-wider text-accent">Money & phones</p>
               <p className="mt-2 text-sm text-muted-foreground">
                 Cash vs card, tipping culture, and local SIM tips so you stay connected in the bush and on the coast.
@@ -60,10 +51,10 @@ const TravelInfo = () => {
             <Accordion type="single" collapsible className="space-y-6" defaultValue="item-1">
               
               {/* Entry Requirements */}
-              <AccordionItem value="item-1" className="border rounded-xl px-6 bg-card shadow-sm">
+              <AccordionItem value="item-1" className="border border-border/50 rounded-none px-6 bg-card shadow-sm hover:shadow-md transition-shadow">
                 <AccordionTrigger className="hover:no-underline py-6">
                   <div className="flex items-center gap-4 text-left">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <div className="w-12 h-12 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
                       <Plane className="w-6 h-6 text-primary" />
                     </div>
                     <div>
@@ -82,10 +73,10 @@ const TravelInfo = () => {
               </AccordionItem>
 
               {/* Health */}
-              <AccordionItem value="item-2" className="border rounded-xl px-6 bg-card shadow-sm">
+              <AccordionItem value="item-2" className="border border-border/50 rounded-none px-6 bg-card shadow-sm hover:shadow-md transition-shadow">
                 <AccordionTrigger className="hover:no-underline py-6">
                   <div className="flex items-center gap-4 text-left">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <div className="w-12 h-12 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
                       <ShieldCheck className="w-6 h-6 text-primary" />
                     </div>
                     <div>
@@ -104,10 +95,10 @@ const TravelInfo = () => {
               </AccordionItem>
 
               {/* Packing */}
-              <AccordionItem value="item-3" className="border rounded-xl px-6 bg-card shadow-sm">
+              <AccordionItem value="item-3" className="border border-border/50 rounded-none px-6 bg-card shadow-sm hover:shadow-md transition-shadow">
                 <AccordionTrigger className="hover:no-underline py-6">
                   <div className="flex items-center gap-4 text-left">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <div className="w-12 h-12 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
                       <Camera className="w-6 h-6 text-primary" />
                     </div>
                     <div>
@@ -128,10 +119,10 @@ const TravelInfo = () => {
               </AccordionItem>
 
               {/* Climate */}
-              <AccordionItem value="item-4" className="border rounded-xl px-6 bg-card shadow-sm">
+              <AccordionItem value="item-4" className="border border-border/50 rounded-none px-6 bg-card shadow-sm hover:shadow-md transition-shadow">
                 <AccordionTrigger className="hover:no-underline py-6">
                   <div className="flex items-center gap-4 text-left">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <div className="w-12 h-12 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
                       <ThermometerSun className="w-6 h-6 text-primary" />
                     </div>
                     <div>
@@ -150,10 +141,10 @@ const TravelInfo = () => {
               </AccordionItem>
 
               {/* Currency */}
-              <AccordionItem value="item-5" className="border rounded-xl px-6 bg-card shadow-sm">
+              <AccordionItem value="item-5" className="border border-border/50 rounded-none px-6 bg-card shadow-sm hover:shadow-md transition-shadow">
                 <AccordionTrigger className="hover:no-underline py-6">
                   <div className="flex items-center gap-4 text-left">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <div className="w-12 h-12 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
                       <Wallet className="w-6 h-6 text-primary" />
                     </div>
                     <div>
@@ -172,10 +163,10 @@ const TravelInfo = () => {
               </AccordionItem>
 
               {/* Culture */}
-              <AccordionItem value="item-6" className="border rounded-xl px-6 bg-card shadow-sm">
+              <AccordionItem value="item-6" className="border border-border/50 rounded-none px-6 bg-card shadow-sm hover:shadow-md transition-shadow">
                 <AccordionTrigger className="hover:no-underline py-6">
                   <div className="flex items-center gap-4 text-left">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <div className="w-12 h-12 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
                       <HelpCircle className="w-6 h-6 text-primary" />
                     </div>
                     <div>

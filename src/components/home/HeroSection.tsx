@@ -27,20 +27,15 @@ const HeroSection = () => {
   }, [backgroundImages.length, shouldReduceMotion]);
 
   useEffect(() => {
-    if (backgroundImages.length === 0) return;
-    const preload = (src?: string) => {
-      if (!src) return;
-      const img = new Image();
-      img.decoding = "async";
-      img.src = src;
-    };
-    preload(backgroundImages[0]);
-    preload(backgroundImages[1]);
-  }, [backgroundImages]);
-
-  useEffect(() => {
     if (currentImage >= backgroundImages.length) setCurrentImage(0);
   }, [backgroundImages.length, currentImage]);
+
+  const shouldRenderSlide = (index: number) => {
+    if (backgroundImages.length <= 2) return true;
+    const previous = (currentImage - 1 + backgroundImages.length) % backgroundImages.length;
+    const next = (currentImage + 1) % backgroundImages.length;
+    return index === currentImage || index === previous || index === next;
+  };
 
   return (
     <section className="relative min-h-screen flex items-end overflow-hidden bg-black">
@@ -55,18 +50,21 @@ const HeroSection = () => {
             transition={{ duration: shouldReduceMotion ? 0 : 1.2, ease: "easeInOut" }}
             className="absolute inset-0 will-change-[opacity]"
           >
-            <OptimizedImage
-              src={image}
-              alt="Maasai Mara wildebeest migration Kenya safari landscape"
-              fallbackSeed={`hero-${index}`}
-              fallbackSrc={fallbackSafariImage(`hero-${index}`)}
-              fill
-              priority
-              quality={90}
-              width={1920}
-              height={1080}
-              className="scale-[1.03] motion-safe:animate-[kenBurns_14s_ease-in-out_infinite]"
-            />
+            {shouldRenderSlide(index) && (
+              <OptimizedImage
+                src={image}
+                alt="Maasai Mara wildebeest migration Kenya safari landscape"
+                fallbackSeed={`hero-${index}`}
+                fallbackSrc={fallbackSafariImage(`hero-${index}`)}
+                fill
+                priority={index === 0}
+                quality={90}
+                width={1920}
+                height={1080}
+                sizes="100vw"
+                className="scale-[1.03] motion-safe:animate-[kenBurns_14s_ease-in-out_infinite]"
+              />
+            )}
           </motion.div>
         ))}
 

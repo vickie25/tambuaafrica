@@ -37,16 +37,12 @@ const HomeFeatureHero = ({
     return () => clearInterval(timer);
   }, [images, interval, shouldReduceMotion]);
 
-  useEffect(() => {
-    const preload = (src?: string) => {
-      if (!src) return;
-      const img = new Image();
-      img.decoding = "async";
-      img.src = src;
-    };
-    preload(images[0]);
-    preload(images[1]);
-  }, [images]);
+  const shouldRenderSlide = (index: number) => {
+    if (images.length <= 2) return true;
+    const previous = (currentImage - 1 + images.length) % images.length;
+    const next = (currentImage + 1) % images.length;
+    return index === currentImage || index === previous || index === next;
+  };
 
   return (
     <section
@@ -65,15 +61,17 @@ const HomeFeatureHero = ({
             transition={{ duration: shouldReduceMotion ? 0 : 0.9, ease: "easeInOut" }}
             className="absolute inset-0"
           >
+            {shouldRenderSlide(index) && (
             <OptimizedImage
               src={image}
               alt={`${title} — image ${index + 1}`}
               fallbackSrc={fallbackSafariImage(`${title}-${index}`)}
               fill
-              priority
               quality={82}
               rootMargin="800px"
+              sizes="(min-width: 1024px) 50vw, 100vw"
             />
+            )}
           </motion.div>
         ))}
         {/* Dark overlay for mobile legibility */}

@@ -49,6 +49,15 @@ export default defineConfig(({ mode }) => ({
         maximumFileSizeToCacheInBytes: 12 * 1024 * 1024,
         runtimeCaching: [
           {
+            urlPattern: ({ url, sameOrigin }) =>
+              sameOrigin && /\.(?:png|jpe?g|svg|gif|webp|avif)$/i.test(url.pathname),
+            handler: "CacheFirst",
+            options: {
+              cacheName: "local-images-cache",
+              expiration: { maxEntries: 180, maxAgeSeconds: 60 * 60 * 24 * 30 },
+            },
+          },
+          {
             urlPattern: /^https:\/\/.*\.(png|jpg|jpeg|svg|gif|webp|avif|mp4)$/,
             handler: "CacheFirst",
             options: {

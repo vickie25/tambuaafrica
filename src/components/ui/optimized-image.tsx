@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { encodePublicImageSrc, normalizePublicImagePath } from '@/lib/public-image-path';
 import { fallbackSafariImage } from '@/lib/remote-media-fallbacks';
+import { responsiveImages } from '@/generated/responsive-images';
 
 interface OptimizedImageProps {
   src: string;
@@ -131,6 +132,11 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   };
 
   const optimizedActive = getOptimizedSrc(activeSrc);
+  const normalizedActive = normalizePublicImagePath(activeSrc);
+  const localVariants = responsiveImages[normalizedActive];
+  const srcSet = localVariants?.length
+    ? localVariants.map((variant) => `${encodePublicImageSrc(variant.src)} ${variant.width}w`).join(', ')
+    : undefined;
   const lqip = generateLQIP();
 
   if (hasError) {
@@ -167,15 +173,16 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
       {/* Actual image — priority/hero loads immediately; others when in view */}
       {isInView && (
         <img
-          src={optimizedActive}
-          alt={alt}
+            src={optimizedActive}
+            srcSet={srcSet}
+            alt={alt}
           width={width}
           height={height}
           loading={priority ? 'eager' : 'lazy'}
           {...(priority || fetchPriority !== 'auto'
             ? { fetchpriority: (priority ? 'high' : fetchPriority) as 'high' | 'low' | 'auto' }
             : {})}
-          sizes={sizes}
+            sizes={sizes || (srcSet ? '100vw' : undefined)}
           decoding="async"
           onLoad={() => setIsLoaded(true)}
           onError={() => {

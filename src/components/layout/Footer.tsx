@@ -113,9 +113,17 @@ const Footer = () => {
                 </div>
                 <div>
                   <span className="block font-sans text-xs uppercase tracking-wider text-white/40 mb-1">Email</span>
-                  <a href={`mailto:${BUSINESS_NAP.email}`} className="font-sans text-sm text-white/80 hover:text-accent transition-colors">
-                    {BUSINESS_NAP.email}
-                  </a>
+                  <div className="flex flex-col gap-1">
+                    <a href="mailto:info@tambuaafrica.com" className="font-sans text-sm text-white/80 hover:text-accent transition-colors">
+                      info@tambuaafrica.com
+                    </a>
+                    <a href="mailto:jorin@tambuaafrica.com" className="font-sans text-sm text-white/80 hover:text-accent transition-colors">
+                      jorin@tambuaafrica.com
+                    </a>
+                    <a href="mailto:isaac@tambuaafrica.com" className="font-sans text-sm text-white/80 hover:text-accent transition-colors">
+                      isaac@tambuaafrica.com
+                    </a>
+                  </div>
                 </div>
               </li>
             </ul>

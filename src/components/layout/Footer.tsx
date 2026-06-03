@@ -17,10 +17,10 @@ const Footer = () => {
   return (
     <footer className="bg-primary text-white pt-20 pb-10 border-t-4 border-accent">
       <div className="container-wide mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 mb-16">
-          
+
           {/* Brand Column */}
           <div className="lg:col-span-4 pr-0 lg:pr-8">
             <Link to="/" className="inline-block mb-6">
@@ -39,9 +39,9 @@ const Footer = () => {
                 { icon: Facebook, href: SOCIAL_PROFILES[0], label: "Facebook" },
                 { icon: Twitter, href: SOCIAL_PROFILES[1], label: "Twitter" },
               ].map((social, i) => (
-                <a 
-                  key={i} 
-                  href={social.href} 
+                <a
+                  key={i}
+                  href={social.href}
                   className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-white/60 hover:bg-accent hover:text-white hover:border-accent transition-all duration-300"
                   aria-label={social.label}
                   rel="noopener noreferrer"
@@ -65,8 +65,8 @@ const Footer = () => {
                 { label: "Contact", to: "/contact" },
               ].map((link) => (
                 <li key={link.to}>
-                  <Link 
-                    to={link.to} 
+                  <Link
+                    to={link.to}
                     className="font-sans text-sm text-white/60 hover:text-accent transition-colors duration-300 inline-flex items-center group"
                   >
                     <ArrowRight className="w-3 h-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all duration-300 text-accent" />
@@ -115,7 +115,7 @@ const Footer = () => {
                   <span className="block font-sans text-xs uppercase tracking-wider text-white/40 mb-1">Email</span>
                   <div className="flex flex-col gap-1">
                     <a href="mailto:info@tambuaafrica.com" className="font-sans text-sm text-white/80 hover:text-accent transition-colors">
-                      info@tambuaafrica.com
+                      info-tambuafrica.com
                     </a>
                     <a href="mailto:jorin@tambuaafrica.com" className="font-sans text-sm text-white/80 hover:text-accent transition-colors">
                       jorin@tambuaafrica.com
@@ -144,8 +144,8 @@ const Footer = () => {
                 required
                 className="w-full bg-white/5 border border-white/10 rounded-full px-5 py-3.5 text-sm font-sans text-white placeholder:text-white/30 focus:outline-none focus:border-accent focus:bg-white/10 transition-all duration-300"
               />
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="absolute right-1.5 top-1.5 bottom-1.5 rounded-full bg-accent hover:bg-accent/90 text-white px-5 shadow-md"
               >
                 Subscribe
